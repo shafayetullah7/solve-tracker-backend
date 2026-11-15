@@ -1,0 +1,55 @@
+name: practice-tracker
+
+services:
+  postgres:
+    image: postgres:18-bookworm
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Copy .env.example to .env first}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
+      POSTGRES_PORT: ${POSTGRES_PORT:?POSTGRES_PORT is required}
+    ports:
+      - '${DOCKER_BIND_ADDRESS:?DOCKER_BIND_ADDRESS is required}:${POSTGRES_PORT:?POSTGRES_PORT is required}:${POSTGRES_PORT:?POSTGRES_PORT is required}'
+    command: ['postgres', '-p', '${POSTGRES_PORT:?POSTGRES_PORT is required}']
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -p "$$POSTGRES_PORT" -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"',
+        ]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+
+  backend:
+    build:
+      context: .
+      target: development
+    init: true
+    env_file: .env
+    environment:
+      NODE_ENV: ${NODE_ENV:?NODE_ENV is required}
+      PORT: ${PORT:?PORT is required}
+      HOST: ${HOST:?HOST is required}
+      SWAGGER_ENABLED: ${SWAGGER_ENABLED:?SWAGGER_ENABLED is required}
+      DATABASE_URL: ${DOCKER_DATABASE_URL:?Set DOCKER_DATABASE_URL in .env}
+    ports:
+      - '${DOCKER_BIND_ADDRESS:?DOCKER_BIND_ADDRESS is required}:${PORT:?PORT is required}:${PORT:?PORT is required}'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src:ro,Z
+      - ./drizzle:/app/drizzle:ro,Z
+      - ./drizzle.config.ts:/app/drizzle.config.ts:ro,Z
+      - ./scripts:/app/scripts:ro,Z
+      - ./tsconfig.json:/app/tsconfig.json:ro,Z
+      - ./tsconfig.build.json:/app/tsconfig.build.json:ro,Z
+      - ./nest-cli.json:/app/nest-cli.json:ro,Z
+    command: ['pnpm', 'start:dev']
+
+volumes:
+  postgres_data:

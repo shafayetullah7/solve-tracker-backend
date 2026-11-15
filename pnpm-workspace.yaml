@@ -1,0 +1,10 @@
+# Scarf's install hook collects package analytics; it is unnecessary at runtime.
+allowBuilds:
+  '@scarf/scarf': false
+  'argon2@0.45.2': true
+  'esbuild@0.28.2': true
+# Generator declares TS 5 but its compiler API is verified with our pinned TS 6.
+# Keep this exception scoped; regenerate/check contracts when either changes.
+peerDependencyRules:
+  allowedVersions:
+    'openapi-typescript>typescript': '6.0.3'

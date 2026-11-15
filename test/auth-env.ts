@@ -1,0 +1,17 @@
+export const authTestEnvironment = {
+  JWT_ISSUER: 'practice-backend',
+  JWT_AUDIENCE: 'practice-api',
+  JWT_ACCESS_TTL_SECONDS: '600',
+  AUTH_SESSION_TTL_SECONDS: '604800',
+  PASSWORD_RESET_TTL_SECONDS: '1800',
+  ARGON2_MEMORY_KIB: '19456',
+  ARGON2_TIME_COST: '2',
+  ARGON2_PARALLELISM: '1',
+  AUTH_COOKIE_SECURE: 'false',
+  AUTH_ACCESS_COOKIE_NAME: 'practice_access',
+  AUTH_REFRESH_COOKIE_NAME: 'practice_refresh',
+  FRONTEND_ORIGIN: 'http://localhost:3001',
+  EMAIL_DELIVERY_MODE: 'mock',
+  JWT_ACCESS_SECRET: 'test-access-secret-not-for-production-0001',
+  JWT_REFRESH_SECRET: 'test-refresh-secret-not-for-production-0002',
+} as const;
