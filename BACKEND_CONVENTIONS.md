@@ -119,7 +119,7 @@ The feature and `common/` folders above are conventions for future work, not exi
 - Use 201 for creation, 200 for reads/updates that return content, and 204 for deletion without content. Use 400 for invalid input, 404 for a missing resource, and 409 for a persistent uniqueness conflict.
 - Return explicit public response fields. Do not spread database rows into API responses or expose secrets, internal metadata, or future ownership fields accidentally.
 - Use camelCase JSON properties and ISO 8601 UTC timestamps. Document nullable values explicitly. Do not return a body with a 204 response.
-- Return a resource directly for a single-resource operation. For new paginated lists, use `{ items, page, pageSize, total }`; do not introduce a universal success wrapper or vary list shapes between features.
+- Return a resource directly for a single-resource operation. For new paginated lists, use `{ items, meta: { page, pageSize, total } }`; do not introduce a universal success wrapper or vary list shapes between features.
 - New list endpoints use one-based `page`, default `pageSize=25`, and maximum `pageSize=100`. These are API conventions for future endpoints, not environment defaults. Validate sort/filter fields against allowlists and use stable ordering with a unique tie-breaker.
 - Apply search/filter conditions consistently to both rows and the filtered total. Product progress summaries retain the overall/topic scope defined in the requirements.
 - Preserve the distinction between an absent resource and an empty list. Return an empty `items` array for a valid list query without matches.

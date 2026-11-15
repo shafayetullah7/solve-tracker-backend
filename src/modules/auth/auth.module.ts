@@ -22,6 +22,12 @@ import { AuthSecurityGuard, AuthLimiter } from './auth-security.guard.js';
     AuthSecurityGuard,
     AuthLimiter,
   ],
-  exports: [AccessGuard, AuthService, AuthCookies],
+  exports: [
+    AccessGuard,
+    AuthSecurityGuard,
+    AuthLimiter,
+    AuthService,
+    AuthCookies,
+  ],
 })
 export class AuthModule {}
