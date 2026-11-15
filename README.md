@@ -294,3 +294,13 @@ pnpm test:auth:integration
 There is no fallback to application `DATABASE_URL`. The suite applies committed migrations, exercises real transactions/HTTP with mocked email, and deletes only users created by that run (with cascading sessions/tokens). It does not truncate tables, drop schemas, reset volumes, or send email. Run it only against an intentionally supplied test database. Docker is not required if that PostgreSQL test instance is otherwise available.
 
 Regular `pnpm test` / `pnpm test:e2e` use explicit test configuration; existing HTTP tests replace the database provider. These are separate from the live suite.
+
+### Real PostgreSQL topics tests
+
+With the same `TEST_DATABASE_URL` rules:
+
+```bash
+pnpm test:topics:integration
+```
+
+The suite exercises create/list/rename/delete, per-user name uniqueness, cross-account **404** on foreign ids, concurrent duplicate create, and Swagger path coverage. Users created during the run are deleted on teardown (cascade removes their topics).
