@@ -242,7 +242,7 @@ Follow [PHASE_0_DECISIONS.md](../docs/PHASE_0_DECISIONS.md) for the detailed aut
 ## 12. Required backend development workflow
 
 - PostgreSQL is the backend database. Local development runs PostgreSQL and the NestJS backend through Docker Compose.
-- `pnpm start:dev:docker` builds/starts the backend and its database dependency. Nest runs in watch mode and picks up source edits without rebuilding the image.
+- `pnpm build:docker` builds the backend image; `pnpm start:dev:docker` starts the backend (and postgres dependency). Nest runs in watch mode and picks up source edits without rebuilding the image.
 - PostgreSQL data persists in a named volume across container restarts and normal Compose shutdowns.
 - The backend waits for the PostgreSQL health check before starting.
 - `pnpm db:migrate:docker` and `pnpm db:seed:docker` execute their base commands inside the already running backend container with `docker compose exec`; they do not launch temporary application containers.
