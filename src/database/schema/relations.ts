@@ -7,6 +7,8 @@ import { users } from './users/users.table.js';
 import { authSessions } from './auth/auth-sessions.table.js';
 import { passwordResetTokens } from './auth/password-reset-tokens.table.js';
 import { topics } from './topics/topics.table.js';
+import { problems } from './problems/problems.table.js';
+import { problemTopics } from './problems/problem-topics.table.js';
 
 const tables = {
   platforms,
@@ -14,6 +16,8 @@ const tables = {
   authSessions,
   passwordResetTokens,
   topics,
+  problems,
+  problemTopics,
 };
 
 export const relations = defineRelations(tables);

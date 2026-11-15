@@ -130,6 +130,8 @@ export const environmentSchema = z
         'AUTH_COOKIE_SECURE',
         'Production requires HTTPS and secure host-only cookie names',
       );
+    if (v.NODE_ENV === 'production' && v.SWAGGER_ENABLED)
+      fail('SWAGGER_ENABLED', 'Swagger must be disabled in production');
     if (v.NODE_ENV === 'production' && v.EMAIL_DELIVERY_MODE !== 'resend')
       fail('EMAIL_DELIVERY_MODE', 'Mock email is prohibited in production');
     if (

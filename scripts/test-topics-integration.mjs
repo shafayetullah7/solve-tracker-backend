@@ -91,13 +91,30 @@ try {
     .expect(201);
   check(createdB.body.id !== topicAId, 'Same display name allowed across users');
 
+  const listB = await request(server)
+    .get('/topics?page=1&pageSize=25')
+    .set(headers)
+    .set('Cookie', userB.cookie)
+    .expect(200);
+  check(
+    listB.body.meta.total === 1 &&
+      listB.body.items[0].id === createdB.body.id &&
+      !listB.body.items.some((item) => item.id === topicAId),
+    'Independent topic libraries per account',
+  );
+
   const duplicate = await request(server)
     .post('/topics')
     .set(headers)
     .set('Cookie', userA.cookie)
     .send({ name: 'MONOTONIC STACK' })
     .expect(409);
-  check(duplicate.body.code === 'TOPIC_NAME_IN_USE', 'Duplicate normalized name → 409');
+  check(
+    duplicate.body.code === 'TOPIC_NAME_IN_USE' &&
+      typeof duplicate.body.message === 'string' &&
+      duplicate.body.message.length > 0,
+    'Duplicate normalized name → 409 with message',
+  );
 
   const listA = await request(server)
     .get('/topics?page=1&pageSize=25')
@@ -199,6 +216,9 @@ try {
 
   console.log(
     `Passed ${count} PostgreSQL/HTTP topics assertions. Users: ${emails.length}.`,
+  );
+  console.log(
+    'Phase 6 note: topic delete with linked problems is covered in scripts/test-problems-integration.mjs.',
   );
 } finally {
   if (emails.length)

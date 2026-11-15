@@ -304,3 +304,24 @@ pnpm test:topics:integration
 ```
 
 The suite exercises create/list/rename/delete, per-user name uniqueness, cross-account **404** on foreign ids, concurrent duplicate create, and Swagger path coverage. Users created during the run are deleted on teardown (cascade removes their topics).
+
+### Real PostgreSQL problems tests
+
+With the same `TEST_DATABASE_URL` rules:
+
+```bash
+pnpm test:problems:integration
+```
+
+The suite exercises problem CRUD, topic associations, URL duplicate **409**, cross-account isolation, `topicId` list filter, concurrent duplicate URL race, topic delete retest (problem remains), and Swagger coverage.
+
+### Phase exit criteria (automated)
+
+On a dedicated `TEST_DATABASE_URL` ending in `_test`:
+
+```bash
+pnpm verify:phase-5   # topics gates + optional problems topic-delete retest (VERIFY_PHASE6_TOPIC_DELETE=0 to skip)
+pnpm verify:phase-6   # problems gates + frontend checks
+```
+
+See `docs/PHASE_5_RESULTS.md` and `docs/PHASE_6_RESULTS.md`.

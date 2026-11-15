@@ -1,6 +1,10 @@
 export const TOPIC_NAME_MIN = 1;
 export const TOPIC_NAME_MAX = 100;
 
+import { measureCodePoints } from '../../common/unicode.js';
+
+export { measureCodePoints } from '../../common/unicode.js';
+
 export class TopicNameError extends Error {
   constructor(readonly code: 'EMPTY' | 'TOO_LONG') {
     super(
@@ -9,11 +13,6 @@ export class TopicNameError extends Error {
         : `Topic name must contain at most ${TOPIC_NAME_MAX} characters.`,
     );
   }
-}
-
-/** Unicode code points, matching auth registration name counting. */
-export function measureCodePoints(value: string): number {
-  return Array.from(value).length;
 }
 
 export function normalizeTopicName(name: string): string {

@@ -1,6 +1,7 @@
 import { environmentSchema } from './environment.js';
 
 import { authTestEnvironment } from '../../test/auth-env.js';
+import { productionEnvironmentFixture } from '../../test/production-environment.js';
 const valid = {
   ...authTestEnvironment,
   NODE_ENV: 'development',
@@ -73,6 +74,22 @@ describe('environment schema', () => {
     expect(
       environmentSchema.safeParse({ ...valid, EMAIL_DELIVERY_MODE: 'resend' })
         .success,
+    ).toBe(false);
+  });
+
+  it('accepts a complete production configuration', () => {
+    const config = environmentSchema.parse(productionEnvironmentFixture);
+    expect(config.NODE_ENV).toBe('production');
+    expect(config.SWAGGER_ENABLED).toBe(false);
+    expect(config.EMAIL_DELIVERY_MODE).toBe('resend');
+  });
+
+  it('rejects Swagger enabled in production', () => {
+    expect(
+      environmentSchema.safeParse({
+        ...productionEnvironmentFixture,
+        SWAGGER_ENABLED: 'true',
+      }).success,
     ).toBe(false);
   });
 });

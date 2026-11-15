@@ -5,6 +5,9 @@ import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { TopicsModule } from './modules/topics/topics.module.js';
+import { ProblemsModule } from './modules/problems/problems.module.js';
+import { ProgressModule } from './modules/progress/progress.module.js';
+import { HealthModule } from './modules/health/health.module.js';
 import { DatabaseModule } from './database/database.module.js';
 
 @Module({
@@ -18,6 +21,9 @@ import { DatabaseModule } from './database/database.module.js';
     DatabaseModule,
     AuthModule,
     TopicsModule,
+    ProblemsModule,
+    ProgressModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -4,3 +4,4 @@ export { relations } from './relations.js';
 export * from './users/index.js';
 export * from './auth/index.js';
 export * from './topics/index.js';
+export * from './problems/index.js';
