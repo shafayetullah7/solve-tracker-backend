@@ -1,6 +1,6 @@
 # Dashboard evolution — phased plan (layout, look, delivery)
 
-**Status:** DASH-1–3 complete (2026-11-16); DASH-4 complete (2026-11-16). Baseline shell from UX-4; polish in [`components/dashboard/`](../../cp-frontend/src/components/dashboard/).  
+**Status:** DASH-1–4 complete (2026-11-16). Mockup-aligned layout (2026-11-16): pill toolbar, stats strip, 3-column queues, topics+platform | dark activity. Results: [DASHBOARD_PHASED_RESULTS.md](DASHBOARD_PHASED_RESULTS.md). Code in [`components/dashboard/`](../../cp-frontend/src/components/dashboard/).  
 **Design constraints:** [UI_UX_PIVOT.md §4](UI_UX_PIVOT.md) (stats only), [REQUIREMENTS.md](../REQUIREMENTS.md) **FR-05** (full-library counts, not list filters).  
 **Out of scope on dashboard:** profile/sign-out, browse toolbar, full library pagination, inline create/edit forms (links/CTAs only).
 
@@ -10,40 +10,32 @@
 
 ## 1. Page layout (target end state)
 
-All content lives in the app shell main column: `mx-auto max-w-6xl px-5 py-10 sm:px-8` (match current dashboard). Vertical rhythm: `space-y-8` between **sections**; `space-y-4` inside sections.
+All content lives in the app shell main column: `mx-auto max-w-6xl px-5 py-10 sm:px-8` (match current dashboard). Vertical rhythm: `space-y-6` between **sections** on the live page.
 
-### 1.1 Desktop (`md+`) wireframe
+### 1.1 Desktop (`md+`) wireframe (live `/app`, 2026-11-16)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ H1  Your practice          [optional: 1-line summary tabular-nums] │
+│ H1  Your practice                    Platforms: A & B (status)   │
+│     Subtitle (one line)                                          │
 ├─────────────────────────────────────────────────────────────────┤
-│ SECTION A — Overall (Panel)                                      │
-│   [total] [solved] [unsolved]   progress bar ▓▓▓░░  NN%            │
-│   empty-state copy OR secondary links                              │
+│ Pill toolbar — Browse (N) · Unsolved (N) · Untagged (N)         │
+│   Manage topics · Re-fetch                                       │
 ├─────────────────────────────────────────────────────────────────┤
-│ SECTION B — Quick actions (horizontal, wrap)                     │
-│   Browse library · Unsolved (N) · Untagged (N) · Add problem     │
+│ Stats strip — Total | Solved | Unsolved | Complete               │
+│   progress bar when total > 0; empty CTA when total = 0          │
+├──────────────────┬──────────────────┬───────────────────────────┤
+│ Pick up next     │ Recently added   │ Recently solved (≤5 each) │
+│ (DASH-2 queues)  │                  │                           │
 ├──────────────────────────────┬──────────────────────────────────┤
-│ SECTION C — Focus            │ SECTION D — Recent (stack)         │
-│   • Stale unsolved (≤5)      │   • Recently added (≤5)            │
-│   • link → library row       │   • Recently solved (≤5)           │
-│   (DASH-2)                   │   (DASH-2)                         │
-├──────────────────────────────┴──────────────────────────────────┤
-│ SECTION E — By topic (full width)                                │
-│   table/cards: name · mini bar · solved/total · link ?topicId=   │
-├─────────────────────────────────────────────────────────────────┤
-│ SECTION F — By platform (full width, DASH-3)                     │
-│   compact grid: PlatformMark + counts + ?platform=slug             │
-├─────────────────────────────────────────────────────────────────┤
-│ SECTION G — Insights (DASH-4+, optional / backend)               │
-│   activity chart, streak, goals                                    │
-└─────────────────────────────────────────────────────────────────┘
+│ By topic + By platform       │ Activity (dark panel)            │
+│ (stacked in left column)     │ chart + weekly rows + streak     │
+└──────────────────────────────┴──────────────────────────────────┘
 ```
 
 ### 1.2 Mobile
 
-Same **section order** on mobile (actions → stats → previews → activity → breakdown). C/D stack **single column** (Focus above Recent). Quick actions wrap; touch targets ≥ `min-h-11`. No horizontal scroll for core stats. **Live `/app` order (2026-11-16):** header → quick links → overall → focus/recent → activity → topics + platform (grouped).
+Same **section order** as desktop: header → toolbar → stats → **3-column queues** (stacked) → breakdown column → activity. Touch targets on pills and links ≥ comfortable tap size. No horizontal scroll for core stats.
 
 ### 1.3 Visual system (all phases)
 
@@ -91,7 +83,7 @@ flowchart LR
 
 ## DASH-1 — Baseline polish (layout + overall + topics)
 
-**Status (2026-11-16):** Done — `ProgressBar`, `DashboardPageHeader`, `DashboardOverallPanel`, `DashboardQuickLinks`, `DashboardTopicProgressList`; route refactored; component tests added.
+**Status (2026-11-16):** Done — `ProgressBar`, `DashboardPageHeader`, `DashboardStatsStrip`, `DashboardToolbar`, `DashboardTopicProgressList`; route refactored; component tests added.
 
 **Goal:** Make the current dashboard feel intentional before adding new data calls.
 
@@ -108,9 +100,9 @@ flowchart LR
 ### 1.2 Implementation notes
 
 - Extract presentational pieces to `cp-frontend/src/components/dashboard/`:
-  - `DashboardOverallPanel.tsx`
+  - `DashboardStatsStrip.tsx`
   - `DashboardTopicProgressList.tsx`
-  - `DashboardQuickLinks.tsx`
+  - `DashboardToolbar.tsx`
 - Reuse `overallPercentComplete` / `formatTopicProgress` from [`progress-display.ts`](../../cp-frontend/src/lib/problems/progress-display.ts).
 - Page [`app/index.tsx`](../../cp-frontend/src/routes/app/index.tsx) orchestrates load + sections only.
 
@@ -156,8 +148,8 @@ Manual: empty library, library with topics only, library with problems.
 
 ### 2.3 Components
 
-- `DashboardFocusList.tsx`, `DashboardRecentLists.tsx`, `DashboardStatLink.tsx` (count + href).
-- Row UI: reuse patterns from [`ProblemLibraryRow`](../../cp-frontend/src/components/problems/ProblemLibraryRow.tsx) in a **compact** variant (title + platform only; no solve/delete).
+- `DashboardQueueGrid.tsx`, `DashboardQueueColumn.tsx`, `DashboardProblemPreviewRow.tsx`.
+- Row UI: compact card rows (title, platform, topic chip, difficulty, relative time).
 
 ### 2.4 Exit criteria
 
@@ -209,7 +201,7 @@ Manual: empty library, library with topics only, library with problems.
 
 ## DASH-4 — Analytics
 
-**Status (2026-11-16):** Done — `GET /progress/activity?weeks=12` (UTC week buckets, `createdAt` adds / `solvedAt` solves), solve-day streak in response + header badge, `DashboardActivitySection` (CSS bar chart + table). Goals / `PATCH /users/me/preferences` still **deferred**.
+**Status (2026-11-16):** Done — `GET /progress/activity?weeks=12` (UTC week buckets, `createdAt` adds / `solvedAt` solves), solve-day streak badge on activity panel, `DashboardActivitySection` (dark panel, `DashboardActivityChart`, in-section weekly list). Goals / `PATCH /users/me/preferences` still **deferred**.
 
 **Goal:** Longer-horizon motivation — only after DASH-1–3 stable.
 
@@ -234,7 +226,7 @@ Manual: empty library, library with topics only, library with problems.
 ### 4.3 Exit criteria
 
 - [x] FR-05 still satisfied for headline numbers (activity is supplementary).
-- [x] Chart accessible (`DashboardActivityTable` + chart `aria-label` summary).
+- [x] Chart accessible (weekly list in `DashboardActivitySection` + chart `aria-label` summary).
 - [x] Dashboard **6** requests: progress + 4 previews + activity.
 
 ---
