@@ -239,6 +239,21 @@ try {
     'Platform + status filter',
   );
 
+  const combinedQPlatformStatus = await request(server)
+    .get(
+      '/problems?q=Binary&platform=leetcode&status=unsolved&pageSize=100',
+    )
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(
+    combinedQPlatformStatus.body.meta.total >= 1 &&
+      combinedQPlatformStatus.body.items.some(
+        (p) => p.id === taggedLeetcode.body.id,
+      ),
+    'Search q + platform + status=unsolved combined filter',
+  );
+
   const searchTopics = await request(server)
     .get(
       `/problems?q=Binary&topicIds=${topicA1.body.id}&topicIds=${topicA2.body.id}&pageSize=100`,

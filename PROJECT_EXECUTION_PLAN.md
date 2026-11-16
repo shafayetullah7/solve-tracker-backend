@@ -213,6 +213,10 @@ All MVP acceptance criteria pass, material failures are fixed, and remaining lim
 
 The authorized production release passes its smoke checks, has documented operational/recovery steps, and meets the MVP requirements.
 
+## UI/UX pivot (post–MVP)
+
+**Status:** planned. Design: [UI_UX_PIVOT.md](docs/UI_UX_PIVOT.md). Phased execution: [UI_UX_PIVOT_EXECUTION_PLAN.md](docs/UI_UX_PIVOT_EXECUTION_PLAN.md) (UX-1 … UX-7).
+
 ## Deferred work
 
 Separate practice sheets, manual ordering, revision reminders, attempt history, bulk actions, CSV import/export, platform synchronization, goals, and sharing remain future phases unless explicitly promoted into the MVP. SSR, BFF, worker-based auth, Redis, generalized repository frameworks, and elaborate retry systems are not prerequisites for completion.
