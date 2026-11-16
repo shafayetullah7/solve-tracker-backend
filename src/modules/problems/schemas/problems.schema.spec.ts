@@ -43,9 +43,15 @@ describe('problems schemas', () => {
     ).toThrow();
   });
 
+  it('list accepts seeded platform slugs', () => {
+    expect(
+      listProblemsQuerySchema.parse({ platform: 'hackerrank' }).platform,
+    ).toBe('hackerrank');
+  });
+
   it('list rejects invalid platform', () => {
     expect(() =>
-      listProblemsQuerySchema.parse({ platform: 'hackerrank' }),
+      listProblemsQuerySchema.parse({ platform: 'not-a-judge' }),
     ).toThrow();
   });
 

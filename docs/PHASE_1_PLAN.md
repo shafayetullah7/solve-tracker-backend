@@ -102,7 +102,7 @@ The current initial migration is a plain generated `CREATE TABLE platforms`; it 
 From `backend/`, in a retained terminal:
 
 ```bash
-pnpm start:dev:docker
+pnpm docker:dev
 ```
 
 In another terminal:

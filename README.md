@@ -12,8 +12,8 @@ From `backend/`, copy the example environment file once and start the stack:
 
 ```bash
 cp .env.example .env
-pnpm build:docker
-pnpm start:dev:docker
+pnpm docker:dev:build
+pnpm docker:dev
 ```
 
 The backend runs at `http://localhost:3000`. PostgreSQL is available on `localhost:5432`. Nest watches the mounted `src/` directory using polling, including on Docker Desktop. Dependencies and build output stay inside the image/container. This Dockerfile is for development.
@@ -29,12 +29,12 @@ These commands use `docker compose exec -T backend` and require the backend cont
 
 ```bash
 pnpm logs:docker
-pnpm stop:dev:docker
+pnpm docker:down
 ```
 
 Normal shutdown preserves the PostgreSQL named volume. PostgreSQL initialization credentials apply only when that volume is empty; editing credentials in `.env` does not change an existing database user's password.
 
-Run `pnpm build:docker` after dependency or Dockerfile changes, then `pnpm start:dev:docker`. After environment changes, stop and restart the stack to recreate the backend. Source changes are picked up automatically via Nest watch (`start:dev` in the container).
+Run `pnpm docker:dev:build` after dependency or Dockerfile changes, then `pnpm docker:dev`. After environment changes, stop and restart the stack to recreate the backend. Source changes are picked up automatically via Nest watch (`start:dev` in the container).
 
 ## Run on the host or use an external database
 

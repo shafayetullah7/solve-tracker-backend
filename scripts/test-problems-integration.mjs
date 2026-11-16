@@ -70,11 +70,16 @@ const problemUrl = `https://leetcode.com/problems/two-sum-${randomUUID()}/`;
 try {
   await migrate(drizzle({ client: pool }), { migrationsFolder: './drizzle' });
   await migrate(drizzle({ client: pool }), { migrationsFolder: './drizzle' });
+  const { PLATFORM_SEED_ROWS } = await import(
+    '../dist/shared/platform-catalog.js'
+  );
+  const platformValues = PLATFORM_SEED_ROWS.map(
+    (row) =>
+      `('${row.slug}', '${row.name.replace(/'/g, "''")}', '${row.baseUrl}')`,
+  ).join(',\n      ');
   await pool.query(`
     INSERT INTO platforms (slug, name, base_url) VALUES
-      ('codeforces', 'Codeforces', 'https://codeforces.com'),
-      ('leetcode', 'LeetCode', 'https://leetcode.com'),
-      ('codechef', 'CodeChef', 'https://www.codechef.com')
+      ${platformValues}
     ON CONFLICT (slug) DO NOTHING
   `);
   await app.init();

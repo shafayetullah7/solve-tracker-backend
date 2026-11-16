@@ -2,6 +2,7 @@ import pg from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from '../src/database/schema/index.js';
 import { databaseEnvironmentSchema } from '../src/config/environment.js';
+import { PLATFORM_SEED_ROWS } from '../src/shared/platform-catalog.js';
 
 const result = databaseEnvironmentSchema.safeParse(process.env);
 if (!result.success) {
@@ -19,19 +20,7 @@ try {
   await db.transaction(async (tx) => {
     await tx
       .insert(schema.platforms)
-      .values([
-        {
-          slug: 'codeforces',
-          name: 'Codeforces',
-          baseUrl: 'https://codeforces.com',
-        },
-        { slug: 'leetcode', name: 'LeetCode', baseUrl: 'https://leetcode.com' },
-        {
-          slug: 'codechef',
-          name: 'CodeChef',
-          baseUrl: 'https://www.codechef.com',
-        },
-      ])
+      .values(PLATFORM_SEED_ROWS)
       .onConflictDoNothing({ target: schema.platforms.slug });
   });
   console.log('Platform seed complete. Existing records were preserved.');

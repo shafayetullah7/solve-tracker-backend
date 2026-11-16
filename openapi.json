@@ -1018,7 +1018,20 @@
               "enum": [
                 "codeforces",
                 "leetcode",
-                "codechef"
+                "codechef",
+                "atcoder",
+                "hackerrank",
+                "geeksforgeeks",
+                "kattis",
+                "spoj",
+                "cses",
+                "beecrowd",
+                "codewars",
+                "hackerearth",
+                "topcoder",
+                "projecteuler",
+                "uva",
+                "aizu"
               ]
             }
           },
