@@ -397,6 +397,31 @@ try {
     progressSolved.body.overall.solved === progressBefore.body.overall.solved + 1,
     'Progress overall solved increases after solve',
   );
+
+  const activityAfterSolve = await request(server)
+    .get('/progress/activity')
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(
+    Array.isArray(activityAfterSolve.body.weeks) &&
+      activityAfterSolve.body.weeks.length === 12,
+    'Activity returns 12 weekly buckets',
+  );
+  const addedSum = activityAfterSolve.body.weeks.reduce(
+    (sum, row) => sum + row.added,
+    0,
+  );
+  const solvedSum = activityAfterSolve.body.weeks.reduce(
+    (sum, row) => sum + row.solved,
+    0,
+  );
+  check(addedSum >= 1, 'Activity counts at least one added problem');
+  check(solvedSum >= 1, 'Activity counts at least one solve');
+  check(
+    activityAfterSolve.body.streak.currentDays >= 1,
+    'Activity streak at least one after solve today',
+  );
   for (const topicId of [topicPr1.body.id, topicPr2.body.id, topicPr3.body.id]) {
     const row = progressSolved.body.topics.find((t) => t.id === topicId);
     check(

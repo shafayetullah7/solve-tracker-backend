@@ -1859,6 +1859,131 @@
         ]
       }
     },
+    "/progress/activity": {
+      "get": {
+        "operationId": "ProgressController_getActivity",
+        "parameters": [
+          {
+            "name": "weeks",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 12,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 52
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "weeks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "weekStart": {
+                            "type": "string",
+                            "description": "ISO calendar date (YYYY-MM-DD) of Monday UTC for this bucket."
+                          },
+                          "added": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "solved": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "weekStart",
+                          "added",
+                          "solved"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "streak": {
+                      "type": "object",
+                      "properties": {
+                        "currentDays": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991,
+                          "description": "Consecutive solve days ending on the most recent solve day, if that day is today or yesterday (UTC); otherwise 0."
+                        },
+                        "lastSolveDate": {
+                          "nullable": true,
+                          "description": "ISO date (UTC) of the latest day with at least one solve.",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "currentDays",
+                        "lastSolveDate"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "timezone": {
+                      "type": "string",
+                      "enum": [
+                        "UTC"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "weeks",
+                    "streak",
+                    "timezone"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Weekly adds (createdAt) and solves (solvedAt). Supplementary to FR-05 GET /progress summaries."
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "statusCode",
+                    "code",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Progress"
+        ]
+      }
+    },
     "/progress": {
       "get": {
         "operationId": "ProgressController_getSummaries",
@@ -1944,11 +2069,78 @@
                         "additionalProperties": false
                       },
                       "description": "Every owned topic, including empty topics. Counts reflect the full library, not active list filters."
+                    },
+                    "platforms": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "total": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "solved": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "unsolved": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "slug": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "codeforces",
+                                  "leetcode",
+                                  "codechef",
+                                  "atcoder",
+                                  "hackerrank",
+                                  "geeksforgeeks",
+                                  "kattis",
+                                  "spoj",
+                                  "cses",
+                                  "beecrowd",
+                                  "codewars",
+                                  "hackerearth",
+                                  "topcoder",
+                                  "projecteuler",
+                                  "uva",
+                                  "aizu"
+                                ]
+                              },
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "other"
+                                ]
+                              }
+                            ]
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "total",
+                          "solved",
+                          "unsolved",
+                          "slug",
+                          "name"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "description": "Per-platform counts (catalog slugs + other). Only platforms with at least one problem."
                     }
                   },
                   "required": [
                     "overall",
-                    "topics"
+                    "topics",
+                    "platforms"
                   ],
                   "additionalProperties": false,
                   "description": "Progress summaries (FR-05). Not affected by GET /problems filters."

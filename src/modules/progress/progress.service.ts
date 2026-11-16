@@ -1,7 +1,19 @@
 import { Injectable } from '@nestjs/common';
+import { computeSolveStreak } from './progress-activity-streak.js';
+import {
+  activityRangeSince,
+  buildWeekRange,
+  mergeActivityWeeks,
+} from './progress-activity-weeks.js';
+import { buildPlatformProgress } from './progress-platform-breakdown.js';
 import { percentComplete } from './progress-percent.js';
 import { ProgressRepository } from './progress.repository.js';
-import type { ProgressCounts, ProgressResponse, TopicProgress } from './schemas/progress.schema.js';
+import type { ProgressActivityResponse } from './schemas/activity.schema.js';
+import type {
+  ProgressCounts,
+  ProgressResponse,
+  TopicProgress,
+} from './schemas/progress.schema.js';
 
 function toCounts(total: number, solved: number): ProgressCounts {
   const safeTotal = Math.max(0, total);
@@ -18,10 +30,11 @@ export class ProgressService {
   constructor(private readonly repo: ProgressRepository) {}
 
   async getSummaries(userId: string): Promise<ProgressResponse> {
-    const [overallRaw, ownedTopics, topicAgg] = await Promise.all([
+    const [overallRaw, ownedTopics, topicAgg, urlStatuses] = await Promise.all([
       this.repo.loadOverallCounts(userId),
       this.repo.loadOwnedTopics(userId),
       this.repo.loadTopicAssociationCounts(userId),
+      this.repo.loadProblemUrlStatuses(userId),
     ]);
 
     const byTopicId = new Map(
@@ -42,6 +55,27 @@ export class ProgressService {
     return {
       overall: toCounts(overallRaw.total, overallRaw.solved),
       topics,
+      platforms: buildPlatformProgress(urlStatuses),
+    };
+  }
+
+  async getActivity(
+    userId: string,
+    weeks: number,
+  ): Promise<ProgressActivityResponse> {
+    const now = new Date();
+    const since = activityRangeSince(weeks, now);
+    const [added, solved, solveDates] = await Promise.all([
+      this.repo.loadWeeklyAddedCounts(userId, since),
+      this.repo.loadWeeklySolvedCounts(userId, since),
+      this.repo.loadDistinctSolveDates(userId),
+    ]);
+
+    const weekStarts = buildWeekRange(weeks, now);
+    return {
+      weeks: mergeActivityWeeks(weekStarts, added, solved),
+      streak: computeSolveStreak(solveDates, now),
+      timezone: 'UTC',
     };
   }
 }

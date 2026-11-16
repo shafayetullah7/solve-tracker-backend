@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, asc, count, eq, sql } from 'drizzle-orm';
+import { and, asc, count, eq, gte, isNotNull, sql } from 'drizzle-orm';
 import { DatabaseService } from '../../database/database.service.js';
 import {
   problemTopics,
@@ -16,6 +16,16 @@ export type RawTopicCounts = {
 };
 
 export type OwnedTopicRow = { id: string; name: string };
+
+export type ProblemUrlStatus = {
+  url: string;
+  status: 'solved' | 'unsolved';
+};
+
+export type RawWeeklyCount = {
+  weekStart: string;
+  count: number;
+};
 
 @Injectable()
 export class ProgressRepository {
@@ -72,5 +82,64 @@ export class ProgressRepository {
       total: Number(r.total),
       solved: Number(r.solved),
     }));
+  }
+
+  async loadProblemUrlStatuses(userId: string): Promise<ProblemUrlStatus[]> {
+    const rows = await this.db
+      .select({ url: problems.url, status: problems.status })
+      .from(problems)
+      .where(eq(problems.userId, userId));
+    return rows.map((r) => ({
+      url: r.url,
+      status: r.status,
+    }));
+  }
+
+  async loadWeeklyAddedCounts(
+    userId: string,
+    since: Date,
+  ): Promise<RawWeeklyCount[]> {
+    const weekStart = sql<string>`(date_trunc('week', ${problems.createdAt})::date)::text`;
+    const rows = await this.db
+      .select({ weekStart, count: count() })
+      .from(problems)
+      .where(and(eq(problems.userId, userId), gte(problems.createdAt, since)))
+      .groupBy(weekStart);
+    return rows.map((r) => ({
+      weekStart: r.weekStart,
+      count: Number(r.count),
+    }));
+  }
+
+  async loadWeeklySolvedCounts(
+    userId: string,
+    since: Date,
+  ): Promise<RawWeeklyCount[]> {
+    const weekStart = sql<string>`(date_trunc('week', ${problems.solvedAt})::date)::text`;
+    const rows = await this.db
+      .select({ weekStart, count: count() })
+      .from(problems)
+      .where(
+        and(
+          eq(problems.userId, userId),
+          isNotNull(problems.solvedAt),
+          gte(problems.solvedAt, since),
+        ),
+      )
+      .groupBy(weekStart);
+    return rows.map((r) => ({
+      weekStart: r.weekStart,
+      count: Number(r.count),
+    }));
+  }
+
+  async loadDistinctSolveDates(userId: string): Promise<string[]> {
+    const solveDay = sql<string>`(${problems.solvedAt}::date)::text`;
+    const rows = await this.db
+      .select({ solveDay })
+      .from(problems)
+      .where(and(eq(problems.userId, userId), isNotNull(problems.solvedAt)))
+      .groupBy(solveDay);
+    return rows.map((r) => r.solveDay);
   }
 }

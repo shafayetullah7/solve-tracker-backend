@@ -1,9 +1,15 @@
 import { z } from 'zod';
+import { PLATFORM_SLUGS } from '../../../shared/platform-catalog.js';
 
 export const progressCountsSchema = z.strictObject({
   total: z.number().int().min(0),
   solved: z.number().int().min(0),
   unsolved: z.number().int().min(0),
+});
+
+export const platformProgressSchema = progressCountsSchema.extend({
+  slug: z.union([z.enum(PLATFORM_SLUGS), z.literal('other')]),
+  name: z.string(),
 });
 
 export const topicProgressSchema = progressCountsSchema.extend({
@@ -29,6 +35,12 @@ export const progressResponseSchema = z
         description:
           'Every owned topic, including empty topics. Counts reflect the full library, not active list filters.',
       }),
+    platforms: z
+      .array(platformProgressSchema)
+      .meta({
+        description:
+          'Per-platform counts (catalog slugs + other). Only platforms with at least one problem.',
+      }),
   })
   .meta({
     description: 'Progress summaries (FR-05). Not affected by GET /problems filters.',
@@ -42,5 +54,6 @@ export const errorSchema = z.object({
 });
 
 export type ProgressCounts = z.infer<typeof progressCountsSchema>;
+export type PlatformProgress = z.infer<typeof platformProgressSchema>;
 export type TopicProgress = z.infer<typeof topicProgressSchema>;
 export type ProgressResponse = z.infer<typeof progressResponseSchema>;
