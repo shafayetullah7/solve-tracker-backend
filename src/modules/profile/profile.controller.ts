@@ -29,7 +29,6 @@ import {
   type PatchProfileInput,
   type UpdateEducationEntryInput,
   type UpdateWorkEntryInput,
-  entryIdParamSchema,
 } from './schemas/profile.schema.js';
 
 @ApiTags('Profile')
@@ -68,7 +67,7 @@ export class ProfileController {
   @ApiResponse({ status: 200, standardSchema: workEntryResponseSchema })
   updateWork(
     @Req() req: AuthenticatedRequest,
-    @Param({ schema: entryIdParamSchema }) id: string,
+    @Param('id') id: string,
     @Body({ schema: updateWorkEntrySchema }) input: UpdateWorkEntryInput,
   ) {
     return this.profile.updateWork(req.auth.user.id, id, input);
@@ -79,7 +78,7 @@ export class ProfileController {
   @ApiResponse({ status: 204, description: 'Work entry deleted' })
   deleteWork(
     @Req() req: AuthenticatedRequest,
-    @Param({ schema: entryIdParamSchema }) id: string,
+    @Param('id') id: string,
   ) {
     return this.profile.deleteWork(req.auth.user.id, id);
   }
@@ -98,7 +97,7 @@ export class ProfileController {
   @ApiResponse({ status: 200, standardSchema: educationEntryResponseSchema })
   updateEducation(
     @Req() req: AuthenticatedRequest,
-    @Param({ schema: entryIdParamSchema }) id: string,
+    @Param('id') id: string,
     @Body({ schema: updateEducationEntrySchema })
     input: UpdateEducationEntryInput,
   ) {
@@ -110,7 +109,7 @@ export class ProfileController {
   @ApiResponse({ status: 204, description: 'Education entry deleted' })
   deleteEducation(
     @Req() req: AuthenticatedRequest,
-    @Param({ schema: entryIdParamSchema }) id: string,
+    @Param('id') id: string,
   ) {
     return this.profile.deleteEducation(req.auth.user.id, id);
   }

@@ -13,15 +13,16 @@ import {
 import { MAX_EDUCATION_ENTRIES } from './profile.constants.js';
 import { profileError } from './profile.errors.js';
 import { ProfileRepository } from './profile.repository.js';
-import type {
-  CreateEducationEntryInput,
-  CreateWorkEntryInput,
-  EducationEntryResponse,
-  PatchProfileInput,
-  ProfileResponse,
-  UpdateEducationEntryInput,
-  UpdateWorkEntryInput,
-  WorkEntryResponse,
+import {
+  entryIdParamSchema,
+  type CreateEducationEntryInput,
+  type CreateWorkEntryInput,
+  type EducationEntryResponse,
+  type PatchProfileInput,
+  type ProfileResponse,
+  type UpdateEducationEntryInput,
+  type UpdateWorkEntryInput,
+  type WorkEntryResponse,
 } from './schemas/profile.schema.js';
 
 function toWorkEntry(row: UserWorkEntry): WorkEntryResponse {
@@ -49,6 +50,17 @@ export class ProfileService {
     private readonly userLock: UserLockRepository,
     private readonly media: MediaService,
   ) {}
+
+  private parseEntryId(rawId: string): string {
+    const trimmed = rawId.trim();
+    const result = entryIdParamSchema.safeParse(trimmed);
+    if (!result.success) {
+      throw profileError(400, 'VALIDATION_ERROR', 'Invalid entry id.', {
+        id: 'Invalid entry id.',
+      });
+    }
+    return result.data;
+  }
 
   private async resolveAvatarUrl(
     userId: string,
@@ -158,7 +170,8 @@ export class ProfileService {
     rawId: string,
     input: UpdateWorkEntryInput,
   ): Promise<WorkEntryResponse> {
-    const row = await this.profiles.updateWork(userId, rawId, {
+    const id = this.parseEntryId(rawId);
+    const row = await this.profiles.updateWork(userId, id, {
       organization: input.organization,
       role: input.role,
       period: input.period ?? null,
@@ -169,7 +182,8 @@ export class ProfileService {
   }
 
   async deleteWork(userId: string, rawId: string): Promise<void> {
-    const deleted = await this.profiles.deleteWork(userId, rawId);
+    const id = this.parseEntryId(rawId);
+    const deleted = await this.profiles.deleteWork(userId, id);
     if (!deleted)
       throw profileError(404, 'NOT_FOUND', 'This entry was removed.');
   }
@@ -201,7 +215,8 @@ export class ProfileService {
     rawId: string,
     input: UpdateEducationEntryInput,
   ): Promise<EducationEntryResponse> {
-    const row = await this.profiles.updateEducation(userId, rawId, {
+    const id = this.parseEntryId(rawId);
+    const row = await this.profiles.updateEducation(userId, id, {
       institution: input.institution,
       program: input.program,
       endYear: input.endYear ?? null,
@@ -212,7 +227,8 @@ export class ProfileService {
   }
 
   async deleteEducation(userId: string, rawId: string): Promise<void> {
-    const deleted = await this.profiles.deleteEducation(userId, rawId);
+    const id = this.parseEntryId(rawId);
+    const deleted = await this.profiles.deleteEducation(userId, id);
     if (!deleted)
       throw profileError(404, 'NOT_FOUND', 'This entry was removed.');
   }
