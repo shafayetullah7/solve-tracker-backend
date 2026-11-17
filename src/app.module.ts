@@ -8,6 +8,8 @@ import { TopicsModule } from './modules/topics/topics.module.js';
 import { ProblemsModule } from './modules/problems/problems.module.js';
 import { ProgressModule } from './modules/progress/progress.module.js';
 import { HealthModule } from './modules/health/health.module.js';
+import { ProfileModule } from './modules/profile/profile.module.js';
+import { MediaModule } from './modules/media/media.module.js';
 import { DatabaseModule } from './database/database.module.js';
 
 @Module({
@@ -16,6 +18,7 @@ import { DatabaseModule } from './database/database.module.js';
       isGlobal: true,
       cache: true,
       skipProcessEnv: true,
+      envFilePath: ['.env.openapi', '.env'],
       validationSchema: environmentSchema,
     }),
     DatabaseModule,
@@ -24,6 +27,8 @@ import { DatabaseModule } from './database/database.module.js';
     ProblemsModule,
     ProgressModule,
     HealthModule,
+    MediaModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],

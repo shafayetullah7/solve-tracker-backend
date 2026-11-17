@@ -27,6 +27,7 @@ import { AuthSecurityGuard, AuthLimiter } from './auth-security.guard.js';
     AuthSecurityGuard,
     AuthLimiter,
     AuthService,
+    AuthRepository,
     AuthCookies,
   ],
 })

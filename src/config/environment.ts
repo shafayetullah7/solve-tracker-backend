@@ -63,6 +63,11 @@ export const authEnvironmentSchema = z.object({
     )
     .optional(),
 });
+export const cloudinaryEnvironmentSchema = z.object({
+  CLOUDINARY_CLOUD_NAME: z.string().trim().min(1),
+  CLOUDINARY_API_KEY: z.string().trim().min(1),
+  CLOUDINARY_API_SECRET: z.string().trim().min(1),
+});
 export const environmentSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']),
@@ -82,6 +87,7 @@ export const environmentSchema = z
     POSTGRES_PORT: port.optional(),
   })
   .extend(authEnvironmentSchema.shape)
+  .extend(cloudinaryEnvironmentSchema.shape)
   .superRefine((v, ctx) => {
     const fail = (key: string, message: string) =>
       ctx.addIssue({ code: 'custom', path: [key], message });

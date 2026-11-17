@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { CanActivate, ExecutionContext } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
+import { httpResourcePath } from '../../common/http-resource-path.js';
 import type { Environment } from '../../config/environment.js';
 import { digest } from './token.service.js';
 import { authError } from './auth.errors.js';
@@ -56,10 +57,14 @@ export class AuthSecurityGuard implements CanActivate {
         'CSRF_REJECTED',
         'Request origin or protection header is invalid.',
       );
+    const resourcePath = httpResourcePath(req);
+    const allowsMultipart =
+      resourcePath === '/media' && req.method === 'POST';
     if (
       req.headers['content-length'] !== '0' &&
       (req.headers['content-length'] || req.headers['transfer-encoding']) &&
-      !req.is('application/json')
+      !req.is('application/json') &&
+      !(allowsMultipart && req.is('multipart/form-data'))
     )
       throw authError(403, 'CSRF_REJECTED', 'JSON request body required.');
     const route =
@@ -68,11 +73,20 @@ export class AuthSecurityGuard implements CanActivate {
         .split('/')
         .at(-1)
         ?.toLowerCase() ?? '';
+    const mediaUploadRetry =
+      resourcePath === '/media' && req.method === 'POST'
+        ? this.limiter.check(
+            `media-upload:${req.ip ?? req.socket.remoteAddress}`,
+            30,
+            3_600_000,
+          )
+        : 0;
     const limits: Record<string, [number, number]> = {
       register: [5, 3600000],
       login: [20, 900000],
       'forgot-password': [5, 900000],
       'reset-password': [10, 900000],
+      'change-password': [10, 900000],
       refresh: [60, 60000],
     };
     const policy = limits[route];
@@ -91,8 +105,11 @@ export class AuthSecurityGuard implements CanActivate {
       route === 'login' && email
         ? this.limiter.check(this.limiter.emailKey(email), 10, 900000, false)
         : 0;
-    if (retry || emailRetry) {
-      res.setHeader('Retry-After', String(retry || emailRetry));
+    if (retry || emailRetry || mediaUploadRetry) {
+      res.setHeader(
+        'Retry-After',
+        String(retry || emailRetry || mediaUploadRetry),
+      );
       throw authError(
         429,
         'RATE_LIMITED',

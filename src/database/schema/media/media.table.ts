@@ -1,6 +1,5 @@
 import { check, index, jsonb, pgTable, smallint, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
-import type { MediaMeta } from '../../../modules/media/media-meta.types.js';
 import { users } from '../users/users.table.js';
 import { mediaResourceTypeEnum } from './media-resource-type.enum.js';
 
@@ -18,7 +17,7 @@ export const media = pgTable(
     publicId: text('public_id').notNull(),
     resourceType: mediaResourceTypeEnum('resource_type').notNull().default('image'),
     extension: text('extension').notNull(),
-    meta: jsonb('meta').$type<MediaMeta>().notNull(),
+    meta: jsonb('meta').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
       .defaultNow(),

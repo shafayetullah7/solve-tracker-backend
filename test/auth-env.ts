@@ -14,4 +14,7 @@ export const authTestEnvironment = {
   EMAIL_DELIVERY_MODE: 'mock',
   JWT_ACCESS_SECRET: 'test-access-secret-not-for-production-0001',
   JWT_REFRESH_SECRET: 'test-refresh-secret-not-for-production-0002',
+  CLOUDINARY_CLOUD_NAME: 'test_cloud',
+  CLOUDINARY_API_KEY: 'test_api_key',
+  CLOUDINARY_API_SECRET: 'test_api_secret',
 } as const;

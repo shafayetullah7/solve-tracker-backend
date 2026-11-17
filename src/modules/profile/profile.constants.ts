@@ -1,0 +1,1 @@
+export const MAX_EDUCATION_ENTRIES = 2;

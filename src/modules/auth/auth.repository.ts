@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
 import { DatabaseService } from '../../database/database.service.js';
+import { UserLockRepository } from '../../database/user-lock.repository.js';
+import type { DbTx } from '../../database/user-lock.repository.js';
 import {
   users,
   authSessions,
@@ -8,10 +10,13 @@ import {
 } from '../../database/schema/index.js';
 import type { User } from '../../database/schema/index.js';
 export type AuthDb = DatabaseService['db'];
-export type AuthTx = Parameters<Parameters<AuthDb['transaction']>[0]>[0];
+export type AuthTx = DbTx;
 @Injectable()
 export class AuthRepository {
-  constructor(private readonly database: DatabaseService) {}
+  constructor(
+    private readonly database: DatabaseService,
+    private readonly userLock: UserLockRepository,
+  ) {}
   get db() {
     return this.database.db;
   }
@@ -27,12 +32,7 @@ export class AuthRepository {
     id: string,
     operation: (tx: AuthTx, user: User) => Promise<T>,
   ): Promise<T | null> {
-    return this.db.transaction(async (tx) => {
-      const user = (
-        await tx.select().from(users).where(eq(users.id, id)).for('update')
-      )[0];
-      return user ? operation(tx, user) : null;
-    });
+    return this.userLock.withLockedUser(id, operation);
   }
   async session(id: string, userId: string, db: AuthDb | AuthTx = this.db) {
     return (

@@ -20,6 +20,7 @@ import {
   loginSchema,
   forgotSchema,
   resetSchema,
+  changePasswordSchema,
   userResponseSchema,
   messageSchema,
   errorSchema,
@@ -28,6 +29,7 @@ import type {
   RegisterInput,
   LoginInput,
   ResetInput,
+  ChangePasswordInput,
 } from './schemas/auth.schema.js';
 @ApiTags('Authentication')
 @ApiResponse({ status: '4XX', standardSchema: errorSchema })
@@ -125,6 +127,21 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     await this.auth.reset(input);
+    this.cookies.clear(res);
+  }
+  @Post('change-password')
+  @HttpCode(204)
+  @UseGuards(AccessGuard)
+  @ApiResponse({
+    status: 204,
+    description: 'Password changed; all sessions revoked',
+  })
+  async changePassword(
+    @Req() req: AuthenticatedRequest,
+    @Body({ schema: changePasswordSchema }) input: ChangePasswordInput,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    await this.auth.changePassword(req.auth.user.id, input);
     this.cookies.clear(res);
   }
 }

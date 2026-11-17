@@ -21,6 +21,7 @@ import type {
   RegisterInput,
   LoginInput,
   ResetInput,
+  ChangePasswordInput,
 } from './schemas/auth.schema.js';
 const safeUser = (u: User) => ({ id: u.id, name: u.name, email: u.email });
 const usable = (s: { revokedAt: Date | null; expiresAt: Date } | undefined) =>
@@ -270,5 +271,39 @@ export class AuthService {
         'RESET_TOKEN_INVALID',
         'Reset link is invalid or expired.',
       );
+  }
+
+  async changePassword(userId: string, input: ChangePasswordInput) {
+    const passwordHash = await this.repo.withUser(userId, async (tx, user) => {
+      const valid = await this.passwords.verify(
+        input.currentPassword,
+        user.passwordHash,
+      );
+      if (!valid) {
+        throw authError(401, 'INVALID_CREDENTIALS', 'Current password is incorrect.');
+      }
+      const same = await this.passwords.verify(
+        input.newPassword,
+        user.passwordHash,
+      );
+      if (same) {
+        throw authError(400, 'VALIDATION_ERROR', 'Invalid input.', {
+          newPassword: 'Choose a different password.',
+        });
+      }
+      const hash = await this.passwords.hash(input.newPassword);
+      const now = new Date();
+      await tx
+        .update(users)
+        .set({ passwordHash: hash, updatedAt: now })
+        .where(eq(users.id, user.id));
+      await tx
+        .update(authSessions)
+        .set({ revokedAt: now, updatedAt: now })
+        .where(eq(authSessions.userId, user.id));
+      return hash;
+    });
+    if (!passwordHash)
+      throw authError(404, 'NOT_FOUND', 'Account was not found.');
   }
 }
