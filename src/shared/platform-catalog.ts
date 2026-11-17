@@ -1,4 +1,8 @@
-/** Canonical judges / practice sites — shared with the frontend via Vite alias. */
+/**
+ * Canonical judges / practice sites for the API (seed + URL breakdown).
+ * Duplicated in solve-tracker-frontend/src/lib/platforms/platform-catalog.ts.
+ * Keep both in sync: `pnpm verify:catalog` from solve-tracker-frontend.
+ */
 export type PlatformCatalogEntry = {
   readonly slug: string;
   readonly name: string;

@@ -2,7 +2,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import openapiTS, { astToString } from 'openapi-typescript';
 const input = new URL('../openapi.json', import.meta.url);
 const output = new URL(
-  '../../cp-frontend/src/lib/api/generated/backend.d.ts',
+  '../../solve-tracker-frontend/src/lib/api/generated/backend.d.ts',
   import.meta.url,
 );
 const content =

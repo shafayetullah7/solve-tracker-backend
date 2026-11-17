@@ -4,7 +4,7 @@ Status: **implementation complete** — Steps **4.1–4.8** documented ([PHASE_4
 
 Outcome: users can register, log in, recover/reset passwords, reload authenticated pages, recover expired access, and log out through the real backend. Session recovery is coordinated across requests and tabs, and old-account responses cannot restore private UI state.
 
-References: [Phase 0 contracts](PHASE_0_DECISIONS.md), [Phase 3 results](PHASE_3_RESULTS.md), [frontend conventions](../cp-frontend/FRONTEND_CONVENTIONS.md), [auth conventions](../cp-frontend/AUTH_CONVENTIONS.md), and [API client](../cp-frontend/API_CLIENT.md).
+References: [Phase 0 contracts](PHASE_0_DECISIONS.md), [Phase 3 results](PHASE_3_RESULTS.md), [frontend conventions](../solve-tracker-frontend/FRONTEND_CONVENTIONS.md), [auth conventions](../solve-tracker-frontend/AUTH_CONVENTIONS.md), and [API client](../solve-tracker-frontend/API_CLIENT.md).
 
 ## 1. Scope and prerequisites
 

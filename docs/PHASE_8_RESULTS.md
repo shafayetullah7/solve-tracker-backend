@@ -29,7 +29,7 @@ Plan reference: [PHASE_8_PLAN.md](PHASE_8_PLAN.md). Acceptance matrix: [PHASE_8_
 ### One-shot exit verifier
 
 ```bash
-cd backend
+cd solve-tracker-backend
 TEST_DATABASE_URL=postgresql://practice:practice_dev@localhost:5432/practice_tracker_test \
   pnpm verify:phase-8
 ```

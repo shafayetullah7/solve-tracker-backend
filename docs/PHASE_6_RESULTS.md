@@ -7,7 +7,7 @@ Date: **2026-11-15**. Phase 6 status: **complete** — user-owned problem librar
 ### Data and migration (Step 6.1)
 
 - Tables `problems`, `problem_topics` with ownership, normalized URL uniqueness per user, optional metadata, `status` + `solved_at`.
-- Migration folder: `backend/drizzle/20261115094352_problems/migration.sql`.
+- Migration folder: `drizzle/20261115094352_problems/migration.sql`.
 - `problem-url.ts` (FR-06), `problem-title.ts`, `problem-fields.ts` + unit tests.
 
 ### Backend API (Step 6.2)
@@ -15,11 +15,11 @@ Date: **2026-11-15**. Phase 6 status: **complete** — user-owned problem librar
 - `ProblemsModule`: `GET/POST /problems`, `GET/PATCH/DELETE /problems/:problemId` behind auth guards.
 - Pagination and `topicId` filter; atomic topic association replace on PATCH.
 - Errors: `VALIDATION_ERROR`, `NOT_FOUND`, `PROBLEM_URL_IN_USE` (409, optional `existingProblemId` in details).
-- OpenAPI: five `ProblemsController_*` operations in `backend/openapi.json`.
+- OpenAPI: five `ProblemsController_*` operations in `openapi.json`.
 
 ### Typed client (Step 6.3)
 
-- `cp-frontend/src/lib/api/modules/problems.api.ts` + `problems.api.test.ts`; `recoverAuth: true` on all ops.
+- `solve-tracker-frontend/src/lib/api/modules/problems.api.ts` + `problems.api.test.ts`; `recoverAuth: true` on all ops.
 
 ### Library and CRUD UI (Steps 6.4–6.5)
 
@@ -42,7 +42,7 @@ Date: **2026-11-15**. Phase 6 status: **complete** — user-owned problem librar
 
 ```bash
 # Backend
-cd backend
+cd solve-tracker-backend
 pnpm lint
 pnpm test                    # 57 unit tests
 pnpm test:e2e                # 3 tests (mocked DB)
@@ -56,12 +56,12 @@ TEST_DATABASE_URL=postgresql://practice:practice_dev@localhost:5432/practice_tra
   pnpm test:problems:integration
 
 # Overall exit criteria (all nine gates)
-cd backend
+cd solve-tracker-backend
 TEST_DATABASE_URL=postgresql://practice:practice_dev@localhost:5432/practice_tracker_test \
   pnpm verify:phase-6
 
 # Frontend
-cd cp-frontend
+cd solve-tracker-frontend
 pnpm exec tsc --noEmit
 pnpm lint
 pnpm test --run

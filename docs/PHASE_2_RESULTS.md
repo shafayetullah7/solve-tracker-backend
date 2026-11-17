@@ -4,17 +4,17 @@ Date: **2026-11-10**. Status: **shared-client foundation complete; live database
 
 ## Implemented
 
-- `cp-frontend/src/lib/api/client.ts`: native-fetch transport factory with same-origin credentials, fixed `/api` prefix, safe path/query handling, JSON/text/204 responses, typed error categories, cancellation, per-attempt timeouts, and one explicitly eligible auth retry.
+- `solve-tracker-frontend/src/lib/api/client.ts`: native-fetch transport factory with same-origin credentials, fixed `/api` prefix, safe path/query handling, JSON/text/204 responses, typed error categories, cancellation, per-attempt timeouts, and one explicitly eligible auth retry.
 - `errors.ts` and `index.ts`: small public transport/error boundary.
 - `modules/system.api.ts`: typed wrapper for the existing scaffold greeting only, referencing generated backend operation types and checking its text response. No fake auth/topic/problem modules or homepage requests.
 - `config/api-proxy.ts` and Vite configuration: required validated development API_PROXY_TARGET; exact `/api` boundary matching; one prefix removal; original Origin and separate Set-Cookie headers retained. Static builds/tests do not require a development upstream.
 - `.env.example`: documented server-only proxy target. An ignored local `.env` was created from that example because it did not exist; no existing credentials were overwritten.
-- `backend/src/configure-app.ts`: shared real-controller OpenAPI document factory used by Swagger and the exporter.
+- `src/configure-app.ts`: shared real-controller OpenAPI document factory used by Swagger and the exporter.
 - Scaffold route: explicit text/plain response header and accurate Swagger response schema. Greeting behavior itself is unchanged.
-- `backend/scripts/export-openapi.mjs`: real AppModule contract export with only DatabaseService lifecycle replaced. Configuration validation still runs, no server listens, no database connects, and no migrations/seeds execute.
-- `backend/openapi.json` and `cp-frontend/src/lib/api/generated/backend.d.ts`: committed deterministic contracts for the existing route.
-- `backend/scripts/generate-api-types.mjs`: maintained openapi-typescript generation and drift checks.
-- `cp-frontend/API_CLIENT.md`, frontend conventions/AGENTS guidance, and both READMEs: usage, boundaries, generation commands, limitations, and proxy setup.
+- `scripts/export-openapi.mjs`: real AppModule contract export with only DatabaseService lifecycle replaced. Configuration validation still runs, no server listens, no database connects, and no migrations/seeds execute.
+- `openapi.json` and `solve-tracker-frontend/src/lib/api/generated/backend.d.ts`: committed deterministic contracts for the existing route.
+- `scripts/generate-api-types.mjs`: maintained openapi-typescript generation and drift checks.
+- `solve-tracker-frontend/API_CLIENT.md`, frontend conventions/AGENTS guidance, and both READMEs: usage, boundaries, generation commands, limitations, and proxy setup.
 
 ## Recovery scope
 
@@ -57,11 +57,11 @@ The proxy integration uses actual Vite and local HTTP listeners with an isolated
 After changes to real backend route schemas:
 
 ```bash
-# backend/
+# solve-tracker-backend/
 pnpm api:export
 pnpm api:check
 
-# cp-frontend/
+# solve-tracker-frontend/
 pnpm api:generate
 pnpm api:check
 ```

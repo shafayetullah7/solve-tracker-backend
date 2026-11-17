@@ -11,13 +11,13 @@ Date: **2026-11-16**. Plan: [DASHBOARD_PHASED_PLAN.md](DASHBOARD_PHASED_PLAN.md)
 | DASH-3 | `platforms[]` on `GET /progress`, platform grid + topic sort |
 | DASH-4 | `GET /progress/activity`, dark activity panel, streak badge |
 
-Live route: [`cp-frontend/src/routes/app/index.tsx`](../cp-frontend/src/routes/app/index.tsx) — **6** API calls (progress, 4× problems, activity).
+Live route: [`solve-tracker-frontend/src/routes/app/index.tsx`](../solve-tracker-frontend/src/routes/app/index.tsx) — **6** API calls (progress, 4× problems, activity).
 
 ## Verification (automated)
 
 ```bash
-cd cp-frontend && pnpm exec tsc --noEmit && pnpm test --run
-cd backend && pnpm test --run
+cd solve-tracker-frontend && pnpm exec tsc --noEmit && pnpm test --run
+cd solve-tracker-backend && pnpm test --run
 ```
 
 Dashboard-focused frontend tests include `DashboardStatsStrip`, `DashboardToolbar`, `DashboardQueueGrid`, `DashboardActivitySection`, `dashboard-sync-label`, chart/date formatters.

@@ -4,7 +4,7 @@ Status: **complete (2026-11-15).** See [PHASE_6_RESULTS.md](PHASE_6_RESULTS.md) 
 
 Outcome: an authenticated user can create, view, edit, and delete their own problems; assign multiple owned topics per problem; and browse a personal library (including topic-scoped lists) through the real API and protected frontend screens. Duplicate URLs within one account fail safely. Cross-account access fails without leaking ownership. Topic deletion removes associations only and **preserves** problem rows. OpenAPI and the shared typed client stay aligned. Completion toggles, search, combined filters, sorting beyond basic list defaults, and progress summaries remain Phase 7.
 
-References: [execution plan](../PROJECT_EXECUTION_PLAN.md), [requirements](../backend/REQUIREMENTS.md) (FR-01, FR-02 associations, FR-06; FR-03/04/05 deferred), [Phase 0 decisions](PHASE_0_DECISIONS.md), [Phase 5 results](PHASE_5_RESULTS.md), [Phase 5 plan](PHASE_5_PLAN.md), [backend conventions](../backend/BACKEND_CONVENTIONS.md), [Drizzle conventions](../backend/DRIZZLE_CONVENTIONS.md), [frontend conventions](../cp-frontend/FRONTEND_CONVENTIONS.md), [API client](../cp-frontend/API_CLIENT.md).
+References: [execution plan](../PROJECT_EXECUTION_PLAN.md), [requirements](../REQUIREMENTS.md) (FR-01, FR-02 associations, FR-06; FR-03/04/05 deferred), [Phase 0 decisions](PHASE_0_DECISIONS.md), [Phase 5 results](PHASE_5_RESULTS.md), [Phase 5 plan](PHASE_5_PLAN.md), [backend conventions](../BACKEND_CONVENTIONS.md), [Drizzle conventions](../DRIZZLE_CONVENTIONS.md), [frontend conventions](../solve-tracker-frontend/FRONTEND_CONVENTIONS.md), [API client](../solve-tracker-frontend/API_CLIENT.md).
 
 ## 1. Scope, prerequisites, and boundaries
 
@@ -39,7 +39,7 @@ References: [execution plan](../PROJECT_EXECUTION_PLAN.md), [requirements](../ba
 ## 2. Intended organization
 
 ```text
-backend/src/
+src/
   database/schema/
     problems/
       problems.table.ts
@@ -56,7 +56,7 @@ backend/src/
       problems.schema.ts        # Zod + Swagger
   modules/topics/                 # extend delete path if join cleanup not DB-only
 
-cp-frontend/src/
+solve-tracker-frontend/src/
   lib/problems/
     messages.ts                   # ApiError mapping (optional)
   lib/api/modules/
@@ -145,7 +145,7 @@ flowchart LR
 - Narrow JSON like `topics.api.ts` / `auth.api.ts`; export types from generated `operations` where available.
 - Paths: `/problems`, `/problems/{problemId}`; validate id strings; encode list query (`page`, `pageSize`, `topicId`).
 - Add transport tests for pagination encoding, duplicate URL code, `NOT_FOUND`, empty list decoding.
-- From `backend/`: `pnpm api:export` and `pnpm api:check`. From `cp-frontend/`: `pnpm api:generate` and `pnpm api:check`. Commit snapshot and generated types together.
+- From repo root (`solve-tracker-backend/`): `pnpm api:export` and `pnpm api:check`. From `solve-tracker-frontend/`: `pnpm api:generate` and `pnpm api:check`. Commit snapshot and generated types together.
 
 ### Exit criteria
 
@@ -205,7 +205,7 @@ flowchart LR
 
 ### Phase 6 exit criteria (overall)
 
-Automated run: `cd backend && TEST_DATABASE_URL=…/practice_tracker_test pnpm verify:phase-6` (see [PHASE_6_RESULTS.md](PHASE_6_RESULTS.md)).
+Automated run: `cd solve-tracker-backend && TEST_DATABASE_URL=…/practice_tracker_test pnpm verify:phase-6` (see [PHASE_6_RESULTS.md](PHASE_6_RESULTS.md)).
 
 1. **Two accounts** each maintain independent problem libraries; same URL allowed across accounts.
 2. **Cross-account** read/update/delete by problem id → **404** (or safe not-found).

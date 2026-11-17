@@ -24,17 +24,18 @@ describe('auth primitives', () => {
       registerSchema.parse({
         name: '  Jane  ',
         email: ' JANE@example.com ',
-        password: '🌱'.repeat(15),
+        password: '🌱'.repeat(8),
       }),
     ).toMatchObject({ name: 'Jane', email: 'jane@example.com' });
-    expect(passwordSchema.safeParse('🌱'.repeat(14)).success).toBe(false);
+    expect(passwordSchema.safeParse('🌱'.repeat(7)).success).toBe(false);
+    expect(passwordSchema.safeParse('🌱'.repeat(8)).success).toBe(true);
     expect(passwordSchema.safeParse('🌱'.repeat(128)).success).toBe(true);
     expect(passwordSchema.safeParse('🌱'.repeat(129)).success).toBe(false);
     expect(
       registerSchema.safeParse({
         name: 'x',
         email: 'x@example.com',
-        password: 'x'.repeat(15),
+        password: 'x'.repeat(8),
         role: 'admin',
       }).success,
     ).toBe(false);

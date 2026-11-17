@@ -4,7 +4,7 @@ Status: **implemented and locally verified**. See [PHASE_3_RESULTS.md](PHASE_3_R
 
 Outcome: real backend account and session APIs, single-use password recovery through Resend, accurate OpenAPI contracts, and verified persistence/rotation behavior. Frontend auth screens and browser refresh coordination remain Phase 4.
 
-Follow [Phase 0 decisions](PHASE_0_DECISIONS.md), [requirements](../backend/REQUIREMENTS.md), [backend conventions](../backend/BACKEND_CONVENTIONS.md), and [Drizzle conventions](../backend/DRIZZLE_CONVENTIONS.md). Preserve the Phase 2 shared API boundary and generation commands.
+Follow [Phase 0 decisions](PHASE_0_DECISIONS.md), [requirements](../REQUIREMENTS.md), [backend conventions](../BACKEND_CONVENTIONS.md), and [Drizzle conventions](../DRIZZLE_CONVENTIONS.md). Preserve the Phase 2 shared API boundary and generation commands.
 
 ## 1. Dependencies, scope, and completion boundary
 
@@ -19,7 +19,7 @@ Follow [Phase 0 decisions](PHASE_0_DECISIONS.md), [requirements](../backend/REQU
 Create concrete modules/providers only where needed:
 
 ```text
-backend/src/
+src/
   modules/auth/
     auth.module.ts
     auth.controller.ts
@@ -78,7 +78,7 @@ Define tables through existing domain barrels and update the central v2 relation
 
 ## Step 3.3 — Implement validation, password hashing, and registration
 
-- Implement Zod request schemas exactly matching Phase 0: name 1–100 trimmed Unicode code points, validated normalized email <=254 characters, passwords 15–128 Unicode code points without trimming/truncation.
+- Implement Zod request schemas exactly matching Phase 0: name 1–100 trimmed Unicode code points, validated normalized email <=254 characters, passwords 8–128 Unicode code points without trimming/truncation.
 - Apply the 16 KiB auth JSON-body limit, unknown-field rejection, and consistent safe validation error responses. Do not depend on browser validation.
 - Implement Argon2id hashing/verification using selected baseline costs and library-managed random salts. Never compare password hashes by string equality or return them to callers.
 - Registration takes name/email/password only, creates a user, and returns 201 safe user metadata without login cookies. Convert email uniqueness conflicts into `EMAIL_IN_USE` without string-matching database messages.

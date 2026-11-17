@@ -20,18 +20,18 @@ Date: **2026-11-15**. Overall Phase 4 status: **implementation complete; live ac
 
 ```bash
 # Phase 1 — contract drift
-cd backend && pnpm api:check
-cd cp-frontend && pnpm api:generate && pnpm api:check
-cd cp-frontend && pnpm test --run src/lib/api/modules/auth.api.test.ts
+cd solve-tracker-backend && pnpm api:check
+cd solve-tracker-frontend && pnpm api:generate && pnpm api:check
+cd solve-tracker-frontend && pnpm test --run src/lib/api/modules/auth.api.test.ts
 
 # Phase 2 — backend + PostgreSQL (dedicated *_test database)
-cd backend && pnpm build
-cd backend && TEST_DATABASE_URL=postgresql://practice:practice_dev@localhost:5432/practice_tracker_test \
+cd solve-tracker-backend && pnpm build
+cd solve-tracker-backend && TEST_DATABASE_URL=postgresql://practice:practice_dev@localhost:5432/practice_tracker_test \
   node scripts/test-auth-integration.mjs
 
 # Phase 3 — proxy + automated 4.1 gate
-cd cp-frontend && pnpm test --run config/api-proxy.test.ts
-cd cp-frontend && pnpm verify:phase-4.1
+cd solve-tracker-frontend && pnpm test --run config/api-proxy.test.ts
+cd solve-tracker-frontend && pnpm verify:phase-4.1
 
 # Phase 4 — browser (no auth UI; in-page fetch on home)
 # Navigated to http://localhost:3001/; DevTools-equivalent checks via page fetch + document.cookie
@@ -41,7 +41,7 @@ cd cp-frontend && pnpm verify:phase-4.1
 
 | ID | Assertion | Result | Evidence |
 | --- | --- | --- | --- |
-| A | OpenAPI/types match `auth.api` | **Pass** | `backend api:check`; `cp-frontend api:check`; seven `AuthController_*` in `backend.d.ts` |
+| A | OpenAPI/types match `auth.api` | **Pass** | `backend api:check`; `solve-tracker-frontend api:check`; seven `AuthController_*` in `backend.d.ts` |
 | B | `/api` proxy reaches Nest | **Pass** | `config/api-proxy.test.ts` (8); `verify-phase-4.1.mjs` through `:3001` |
 | C | Login → two HttpOnly cookies; no JWT in JSON | **Pass** | Verify script Set-Cookie checks; browser login `user` only; `document.cookie` empty |
 | D | Register without session cookies | **Pass** | Verify script; browser register 201 |
@@ -58,8 +58,8 @@ cd cp-frontend && pnpm verify:phase-4.1
 
 ### Deliverables added
 
-- [cp-frontend/scripts/verify-phase-4.1.mjs](../cp-frontend/scripts/verify-phase-4.1.mjs) — repeatable proxy/cookie gate (no cookie values logged).
-- `pnpm verify:phase-4.1` in [cp-frontend/package.json](../cp-frontend/package.json).
+- [solve-tracker-frontend/scripts/verify-phase-4.1.mjs](../solve-tracker-frontend/scripts/verify-phase-4.1.mjs) — repeatable proxy/cookie gate (no cookie values logged).
+- `pnpm verify:phase-4.1` in [solve-tracker-frontend/package.json](../solve-tracker-frontend/package.json).
 
 ### Blockers / deferred (not failures for 4.1)
 
@@ -78,11 +78,11 @@ cd cp-frontend && pnpm verify:phase-4.1
 
 | File | Role |
 | --- | --- |
-| [cp-frontend/src/lib/auth/locks.ts](../cp-frontend/src/lib/auth/locks.ts) | `LockAdapter`, `practice:auth-session`, browser + memory adapters |
-| [cp-frontend/src/lib/auth/coordinator.ts](../cp-frontend/src/lib/auth/coordinator.ts) | Single-flight recovery, lock + session probe, one refresh, epoch |
-| [cp-frontend/src/lib/auth/clients.ts](../cp-frontend/src/lib/auth/clients.ts) | `createAuthClients()` → `rawClient`, `authApi`, `coordinator`, `productClient` |
-| [cp-frontend/src/lib/auth/coordinator.test.ts](../cp-frontend/src/lib/auth/coordinator.test.ts) | Recovery, concurrency, terminal errors, epoch-during-refresh |
-| [cp-frontend/src/lib/auth/clients.test.ts](../cp-frontend/src/lib/auth/clients.test.ts) | Product client retries once via coordinator |
+| [solve-tracker-frontend/src/lib/auth/locks.ts](../solve-tracker-frontend/src/lib/auth/locks.ts) | `LockAdapter`, `practice:auth-session`, browser + memory adapters |
+| [solve-tracker-frontend/src/lib/auth/coordinator.ts](../solve-tracker-frontend/src/lib/auth/coordinator.ts) | Single-flight recovery, lock + session probe, one refresh, epoch |
+| [solve-tracker-frontend/src/lib/auth/clients.ts](../solve-tracker-frontend/src/lib/auth/clients.ts) | `createAuthClients()` → `rawClient`, `authApi`, `coordinator`, `productClient` |
+| [solve-tracker-frontend/src/lib/auth/coordinator.test.ts](../solve-tracker-frontend/src/lib/auth/coordinator.test.ts) | Recovery, concurrency, terminal errors, epoch-during-refresh |
+| [solve-tracker-frontend/src/lib/auth/clients.test.ts](../solve-tracker-frontend/src/lib/auth/clients.test.ts) | Product client retries once via coordinator |
 
 ### Policy
 
@@ -94,8 +94,8 @@ cd cp-frontend && pnpm verify:phase-4.1
 ### Commands run
 
 ```bash
-cd cp-frontend && pnpm exec tsc --noEmit && pnpm lint
-cd cp-frontend && pnpm test --run src/lib/auth/ src/lib/api/client.test.ts
+cd solve-tracker-frontend && pnpm exec tsc --noEmit && pnpm lint
+cd solve-tracker-frontend && pnpm test --run src/lib/auth/ src/lib/api/client.test.ts
 ```
 
 **37 tests passed** across coordinator, clients, and existing API transport suite.
@@ -108,9 +108,9 @@ cd cp-frontend && pnpm test --run src/lib/auth/ src/lib/api/client.test.ts
 
 | File | Role |
 | --- | --- |
-| [cp-frontend/src/lib/auth/session-state.ts](../cp-frontend/src/lib/auth/session-state.ts) | `resolveBootstrapSession` (probe → recover → re-probe) |
-| [cp-frontend/src/lib/auth/context.tsx](../cp-frontend/src/lib/auth/context.tsx) | `AuthProvider`, `useAuth()`, `establishSession` / `clearSession` / `retryBootstrap` |
-| [cp-frontend/src/App.tsx](../cp-frontend/src/App.tsx) | Root wraps `<Router>` with `<AuthProvider>` |
+| [solve-tracker-frontend/src/lib/auth/session-state.ts](../solve-tracker-frontend/src/lib/auth/session-state.ts) | `resolveBootstrapSession` (probe → recover → re-probe) |
+| [solve-tracker-frontend/src/lib/auth/context.tsx](../solve-tracker-frontend/src/lib/auth/context.tsx) | `AuthProvider`, `useAuth()`, `establishSession` / `clearSession` / `retryBootstrap` |
+| [solve-tracker-frontend/src/App.tsx](../solve-tracker-frontend/src/App.tsx) | Root wraps `<Router>` with `<AuthProvider>` |
 
 ### Behavior
 
@@ -122,8 +122,8 @@ cd cp-frontend && pnpm test --run src/lib/auth/ src/lib/api/client.test.ts
 ### Commands run
 
 ```bash
-cd cp-frontend && pnpm exec tsc --noEmit && pnpm lint
-cd cp-frontend && pnpm test --run src/lib/auth/
+cd solve-tracker-frontend && pnpm exec tsc --noEmit && pnpm lint
+cd solve-tracker-frontend && pnpm test --run src/lib/auth/
 ```
 
 **20 tests passed** in `src/lib/auth/` (including session-state and context).
@@ -136,15 +136,15 @@ cd cp-frontend && pnpm test --run src/lib/auth/
 
 | File | Role |
 | --- | --- |
-| [cp-frontend/src/lib/auth/forms.ts](../cp-frontend/src/lib/auth/forms.ts) | Field errors, form messages, `safeReturnPath`, reset hash token parse |
-| [cp-frontend/src/components/auth/AuthLayout.tsx](../cp-frontend/src/components/auth/AuthLayout.tsx) | Centered auth page shell |
-| [cp-frontend/src/components/auth/AuthNav.tsx](../cp-frontend/src/components/auth/AuthNav.tsx) | Nav links (login / register / account) |
-| [cp-frontend/src/lib/auth/context.tsx](../cp-frontend/src/lib/auth/context.tsx) | `login()` / `logout()` via `runWithSessionLock` |
-| [cp-frontend/src/routes/login.tsx](../cp-frontend/src/routes/login.tsx) | Sign-in + optional `?next=` |
-| [cp-frontend/src/routes/register.tsx](../cp-frontend/src/routes/register.tsx) | Register (no auto sign-in) |
-| [cp-frontend/src/routes/account.tsx](../cp-frontend/src/routes/account.tsx) | Identity + sign out (soft gate until 4.5) |
-| [cp-frontend/src/routes/forgot-password.tsx](../cp-frontend/src/routes/forgot-password.tsx) | Reset email request |
-| [cp-frontend/src/routes/reset-password.tsx](../cp-frontend/src/routes/reset-password.tsx) | New password from `#token=` hash |
+| [solve-tracker-frontend/src/lib/auth/forms.ts](../solve-tracker-frontend/src/lib/auth/forms.ts) | Field errors, form messages, `safeReturnPath`, reset hash token parse |
+| [solve-tracker-frontend/src/components/auth/AuthLayout.tsx](../solve-tracker-frontend/src/components/auth/AuthLayout.tsx) | Centered auth page shell |
+| [solve-tracker-frontend/src/components/auth/AuthNav.tsx](../solve-tracker-frontend/src/components/auth/AuthNav.tsx) | Nav links (login / register / account) |
+| [solve-tracker-frontend/src/lib/auth/context.tsx](../solve-tracker-frontend/src/lib/auth/context.tsx) | `login()` / `logout()` via `runWithSessionLock` |
+| [solve-tracker-frontend/src/routes/login.tsx](../solve-tracker-frontend/src/routes/login.tsx) | Sign-in + optional `?next=` |
+| [solve-tracker-frontend/src/routes/register.tsx](../solve-tracker-frontend/src/routes/register.tsx) | Register (no auto sign-in) |
+| [solve-tracker-frontend/src/routes/account.tsx](../solve-tracker-frontend/src/routes/account.tsx) | Identity + sign out (soft gate until 4.5) |
+| [solve-tracker-frontend/src/routes/forgot-password.tsx](../solve-tracker-frontend/src/routes/forgot-password.tsx) | Reset email request |
+| [solve-tracker-frontend/src/routes/reset-password.tsx](../solve-tracker-frontend/src/routes/reset-password.tsx) | New password from `#token=` hash |
 
 Hyphenated routes use `paths["forgot-password"]()` / `paths["reset-password"]()` after filesystem route generation.
 
@@ -160,8 +160,8 @@ Hyphenated routes use `paths["forgot-password"]()` / `paths["reset-password"]()`
 ### Commands run
 
 ```bash
-cd cp-frontend && pnpm exec tsc --noEmit && pnpm lint
-cd cp-frontend && pnpm test --run src/lib/auth/
+cd solve-tracker-frontend && pnpm exec tsc --noEmit && pnpm lint
+cd solve-tracker-frontend && pnpm test --run src/lib/auth/
 ```
 
 **24 tests passed** in `src/lib/auth/` (includes `forms.test.ts`).
@@ -183,11 +183,11 @@ With `pnpm dev` (frontend **3001**) and backend **3000**:
 
 | File | Role |
 | --- | --- |
-| [cp-frontend/src/lib/auth/forms.ts](../cp-frontend/src/lib/auth/forms.ts) | Extended `safeReturnPath` (`/topics`, auth-loop denylist); `loginPathWithReturn`, `isPublicAuthPath` |
-| [cp-frontend/src/components/auth/RequireSession.tsx](../cp-frontend/src/components/auth/RequireSession.tsx) | Protected-route gate (checking / unavailable / anonymous redirect / authenticated children) |
-| [cp-frontend/src/lib/auth/guest-auth-page.ts](../cp-frontend/src/lib/auth/guest-auth-page.ts) | `useRedirectIfAuthenticated` on login + register |
-| [cp-frontend/src/routes/account.tsx](../cp-frontend/src/routes/account.tsx) | Account content wrapped in `RequireSession` |
-| [cp-frontend/src/lib/auth/context.tsx](../cp-frontend/src/lib/auth/context.tsx) | `AuthContextOverride` for tests |
+| [solve-tracker-frontend/src/lib/auth/forms.ts](../solve-tracker-frontend/src/lib/auth/forms.ts) | Extended `safeReturnPath` (`/topics`, auth-loop denylist); `loginPathWithReturn`, `isPublicAuthPath` |
+| [solve-tracker-frontend/src/components/auth/RequireSession.tsx](../solve-tracker-frontend/src/components/auth/RequireSession.tsx) | Protected-route gate (checking / unavailable / anonymous redirect / authenticated children) |
+| [solve-tracker-frontend/src/lib/auth/guest-auth-page.ts](../solve-tracker-frontend/src/lib/auth/guest-auth-page.ts) | `useRedirectIfAuthenticated` on login + register |
+| [solve-tracker-frontend/src/routes/account.tsx](../solve-tracker-frontend/src/routes/account.tsx) | Account content wrapped in `RequireSession` |
+| [solve-tracker-frontend/src/lib/auth/context.tsx](../solve-tracker-frontend/src/lib/auth/context.tsx) | `AuthContextOverride` for tests |
 
 ### Behavior
 
@@ -199,8 +199,8 @@ With `pnpm dev` (frontend **3001**) and backend **3000**:
 ### Commands run
 
 ```bash
-cd cp-frontend && pnpm exec tsc --noEmit && pnpm lint
-cd cp-frontend && pnpm test --run
+cd solve-tracker-frontend && pnpm exec tsc --noEmit && pnpm lint
+cd solve-tracker-frontend && pnpm test --run
 ```
 
 **78 tests passed** (includes `RequireSession.test.tsx`, extended `forms.test.ts`).
@@ -224,11 +224,11 @@ With `pnpm dev` (**3001**) and backend **3000**:
 
 | File | Role |
 | --- | --- |
-| [cp-frontend/src/lib/auth/broadcast.ts](../cp-frontend/src/lib/auth/broadcast.ts) | `practice:auth-events`, browser + memory hub + noop adapters |
-| [cp-frontend/src/lib/auth/cross-tab.ts](../cp-frontend/src/lib/auth/cross-tab.ts) | Echo filter, publish, peer invalidation → bootstrap |
-| [cp-frontend/src/lib/auth/coordinator.ts](../cp-frontend/src/lib/auth/coordinator.ts) | `suppressRecovery` / `releaseRecoverySuppression` during peer logout hints |
-| [cp-frontend/src/lib/auth/context.tsx](../cp-frontend/src/lib/auth/context.tsx) | Subscribe on mount; login/logout/reset notify peers; `revocationUnconfirmed` + `retryLogout` |
-| [cp-frontend/src/lib/auth/clients.ts](../cp-frontend/src/lib/auth/clients.ts) | Injects `broadcast` into client bundle |
+| [solve-tracker-frontend/src/lib/auth/broadcast.ts](../solve-tracker-frontend/src/lib/auth/broadcast.ts) | `practice:auth-events`, browser + memory hub + noop adapters |
+| [solve-tracker-frontend/src/lib/auth/cross-tab.ts](../solve-tracker-frontend/src/lib/auth/cross-tab.ts) | Echo filter, publish, peer invalidation → bootstrap |
+| [solve-tracker-frontend/src/lib/auth/coordinator.ts](../solve-tracker-frontend/src/lib/auth/coordinator.ts) | `suppressRecovery` / `releaseRecoverySuppression` during peer logout hints |
+| [solve-tracker-frontend/src/lib/auth/context.tsx](../solve-tracker-frontend/src/lib/auth/context.tsx) | Subscribe on mount; login/logout/reset notify peers; `revocationUnconfirmed` + `retryLogout` |
+| [solve-tracker-frontend/src/lib/auth/clients.ts](../solve-tracker-frontend/src/lib/auth/clients.ts) | Injects `broadcast` into client bundle |
 
 ### Message contract
 
@@ -244,8 +244,8 @@ With `pnpm dev` (**3001**) and backend **3000**:
 ### Commands run
 
 ```bash
-cd cp-frontend && pnpm exec tsc --noEmit && pnpm lint
-cd cp-frontend && pnpm test --run src/lib/auth/
+cd solve-tracker-frontend && pnpm exec tsc --noEmit && pnpm lint
+cd solve-tracker-frontend && pnpm test --run src/lib/auth/
 ```
 
 **38 tests passed** in `src/lib/auth/` (includes broadcast, cross-tab, coordinator suppression, peer invalidation context test).
@@ -262,30 +262,30 @@ Two tabs on **localhost:3001**: login in tab A → tab B updates user; logout in
 
 | Artifact | Role |
 | --- | --- |
-| [cp-frontend/e2e/](../cp-frontend/e2e/) | Playwright specs: auth-flow, cross-tab, reset-password, a11y, privacy, unsupported-locks |
-| [cp-frontend/scripts/verify-phase-4.7.mjs](../cp-frontend/scripts/verify-phase-4.7.mjs) | Orchestrator: tsc, lint, vitest, api:check, 4.1, 4.7-api, backend build, Playwright |
-| [cp-frontend/scripts/verify-phase-4.7-api.mjs](../cp-frontend/scripts/verify-phase-4.7-api.mjs) | Proxy API races (parallel session, refresh without access cookie, dual refresh) |
-| [backend/scripts/phase-4.7-issue-reset-token.mjs](../backend/scripts/phase-4.7-issue-reset-token.mjs) | Test-only reset token issuer (`PHASE_47_ISSUE_RESET=1`; not deployed) |
-| [cp-frontend/package.json](../cp-frontend/package.json) | `verify:phase-4.7`, `test:e2e` |
-| [cp-frontend/vite.config.ts](../cp-frontend/vite.config.ts) | Vitest excludes `e2e/**` |
+| [solve-tracker-frontend/e2e/](../solve-tracker-frontend/e2e/) | Playwright specs: auth-flow, cross-tab, reset-password, a11y, privacy, unsupported-locks |
+| [solve-tracker-frontend/scripts/verify-phase-4.7.mjs](../solve-tracker-frontend/scripts/verify-phase-4.7.mjs) | Orchestrator: tsc, lint, vitest, api:check, 4.1, 4.7-api, backend build, Playwright |
+| [solve-tracker-frontend/scripts/verify-phase-4.7-api.mjs](../solve-tracker-frontend/scripts/verify-phase-4.7-api.mjs) | Proxy API races (parallel session, refresh without access cookie, dual refresh) |
+| [scripts/phase-4.7-issue-reset-token.mjs](../scripts/phase-4.7-issue-reset-token.mjs) | Test-only reset token issuer (`PHASE_47_ISSUE_RESET=1`; not deployed) |
+| [solve-tracker-frontend/package.json](../solve-tracker-frontend/package.json) | `verify:phase-4.7`, `test:e2e` |
+| [solve-tracker-frontend/vite.config.ts](../solve-tracker-frontend/vite.config.ts) | Vitest excludes `e2e/**` |
 
 ### Static gates (this workspace run)
 
 ```bash
-cd cp-frontend && pnpm exec tsc --noEmit && pnpm lint
-cd cp-frontend && pnpm test --run          # 91 passed (unit/component; excludes e2e)
+cd solve-tracker-frontend && pnpm exec tsc --noEmit && pnpm lint
+cd solve-tracker-frontend && pnpm test --run          # 91 passed (unit/component; excludes e2e)
 ```
 
 ### Live gates (operator)
 
 ```bash
 # Terminal A: backend :3000 with FRONTEND_ORIGIN=http://localhost:3001
-# Terminal B: cd cp-frontend && pnpm dev
-cd cp-frontend && pnpm exec playwright install chromium   # once
-cd cp-frontend && pnpm verify:phase-4.7
+# Terminal B: cd solve-tracker-frontend && pnpm dev
+cd solve-tracker-frontend && pnpm exec playwright install chromium   # once
+cd solve-tracker-frontend && pnpm verify:phase-4.7
 ```
 
-Reports: `cp-frontend/e2e/playwright-report/`.
+Reports: `solve-tracker-frontend/e2e/playwright-report/`.
 
 ### Scenario matrix (§4.7 plan)
 
@@ -329,11 +329,11 @@ Post-login default: `/account` (or `?next=` when allowlisted). Topics allowlist 
 
 | Criterion | Status | Evidence |
 | --- | --- | --- |
-| Root auth provider + browser-safe coordinator on typed API | **Pass** | [context.tsx](../cp-frontend/src/lib/auth/context.tsx), [coordinator.ts](../cp-frontend/src/lib/auth/coordinator.ts), [clients.ts](../cp-frontend/src/lib/auth/clients.ts) |
+| Root auth provider + browser-safe coordinator on typed API | **Pass** | [context.tsx](../solve-tracker-frontend/src/lib/auth/context.tsx), [coordinator.ts](../solve-tracker-frontend/src/lib/auth/coordinator.ts), [clients.ts](../solve-tracker-frontend/src/lib/auth/clients.ts) |
 | Register, login, forgot/reset, account, logout E2E-capable | **Pass** | Auth routes §4.4; `pnpm build` includes route chunks |
 | `checking` / `unavailable` / `anonymous` / `authenticated` + safe redirects | **Pass** | `RequireSession`, §4.5 manual checklist; unit tests |
-| Single-flight recovery, Web Lock, post-lock probe, one retry | **Pass** | [coordinator.test.ts](../cp-frontend/src/lib/auth/coordinator.test.ts), [client.test.ts](../cp-frontend/src/lib/api/client.test.ts) |
-| Multi-tab logout/reset/account-switch (browser) | **Pending** | [cross-tab.spec.ts](../cp-frontend/e2e/cross-tab.spec.ts) + memory-hub unit tests; **live Playwright not run** in record (§4.7 blockers) |
+| Single-flight recovery, Web Lock, post-lock probe, one retry | **Pass** | [coordinator.test.ts](../solve-tracker-frontend/src/lib/auth/coordinator.test.ts), [client.test.ts](../solve-tracker-frontend/src/lib/api/client.test.ts) |
+| Multi-tab logout/reset/account-switch (browser) | **Pending** | [cross-tab.spec.ts](../solve-tracker-frontend/e2e/cross-tab.spec.ts) + memory-hub unit tests; **live Playwright not run** in record (§4.7 blockers) |
 | JWTs HttpOnly; reset token transient in URL | **Pass** | §4.1 verify script; `reset-password` `replaceState` |
 | Proxy/cookie/CSRF + unsupported-lock policy | **Partial** | `verify-phase-4.1.mjs`; `supportsAutoRecovery` + `unsupported-locks.spec.ts` (live pending) |
 | Build, type, lint, drift, meaningful tests | **Pass** | **2026-11-15:** `tsc`, `lint`, **91** vitest, `api:check`, `pnpm build` |
@@ -343,14 +343,14 @@ Post-login default: `/account` (or `?next=` when allowlisted). Topics allowlist 
 
 ```bash
 # Static (no servers)
-cd cp-frontend && pnpm exec tsc --noEmit && pnpm lint && pnpm test --run && pnpm api:check && pnpm build
+cd solve-tracker-frontend && pnpm exec tsc --noEmit && pnpm lint && pnpm test --run && pnpm api:check && pnpm build
 
 # Live acceptance (backend :3000, pnpm dev :3001, Playwright Chromium)
-cd cp-frontend && pnpm verify:phase-4.1
-cd cp-frontend && pnpm verify:phase-4.7
+cd solve-tracker-frontend && pnpm verify:phase-4.1
+cd solve-tracker-frontend && pnpm verify:phase-4.7
 
 # Backend auth integration (dedicated *_test DB)
-cd backend && TEST_DATABASE_URL=... pnpm test:auth:integration
+cd solve-tracker-backend && TEST_DATABASE_URL=... pnpm test:auth:integration
 ```
 
 ### Release gates (not claimed complete)

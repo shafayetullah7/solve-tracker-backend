@@ -2,9 +2,9 @@
 
 Status: **complete** (automated `verify:phase-8` + documented manual sign-off). Results: [PHASE_8_RESULTS.md](PHASE_8_RESULTS.md). Traceability: [PHASE_8_ACCEPTANCE.md](PHASE_8_ACCEPTANCE.md). **Playwright not required** for Phase 8 exit.
 
-Outcome: every [MVP acceptance criterion](../backend/REQUIREMENTS.md) §8 is **traced to evidence** (automated gate, integration script, Playwright, or signed manual checklist); material gaps are **fixed** or **documented**; template/demo navigation no longer presents as product; a single **`pnpm verify:phase-8`** (plus live Playwright when enabled) demonstrates the integrated system on a dedicated `*_test` database and local dev stack.
+Outcome: every [MVP acceptance criterion](../REQUIREMENTS.md) §8 is **traced to evidence** (automated gate, integration script, Playwright, or signed manual checklist); material gaps are **fixed** or **documented**; template/demo navigation no longer presents as product; a single **`pnpm verify:phase-8`** (plus live Playwright when enabled) demonstrates the integrated system on a dedicated `*_test` database and local dev stack.
 
-References: [execution plan](../PROJECT_EXECUTION_PLAN.md), [requirements](../backend/REQUIREMENTS.md) (§7–8, FR-01–FR-09), [Phase 7 results](PHASE_7_RESULTS.md), [Phase 7 plan](PHASE_7_PLAN.md), [Phase 4 results](PHASE_4_RESULTS.md), [Phase 6 results](PHASE_6_RESULTS.md), [backend conventions](../backend/BACKEND_CONVENTIONS.md), [frontend conventions](../cp-frontend/FRONTEND_CONVENTIONS.md), [API client](../cp-frontend/API_CLIENT.md), [auth conventions](../cp-frontend/AUTH_CONVENTIONS.md).
+References: [execution plan](../PROJECT_EXECUTION_PLAN.md), [requirements](../REQUIREMENTS.md) (§7–8, FR-01–FR-09), [Phase 7 results](PHASE_7_RESULTS.md), [Phase 7 plan](PHASE_7_PLAN.md), [Phase 4 results](PHASE_4_RESULTS.md), [Phase 6 results](PHASE_6_RESULTS.md), [backend conventions](../BACKEND_CONVENTIONS.md), [frontend conventions](../solve-tracker-frontend/FRONTEND_CONVENTIONS.md), [API client](../solve-tracker-frontend/API_CLIENT.md), [auth conventions](../solve-tracker-frontend/AUTH_CONVENTIONS.md).
 
 ## 1. Scope, prerequisites, and boundaries
 
@@ -12,7 +12,7 @@ References: [execution plan](../PROJECT_EXECUTION_PLAN.md), [requirements](../ba
 
 - **Phase 7 complete:** `pnpm verify:phase-7` on `practice_tracker_test` (or equivalent `*_test` DB).
 - **Phase 4 auth:** cookies, CSRF, refresh rotation, reset flow; `pnpm verify:phase-4.7` available when backend `:3000` and frontend `pnpm dev` `:3001` are running.
-- **Local stack:** Docker PostgreSQL (or `TEST_DATABASE_URL`), backend, Vite proxy; Playwright Chromium installed once (`pnpm exec playwright install chromium` in `cp-frontend`).
+- **Local stack:** Docker PostgreSQL (or `TEST_DATABASE_URL`), backend, Vite proxy; Playwright Chromium installed once (`pnpm exec playwright install chromium` in `solve-tracker-frontend`).
 
 ### In scope
 
@@ -83,7 +83,7 @@ Use this table in Step 8.1; extend with links to test files / checklist rows in 
 ### Work
 
 - Create [`docs/PHASE_8_ACCEPTANCE.md`](PHASE_8_ACCEPTANCE.md) (or a section in `PHASE_8_RESULTS.md`): table above filled with command names, spec paths, and manual steps.
-- Cross-check FR-01–FR-09 headers in [REQUIREMENTS.md](../backend/REQUIREMENTS.md) against Phases 5–7; note any wording-only gaps.
+- Cross-check FR-01–FR-09 headers in [REQUIREMENTS.md](../REQUIREMENTS.md) against Phases 5–7; note any wording-only gaps.
 
 ### Exit criteria
 
@@ -96,7 +96,7 @@ Use this table in Step 8.1; extend with links to test files / checklist rows in 
 ### Work
 
 - **Home (`/`):** Authenticated users **redirect** to `/problems` (or account landing); guests see a short product intro + Sign in / Register—not the full UI foundation showcase as the default signed-in experience.
-- **Navigation:** Remove **Template examples** from [`AuthNav.tsx`](../cp-frontend/src/components/auth/AuthNav.tsx) for production UX, or restrict to dev-only (`import.meta.env.DEV`) if routes stay for contributors.
+- **Navigation:** Remove **Template examples** from [`AuthNav.tsx`](../solve-tracker-frontend/src/components/auth/AuthNav.tsx) for production UX, or restrict to dev-only (`import.meta.env.DEV`) if routes stay for contributors.
 - **Template routes:** Keep `routes/users/*` and foundation homepage **out of primary nav**; document in RESULTS if files remain for reference.
 - **Counter / system API:** Confirm no product route depends on `Counter` or `system.api` for MVP flows.
 
@@ -111,8 +111,8 @@ Use this table in Step 8.1; extend with links to test files / checklist rows in 
 
 ### Work
 
-- Add **one or two** specs under [`cp-frontend/e2e/`](../cp-frontend/e2e/) (e.g. `product-library.spec.ts`):
-  - Register or login (reuse [`fixtures.ts`](../cp-frontend/e2e/fixtures.ts) patterns).
+- Add **one or two** specs under [`solve-tracker-frontend/e2e/`](../solve-tracker-frontend/e2e/) (e.g. `product-library.spec.ts`):
+  - Register or login (reuse [`fixtures.ts`](../solve-tracker-frontend/e2e/fixtures.ts) patterns).
   - Create problem with URL + two topics (or use API seed helper if added).
   - Mark solved from library; assert progress strip / topic row text (substring match).
   - Apply filter (unsolved + `q` or platform) and assert result count line updates.
@@ -129,11 +129,11 @@ Use this table in Step 8.1; extend with links to test files / checklist rows in 
 ### Work
 
 - Re-run on `TEST_DATABASE_URL` `*_test`:
-  - [`test-auth-integration.mjs`](../backend/scripts/test-auth-integration.mjs)
-  - [`verify-phase-4.7-api.mjs`](../cp-frontend/scripts/verify-phase-4.7-api.mjs) (with backend up) when live gate enabled
+  - [`test-auth-integration.mjs`](../scripts/test-auth-integration.mjs)
+  - [`verify-phase-4.7-api.mjs`](../solve-tracker-frontend/scripts/verify-phase-4.7-api.mjs) (with backend up) when live gate enabled
 - Static checks in `verify-phase-8`:
-  - No `\bfetch\s*\(` under `cp-frontend/src/routes/` (problems, topics, auth, account).
-  - Grep for obvious secret leaks: `console.log` + password/token patterns in `backend/src` (allowlist test mocks).
+  - No `\bfetch\s*\(` under `solve-tracker-frontend/src/routes/` (problems, topics, auth, account).
+  - Grep for obvious secret leaks: `console.log` + password/token patterns in `src` (allowlist test mocks).
 - Confirm CSRF header on writes still enforced (covered by 4.7 API script).
 
 ### Exit criteria
@@ -144,7 +144,7 @@ Use this table in Step 8.1; extend with links to test files / checklist rows in 
 
 ### Work
 
-- Extend or re-run [`auth-a11y-smoke.spec.ts`](../cp-frontend/e2e/auth-a11y-smoke.spec.ts); add **library** smoke: tab to Apply filters, visible labels on browse toolbar (`ProblemBrowseToolbar`).
+- Extend or re-run [`auth-a11y-smoke.spec.ts`](../solve-tracker-frontend/e2e/auth-a11y-smoke.spec.ts); add **library** smoke: tab to Apply filters, visible labels on browse toolbar (`ProblemBrowseToolbar`).
 - Manual checklist in `PHASE_8_RESULTS.md`:
   - Keyboard: login, library filters, solve button, delete dialog (focus trap / Esc).
   - Reduced motion: no required animation for core tasks (document if `prefers-reduced-motion` unchanged).
@@ -184,7 +184,7 @@ Use this table in Step 8.1; extend with links to test files / checklist rows in 
 
 ### Work
 
-- Add [`backend/scripts/verify-phase-8-exit.mjs`](../backend/scripts/verify-phase-8-exit.mjs) + `pnpm verify:phase-8` in [`backend/package.json`](../backend/package.json).
+- Add [`scripts/verify-phase-8-exit.mjs`](../scripts/verify-phase-8-exit.mjs) + `pnpm verify:phase-8` in [`package.json`](../package.json).
 - Suggested gate order:
   1. `pnpm verify:phase-7` (regression umbrella)
   2. `pnpm test:auth:integration`
@@ -199,7 +199,7 @@ Use this table in Step 8.1; extend with links to test files / checklist rows in 
 Automated target:
 
 ```bash
-cd backend
+cd solve-tracker-backend
 TEST_DATABASE_URL=postgresql://practice:practice_dev@localhost:5432/practice_tracker_test \
   pnpm verify:phase-8
 ```
@@ -207,8 +207,8 @@ TEST_DATABASE_URL=postgresql://practice:practice_dev@localhost:5432/practice_tra
 With live browser gate (operator machine):
 
 ```bash
-# terminals: backend :3000, cp-frontend pnpm dev :3001
-cd backend
+# terminals: backend :3000, solve-tracker-frontend pnpm dev :3001
+cd solve-tracker-backend
 TEST_DATABASE_URL=.../practice_tracker_test \
 PHASE_8_RUN_PLAYWRIGHT=1 \
   pnpm verify:phase-8

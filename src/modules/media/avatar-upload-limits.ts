@@ -1,4 +1,4 @@
-/** Align with cp-frontend `profile-avatar-upload.ts`. */
+/** Align with solve-tracker-frontend `profile-avatar-upload.ts`. */
 export const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
 
 export const AVATAR_ALLOWED_MIME_TYPES = new Set([

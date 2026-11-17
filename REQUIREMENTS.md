@@ -106,7 +106,7 @@ The MVP requirements below add supporting behavior needed to make that core usab
 - Rotate refresh tokens on successful refresh, invalidate the previous token, and track server-side session state to support logout and revocation. Store only a hash/digest of the refresh credential, not its raw value.
 - Reject replay of a consumed refresh token and revoke its associated session/token family. Make refresh rotation atomic to prevent concurrent reuse; coordinate refresh requests in the frontend.
 - Logout revokes the relevant refresh session. Password reset revokes all account sessions. Protected requests must enforce session revocation so existing access tokens cannot remain usable after the required invalidation.
-- For the browser client, follow `../cp-frontend/AUTH_CONVENTIONS.md`: JWT access/refresh tokens are delivered through HttpOnly cookies via a same-origin API proxy, with CSRF protection and coordinated refresh. Select exact token lifetimes, signing algorithm/key management, and deployment-specific cookie/CSRF configuration before implementation. Keep signing secrets/keys in validated environment configuration and never expose refresh credentials in URLs or logs.
+- For the browser client, follow `../solve-tracker-frontend/AUTH_CONVENTIONS.md`: JWT access/refresh tokens are delivered through HttpOnly cookies via a same-origin API proxy, with CSRF protection and coordinated refresh. Select exact token lifetimes, signing algorithm/key management, and deployment-specific cookie/CSRF configuration before implementation. Keep signing secrets/keys in validated environment configuration and never expose refresh credentials in URLs or logs.
 - Protect problem/topic APIs and tracker pages behind authentication. Authentication pages remain available without a session.
 - Limit registration, login, and password-recovery attempts to reduce abuse. Select concrete limits during API design.
 - Provide accessible form validation, pending states, and actionable errors. Preserve safe input such as name/email on failure; never expose password values in responses.
@@ -235,7 +235,7 @@ Follow [PHASE_0_DECISIONS.md](../docs/PHASE_0_DECISIONS.md) for the detailed aut
 - MVP organization uses topics/tags without separate sheets; entry is manual without CSV import; solve dates are server-recorded without historical editing.
 - Registration creates the account, then the user logs in separately. Email verification is deferred; do not represent email ownership as verified.
 - JWT access lifetime is 600 seconds, capped by the remaining absolute 604800-second session lifetime. Refresh rotation does not extend that deadline. Reset tokens expire after 1800 seconds.
-- Use allowlisted HS256 with separate access/refresh secrets, Argon2id with the selected baseline parameters, and 15–128-code-point passwords. Validate explicit environment values; do not introduce hidden defaults.
+- Use allowlisted HS256 with separate access/refresh secrets, Argon2id with the selected baseline parameters, and 8–128-code-point passwords. Validate explicit environment values; do not introduce hidden defaults.
 - Retain immediate PostgreSQL-backed session revocation, HttpOnly cookie transport, same-origin API routing, and coordinated refresh.
 - Production hosting/origin, verified Resend sender/credentials, representative hash-cost benchmarking, and production cookie/proxy testing remain release dependencies. They do not prevent local mocked integration work.
 

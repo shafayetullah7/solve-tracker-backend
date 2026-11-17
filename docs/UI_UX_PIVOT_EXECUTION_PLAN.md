@@ -1,10 +1,10 @@
 # UI/UX pivot — phased execution plan
 
-**Status:** not started. **Design reference:** [UI_UX_PIVOT.md](UI_UX_PIVOT.md). **Prerequisites:** Phase 8 complete (`pnpm verify:phase-8`); `cp-frontend` builds and tests green.
+**Status:** not started. **Design reference:** [UI_UX_PIVOT.md](UI_UX_PIVOT.md). **Prerequisites:** Phase 8 complete (`pnpm verify:phase-8`); `solve-tracker-frontend` builds and tests green.
 
 **Outcome:** Signed-in users work inside an **app shell** (sidebar + icons), land on **`/app` (stats)**, manage identity on **`/app/profile`**, and use **`/app/problems`** with **sufficient** search/filter UX. Global top nav no longer lists product sections.
 
-**Scope:** `cp-frontend` only unless a redirect or `next=` default requires a one-line auth helper change. **No** new backend features.
+**Scope:** `solve-tracker-frontend` only unless a redirect or `next=` default requires a one-line auth helper change. **No** new backend features.
 
 ---
 
@@ -47,10 +47,10 @@ flowchart LR
 
 ### Work
 
-- Create [`cp-frontend/src/icons/`](../../cp-frontend/src/icons/) with **one SVG component per file** and [`index.ts`](../../cp-frontend/src/icons/index.ts) barrel (see UI_UX_PIVOT §7.2):
+- Create [`solve-tracker-frontend/src/icons/`](../../solve-tracker-frontend/src/icons/) with **one SVG component per file** and [`index.ts`](../../solve-tracker-frontend/src/icons/index.ts) barrel (see UI_UX_PIVOT §7.2):
   - `IconDashboard`, `IconLibrary`, `IconTopics`, `IconPlus`, `IconUser`, `IconLogOut`, `IconMenu`, `IconClose`
 - Optional for UX-5: `IconSearch`, `IconFilter`, `IconX` (chips/clear).
-- Add [`cp-frontend/src/lib/app/nav-active.ts`](../../cp-frontend/src/lib/app/nav-active.ts) (or similar): given `pathname` + `search`, return active sidebar key (`dashboard` \| `library` \| `topics` \| `profile` \| `add-problem`) per UI_UX_PIVOT §3.2.
+- Add [`solve-tracker-frontend/src/lib/app/nav-active.ts`](../../solve-tracker-frontend/src/lib/app/nav-active.ts) (or similar): given `pathname` + `search`, return active sidebar key (`dashboard` \| `library` \| `topics` \| `profile` \| `add-problem`) per UI_UX_PIVOT §3.2.
 - Unit tests for `nav-active` (nested `/problems/:id`, `/problems/new`, exact `/dashboard`).
 
 ### Exit criteria
@@ -61,7 +61,7 @@ flowchart LR
 ### Verification
 
 ```bash
-cd cp-frontend && pnpm exec tsc --noEmit && pnpm test --run
+cd solve-tracker-frontend && pnpm exec tsc --noEmit && pnpm test --run
 ```
 
 ---
@@ -72,8 +72,8 @@ cd cp-frontend && pnpm exec tsc --noEmit && pnpm test --run
 
 ### Work
 
-- Implement [`AppShell.tsx`](../../cp-frontend/src/components/app/AppShell.tsx): flex layout, sidebar column + main (`#main-content`), skip-link target preserved.
-- Implement [`AppSidebar.tsx`](../../cp-frontend/src/components/app/AppSidebar.tsx): nav rows with icon + label; footer sign out; **Add problem** CTA; wire `nav-active` + `aria-current="page"`.
+- Implement [`AppShell.tsx`](../../solve-tracker-frontend/src/components/app/AppShell.tsx): flex layout, sidebar column + main (`#main-content`), skip-link target preserved.
+- Implement [`AppSidebar.tsx`](../../solve-tracker-frontend/src/components/app/AppSidebar.tsx): nav rows with icon + label; footer sign out; **Add problem** CTA; wire `nav-active` + `aria-current="page"`.
 - Mobile: header with `IconMenu`; drawer overlay (focus trap, Escape, close on navigate) — can be minimal in UX-2, hardened in UX-6.
 - **Do not** mount shell on login/register/forgot/reset/guest `/` yet (UX-3).
 
@@ -94,14 +94,14 @@ Frontend unit tests if shell logic extracted; manual smoke in dev.
 
 ### Work
 
-- Introduce layout route [`routes/dashboard.tsx`](../../cp-frontend/src/routes/dashboard.tsx) (app workspace layout: `RequireSession` + `AppShell` + `<Outlet>`).
+- Introduce layout route [`routes/dashboard.tsx`](../../solve-tracker-frontend/src/routes/dashboard.tsx) (app workspace layout: `RequireSession` + `AppShell` + `<Outlet>`).
 - Nest under shell (adjust file tree per Solid router — see UI_UX_PIVOT §3.3):
   - `dashboard/index.tsx` (placeholder OK until UX-4)
   - `profile.tsx` (placeholder OK until UX-4)
   - Move shell wrapper from duplicate `problems.tsx` / `topics.tsx` `<main>` into shared parent **or** import `AppShell` once in a new parent `app.tsx` if cleaner.
-- [`App.tsx`](../../cp-frontend/src/App.tsx): global nav **guest-only** links (`AuthNav` sign in/register); remove authenticated Library/Topics/Account from top bar.
-- [`AuthNav.tsx`](../../cp-frontend/src/components/auth/AuthNav.tsx): authenticated branch removed from global header.
-- Add [`routes/account.tsx`](../../cp-frontend/src/routes/account.tsx) redirect → `/profile` (or thin re-export).
+- [`App.tsx`](../../solve-tracker-frontend/src/App.tsx): global nav **guest-only** links (`AuthNav` sign in/register); remove authenticated Library/Topics/Account from top bar.
+- [`AuthNav.tsx`](../../solve-tracker-frontend/src/components/auth/AuthNav.tsx): authenticated branch removed from global header.
+- Add [`routes/account.tsx`](../../solve-tracker-frontend/src/routes/account.tsx) redirect → `/profile` (or thin re-export).
 - Ensure deep links: `/problems?topicId=`, `next=` on login unchanged.
 
 ### Exit criteria
@@ -113,8 +113,8 @@ Frontend unit tests if shell logic extracted; manual smoke in dev.
 ### Verification
 
 ```bash
-cd cp-frontend && pnpm exec tsc --noEmit && pnpm lint && pnpm test --run
-cd ../backend && TEST_DATABASE_URL=.../_test pnpm verify:phase-8
+cd solve-tracker-frontend && pnpm exec tsc --noEmit && pnpm lint && pnpm test --run
+cd ../solve-tracker-backend && TEST_DATABASE_URL=.../_test pnpm verify:phase-8
 ```
 
 ---
@@ -125,14 +125,14 @@ cd ../backend && TEST_DATABASE_URL=.../_test pnpm verify:phase-8
 
 ### Work
 
-- **`/dashboard`** ([`routes/dashboard/index.tsx`](../../cp-frontend/src/routes/dashboard/index.tsx)):
+- **`/dashboard`** ([`routes/dashboard/index.tsx`](../../solve-tracker-frontend/src/routes/dashboard/index.tsx)):
   - `GET /progress` overall + per-topic summaries (FR-UX-04).
   - No profile fields, no browse toolbar, no problem list.
   - Loading/error/empty states.
-- **`/profile`** ([`routes/profile.tsx`](../../cp-frontend/src/routes/profile.tsx)):
-  - Migrate content from [`account.tsx`](../../cp-frontend/src/routes/account.tsx); drop `AuthLayout` wrapper; keep sign out + revocation UX.
-- **[`index.tsx`](../../cp-frontend/src/routes/index.tsx):** authenticated redirect **`/dashboard`** (not `/problems`).
-- **Auth flows:** default post-login/register destination `/dashboard` when no `next` ([`guest-auth-page.ts`](../../cp-frontend/src/lib/auth/guest-auth-page.ts), login/register as needed).
+- **`/profile`** ([`routes/profile.tsx`](../../solve-tracker-frontend/src/routes/profile.tsx)):
+  - Migrate content from [`account.tsx`](../../solve-tracker-frontend/src/routes/account.tsx); drop `AuthLayout` wrapper; keep sign out + revocation UX.
+- **[`index.tsx`](../../solve-tracker-frontend/src/routes/index.tsx):** authenticated redirect **`/dashboard`** (not `/problems`).
+- **Auth flows:** default post-login/register destination `/dashboard` when no `next` ([`guest-auth-page.ts`](../../solve-tracker-frontend/src/lib/auth/guest-auth-page.ts), login/register as needed).
 - Logo in shell → `/dashboard`.
 
 ### Exit criteria
@@ -152,11 +152,11 @@ Same as UX-3; no backend changes required.
 
 ### Work
 
-- Refactor [`ProblemBrowseToolbar.tsx`](../../cp-frontend/src/components/problems/ProblemBrowseToolbar.tsx) per UI_UX_PIVOT §5.3:
+- Refactor [`ProblemBrowseToolbar.tsx`](../../solve-tracker-frontend/src/components/problems/ProblemBrowseToolbar.tsx) per UI_UX_PIVOT §5.3:
   - **Primary:** search, status, platform, apply (or debounced search + auto-apply on selects — document choice in component).
   - **Collapsible “More filters”:** topics, untagged, sort, order, page size.
 - Add **active filter summary** or chips + clear all (use `hasActiveBrowseFilters` / serialize helpers).
-- Preserve URL sync via [`browse-query.ts`](../../cp-frontend/src/lib/problems/browse-query.ts); extend tests for combined `q` + `platform` + `status`.
+- Preserve URL sync via [`browse-query.ts`](../../solve-tracker-frontend/src/lib/problems/browse-query.ts); extend tests for combined `q` + `platform` + `status`.
 - **Backend (minimal):** one integration assertion in [`test-problems-integration.mjs`](../scripts/test-problems-integration.mjs) for combined GET (Phase 8 gap).
 - Confirm `LibraryProgressStrip` still correct inside shell.
 
@@ -168,8 +168,8 @@ Same as UX-3; no backend changes required.
 ### Verification
 
 ```bash
-cd backend && TEST_DATABASE_URL=.../_test pnpm test:problems:integration
-cd ../cp-frontend && pnpm test --run
+cd solve-tracker-backend && TEST_DATABASE_URL=.../_test pnpm test:problems:integration
+cd ../solve-tracker-frontend && pnpm test --run
 ```
 
 ---
@@ -204,10 +204,10 @@ Manual checklist in results doc; frontend tests updated for changed components.
 ### Work
 
 - Create [`UI_UX_PIVOT_RESULTS.md`](UI_UX_PIVOT_RESULTS.md): phases completed, manual checklist, known limits.
-- Update [`FRONTEND_CONVENTIONS.md`](../../cp-frontend/FRONTEND_CONVENTIONS.md): app shell, icons folder, sidebar routes.
+- Update [`FRONTEND_CONVENTIONS.md`](../../solve-tracker-frontend/FRONTEND_CONVENTIONS.md): app shell, icons folder, sidebar routes.
 - Update [`PROJECT_EXECUTION_PLAN.md`](../PROJECT_EXECUTION_PLAN.md) UI/UX pivot status → complete.
 - Update [`UI_UX_PIVOT.md`](UI_UX_PIVOT.md) status line.
-- Optional: [`cp-frontend/scripts/verify-ux-pivot.mjs`](../../cp-frontend/scripts/verify-ux-pivot.mjs) — tsc, lint, test, grep for `AuthNav` authenticated product links absence, `src/icons/index.ts` exists.
+- Optional: [`solve-tracker-frontend/scripts/verify-ux-pivot.mjs`](../../solve-tracker-frontend/scripts/verify-ux-pivot.mjs) — tsc, lint, test, grep for `AuthNav` authenticated product links absence, `src/icons/index.ts` exists.
 
 ### Exit criteria
 
@@ -217,8 +217,8 @@ Manual checklist in results doc; frontend tests updated for changed components.
 ### Suggested one-shot gate
 
 ```bash
-cd cp-frontend && pnpm exec tsc --noEmit && pnpm lint && pnpm test --run && pnpm build
-cd ../backend && TEST_DATABASE_URL=.../practice_tracker_test pnpm verify:phase-8
+cd solve-tracker-frontend && pnpm exec tsc --noEmit && pnpm lint && pnpm test --run && pnpm build
+cd ../solve-tracker-backend && TEST_DATABASE_URL=.../practice_tracker_test pnpm verify:phase-8
 ```
 
 ---

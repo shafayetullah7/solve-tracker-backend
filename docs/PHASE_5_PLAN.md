@@ -4,7 +4,7 @@ Status: **complete (2026-11-15).** See [PHASE_5_RESULTS.md](PHASE_5_RESULTS.md) 
 
 Outcome: an authenticated user can create, list, rename, and delete their own topics through the real API and a protected frontend screen. Topic names are unique per account (trimmed, case-insensitive). Cross-account access and duplicate names fail safely. OpenAPI and the shared typed client stay aligned. Problem records, associations, and progress UI remain Phase 6.
 
-References: [execution plan](../PROJECT_EXECUTION_PLAN.md), [requirements](../backend/REQUIREMENTS.md) (FR-02), [Phase 0 decisions](PHASE_0_DECISIONS.md), [Phase 3 results](PHASE_3_RESULTS.md), [Phase 4 plan](PHASE_4_PLAN.md), [backend conventions](../backend/BACKEND_CONVENTIONS.md), [Drizzle conventions](../backend/DRIZZLE_CONVENTIONS.md), [frontend conventions](../cp-frontend/FRONTEND_CONVENTIONS.md), [API client](../cp-frontend/API_CLIENT.md).
+References: [execution plan](../PROJECT_EXECUTION_PLAN.md), [requirements](../REQUIREMENTS.md) (FR-02), [Phase 0 decisions](PHASE_0_DECISIONS.md), [Phase 3 results](PHASE_3_RESULTS.md), [Phase 4 plan](PHASE_4_PLAN.md), [backend conventions](../BACKEND_CONVENTIONS.md), [Drizzle conventions](../DRIZZLE_CONVENTIONS.md), [frontend conventions](../solve-tracker-frontend/FRONTEND_CONVENTIONS.md), [API client](../solve-tracker-frontend/API_CLIENT.md).
 
 ## 1. Scope, prerequisites, and boundaries
 
@@ -34,7 +34,7 @@ References: [execution plan](../PROJECT_EXECUTION_PLAN.md), [requirements](../ba
 ## 2. Intended organization
 
 ```text
-backend/src/
+src/
   database/schema/
     topics/
       topics.table.ts
@@ -49,7 +49,7 @@ backend/src/
     schemas/
       topics.schema.ts             # Zod + Swagger response schemas
 
-cp-frontend/src/
+solve-tracker-frontend/src/
   lib/api/modules/
     topics.api.ts
     topics.api.test.ts
@@ -87,7 +87,7 @@ Follow existing Nest module layout (`auth/`). Register `TopicsModule` in `AppMod
 ### Work
 
 - Implement `TopicsModule` with controller, service, repository. Every handler uses `AccessGuard`; identity from `req.auth` only—never a body/query `userId`.
-- Endpoints (align with [backend conventions](../backend/BACKEND_CONVENTIONS.md)):
+- Endpoints (align with [backend conventions](../BACKEND_CONVENTIONS.md)):
 
   | Method | Path | Purpose |
   | --- | --- | --- |
@@ -119,7 +119,7 @@ Follow existing Nest module layout (`auth/`). Register `TopicsModule` in `AppMod
 - Narrow JSON responses like `auth.api.ts`; export input/output types from generated `operations` where available.
 - Paths: `/topics`, `/topics/{topicId}` with validated id strings; no encoded path segments beyond agreed rules in `API_CLIENT.md`.
 - Add focused transport tests for list pagination query encoding and error code mapping (`TOPIC_NAME_IN_USE`, `NOT_FOUND`).
-- From `backend/`: `pnpm api:export` and `pnpm api:check`. From `cp-frontend/`: `pnpm api:generate` and `pnpm api:check`. Commit snapshot and generated types together.
+- From repo root (`solve-tracker-backend/`): `pnpm api:export` and `pnpm api:check`. From `solve-tracker-frontend/`: `pnpm api:generate` and `pnpm api:check`. Commit snapshot and generated types together.
 
 ### Exit criteria
 
@@ -164,7 +164,7 @@ Follow existing Nest module layout (`auth/`). Register `TopicsModule` in `AppMod
 
 ### Phase 5 exit criteria (overall)
 
-Automated run: `cd backend && TEST_DATABASE_URL=…/practice_tracker_test pnpm verify:phase-5` (includes Phase 6 topic-delete retest by default; set `VERIFY_PHASE6_TOPIC_DELETE=0` to skip). See [PHASE_5_RESULTS.md](PHASE_5_RESULTS.md).
+Automated run: `cd solve-tracker-backend && TEST_DATABASE_URL=…/practice_tracker_test pnpm verify:phase-5` (includes Phase 6 topic-delete retest by default; set `VERIFY_PHASE6_TOPIC_DELETE=0` to skip). See [PHASE_5_RESULTS.md](PHASE_5_RESULTS.md).
 
 From the execution plan, plus concrete evidence:
 

@@ -28,7 +28,7 @@ Plan reference: [PHASE_7_PLAN.md](PHASE_7_PLAN.md). Prerequisites: Phase 6 libra
 ### One-shot exit verifier
 
 ```bash
-cd backend
+cd solve-tracker-backend
 TEST_DATABASE_URL=postgresql://practice:practice_dev@localhost:5432/practice_tracker_test \
   pnpm verify:phase-7
 ```
@@ -46,10 +46,10 @@ Maps [PHASE_7_PLAN.md](PHASE_7_PLAN.md) §Phase 7 exit criteria 1–7: backend l
 
 | Gate | Result |
 | --- | --- |
-| Backend unit | **~76** tests (`pnpm test` in `backend`) |
+| Backend unit | **~76** tests (`pnpm test` in `solve-tracker-backend`) |
 | Backend e2e | **3** tests (mocked DB) |
 | Problems integration | **51+** assertions (`scripts/test-problems-integration.mjs`) — completion, FR-04 filters, `GET /progress`, ownership |
-| Frontend unit | **~120** tests (`pnpm test --run` in `cp-frontend`) |
+| Frontend unit | **~120** tests (`pnpm test --run` in `solve-tracker-frontend`) |
 | OpenAPI | `pnpm api:check` (backend + generated `backend.d.ts`) |
 
 ## Known limits / deferrals
@@ -64,9 +64,9 @@ Maps [PHASE_7_PLAN.md](PHASE_7_PLAN.md) §Phase 7 exit criteria 1–7: backend l
 
 ```bash
 # Backend
-cd backend && pnpm lint && pnpm test && pnpm test:e2e && pnpm build && pnpm api:check
+cd solve-tracker-backend && pnpm lint && pnpm test && pnpm test:e2e && pnpm build && pnpm api:check
 TEST_DATABASE_URL=.../practice_tracker_test pnpm test:problems:integration
 
 # Frontend
-cd cp-frontend && pnpm exec tsc --noEmit && pnpm lint && pnpm test --run && pnpm build && pnpm api:check
+cd solve-tracker-frontend && pnpm exec tsc --noEmit && pnpm lint && pnpm test --run && pnpm build && pnpm api:check
 ```

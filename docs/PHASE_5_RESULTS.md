@@ -8,24 +8,24 @@ Date: **2026-11-15**. Phase 5 status: **complete** — user-owned topics from Po
 
 - `topics` table: UUID `id`, `user_id` → `users.id` (`ON DELETE CASCADE`), `name`, `normalized_name`, timestamps.
 - Unique index `topics_user_normalized_name_uniq` on (`user_id`, `normalized_name`).
-- Migration folder: `backend/drizzle/20261115065302_topics/migration.sql`.
-- Drizzle schema under `backend/src/database/schema/topics/`; relations registered in `relations.ts`.
+- Migration folder: `drizzle/20261115065302_topics/migration.sql`.
+- Drizzle schema under `src/database/schema/topics/`; relations registered in `relations.ts`.
 
 ### Backend API (Step 5.2)
 
 - `TopicsModule`: `GET/POST /topics`, `PATCH/DELETE /topics/:topicId` behind `AuthSecurityGuard` + `AccessGuard`.
 - Pagination `{ items, meta: { page, pageSize, total } }`; stable name sort.
 - Errors: `VALIDATION_ERROR`, `NOT_FOUND` (missing or other-user id), `TOPIC_NAME_IN_USE` (409).
-- OpenAPI: four `TopicsController_*` operations in `backend/openapi.json`.
+- OpenAPI: four `TopicsController_*` operations in `openapi.json`.
 
 ### Typed client (Step 5.3)
 
-- `cp-frontend/src/lib/api/modules/topics.api.ts` + `topics.api.test.ts`; all operations use `recoverAuth: true`.
+- `solve-tracker-frontend/src/lib/api/modules/topics.api.ts` + `topics.api.test.ts`; all operations use `recoverAuth: true`.
 - `pnpm api:check` (backend) and `pnpm api:check` (frontend) pass.
 
 ### Topics management UI (Step 5.4)
 
-- `cp-frontend/src/routes/topics.tsx`, `topics/index.tsx`, `lib/topics/messages.ts`.
+- `solve-tracker-frontend/src/routes/topics.tsx`, `topics/index.tsx`, `lib/topics/messages.ts`.
 - `AuthNav` promotes **Topics** before **Account** when authenticated.
 - No raw `fetch` on the topics route (product calls via `createTopicsApi(auth.productClient)` only).
 
@@ -43,7 +43,7 @@ Date: **2026-11-15**. Phase 5 status: **complete** — user-owned topics from Po
 
 ```bash
 # Backend
-cd backend
+cd solve-tracker-backend
 pnpm lint
 pnpm test                    # 43 unit tests
 pnpm test:e2e                # 3 tests (mocked DB)
@@ -55,12 +55,12 @@ TEST_DATABASE_URL=postgresql://practice:practice_dev@localhost:5432/practice_tra
   pnpm test:topics:integration
 
 # Overall exit criteria (all seven gates; includes Phase 6 topic-delete retest)
-cd backend
+cd solve-tracker-backend
 TEST_DATABASE_URL=postgresql://practice:practice_dev@localhost:5432/practice_tracker_test \
   pnpm verify:phase-5
 
 # Frontend
-cd cp-frontend
+cd solve-tracker-frontend
 pnpm exec tsc --noEmit
 pnpm lint
 pnpm test --run

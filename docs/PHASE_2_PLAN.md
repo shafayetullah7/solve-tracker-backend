@@ -4,7 +4,7 @@ Status: **independent foundation executed and verified**. See [PHASE_2_RESULTS.m
 
 Outcome: the frontend has one reusable HTTP boundary, typed backend API definitions, and an explicit integration point for the later auth coordinator. Components continue to use Solid 2 for reactive UI while HTTP details stay in ordinary TypeScript.
 
-References: [execution plan](../PROJECT_EXECUTION_PLAN.md), [Phase 0 contracts](PHASE_0_DECISIONS.md), [frontend conventions](../cp-frontend/FRONTEND_CONVENTIONS.md), [auth conventions](../cp-frontend/AUTH_CONVENTIONS.md), and [backend conventions](../backend/BACKEND_CONVENTIONS.md).
+References: [execution plan](../PROJECT_EXECUTION_PLAN.md), [Phase 0 contracts](PHASE_0_DECISIONS.md), [frontend conventions](../solve-tracker-frontend/FRONTEND_CONVENTIONS.md), [auth conventions](../solve-tracker-frontend/AUTH_CONVENTIONS.md), and [backend conventions](../BACKEND_CONVENTIONS.md).
 
 ## 1. Dependencies and scope
 
@@ -26,7 +26,7 @@ Excluded:
 ## 2. Intended files and responsibilities
 
 ```text
-cp-frontend/
+solve-tracker-frontend/
   .env.example                       # server-side proxy target only
   vite.config.ts                     # /api proxy and validated target
   src/lib/api/

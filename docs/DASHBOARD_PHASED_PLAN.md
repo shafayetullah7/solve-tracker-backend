@@ -1,6 +1,6 @@
 # Dashboard evolution — phased plan (layout, look, delivery)
 
-**Status:** DASH-1–4 complete (2026-11-16). Mockup-aligned layout (2026-11-16): pill toolbar, stats strip, 3-column queues, topics+platform | dark activity. Results: [DASHBOARD_PHASED_RESULTS.md](DASHBOARD_PHASED_RESULTS.md). Code in [`components/dashboard/`](../../cp-frontend/src/components/dashboard/).  
+**Status:** DASH-1–4 complete (2026-11-16). Mockup-aligned layout (2026-11-16): pill toolbar, stats strip, 3-column queues, topics+platform | dark activity. Results: [DASHBOARD_PHASED_RESULTS.md](DASHBOARD_PHASED_RESULTS.md). Code in [`components/dashboard/`](../../solve-tracker-frontend/src/components/dashboard/).  
 **Design constraints:** [UI_UX_PIVOT.md §4](UI_UX_PIVOT.md) (stats only), [REQUIREMENTS.md](../REQUIREMENTS.md) **FR-05** (full-library counts, not list filters).  
 **Out of scope on dashboard:** profile/sign-out, browse toolbar, full library pagination, inline create/edit forms (links/CTAs only).
 
@@ -43,18 +43,18 @@ Same **section order** as desktop: header → toolbar → stats → **3-column q
 | --- | --- |
 | Headings | `text-page` (H1), `text-section` (H2), Panel title for A |
 | Numbers | `tabular-nums`, `font-medium` on key counts |
-| Panels | Existing [`Panel`](../../cp-frontend/src/components/ui/Panel.tsx); one primary “Overall” panel |
+| Panels | Existing [`Panel`](../../solve-tracker-frontend/src/components/ui/Panel.tsx); one primary “Overall” panel |
 | Links to work | `text-brand underline-offset-4 hover:underline` |
 | Primary CTA | `ui-button` `data-variant="primary"` only for **Add problem** in B (sidebar already has CTA — avoid duplicate primary buttons in body) |
-| Platform | Reuse [`PlatformMark`](../../cp-frontend/src/components/platforms/PlatformMark.tsx) where platform appears |
-| Loading | [`LoadingPlaceholder`](../../cp-frontend/src/components/ui/LoadingPlaceholder.tsx) block → sectional placeholders in later phases |
-| Errors | Muted status + **Try again** ([`Button`](../../cp-frontend/src/components/ui/Button.tsx) secondary), same as today |
+| Platform | Reuse [`PlatformMark`](../../solve-tracker-frontend/src/components/platforms/PlatformMark.tsx) where platform appears |
+| Loading | [`LoadingPlaceholder`](../../solve-tracker-frontend/src/components/ui/LoadingPlaceholder.tsx) block → sectional placeholders in later phases |
+| Errors | Muted status + **Try again** ([`Button`](../../solve-tracker-frontend/src/components/ui/Button.tsx) secondary), same as today |
 
 ### 1.4 Data rules (FR-05)
 
 - **Dashboard widgets** use **`GET /progress`** for totals and per-topic rows (unchanged semantics).
 - **Preview lists** (recent/stale) use **`GET /problems`** with explicit `sort` / `status` / `pageSize` — show **at most 5 rows**, no pagination UI.
-- Every deep link into Library must use [`problemsBrowseHref`](../../cp-frontend/src/lib/problems/paths.ts) / [`browse-query`](../../cp-frontend/src/lib/problems/browse-query.ts) so URLs are bookmarkable.
+- Every deep link into Library must use [`problemsBrowseHref`](../../solve-tracker-frontend/src/lib/problems/paths.ts) / [`browse-query`](../../solve-tracker-frontend/src/lib/problems/browse-query.ts) so URLs are bookmarkable.
 - Copy must distinguish **full library** stats from **filtered** views (e.g. “12 unsolved in your library” linking to `?status=unsolved`).
 
 ---
@@ -77,7 +77,7 @@ flowchart LR
   D1 --> D2 --> D3 --> D4
 ```
 
-**Dependencies:** App shell and route [`/app`](../../cp-frontend/src/routes/app/index.tsx) (UX-3/UX-4). Library filter URLs (UX-5). Platform catalog/icons (shared catalog).
+**Dependencies:** App shell and route [`/app`](../../solve-tracker-frontend/src/routes/app/index.tsx) (UX-3/UX-4). Library filter URLs (UX-5). Platform catalog/icons (shared catalog).
 
 ---
 
@@ -99,12 +99,12 @@ flowchart LR
 
 ### 1.2 Implementation notes
 
-- Extract presentational pieces to `cp-frontend/src/components/dashboard/`:
+- Extract presentational pieces to `solve-tracker-frontend/src/components/dashboard/`:
   - `DashboardStatsStrip.tsx`
   - `DashboardTopicProgressList.tsx`
   - `DashboardToolbar.tsx`
-- Reuse `overallPercentComplete` / `formatTopicProgress` from [`progress-display.ts`](../../cp-frontend/src/lib/problems/progress-display.ts).
-- Page [`app/index.tsx`](../../cp-frontend/src/routes/app/index.tsx) orchestrates load + sections only.
+- Reuse `overallPercentComplete` / `formatTopicProgress` from [`progress-display.ts`](../../solve-tracker-frontend/src/lib/problems/progress-display.ts).
+- Page [`app/index.tsx`](../../solve-tracker-frontend/src/routes/app/index.tsx) orchestrates load + sections only.
 
 ### 1.3 Exit criteria
 
@@ -117,7 +117,7 @@ flowchart LR
 ### 1.4 Verification
 
 ```bash
-cd cp-frontend && pnpm exec tsc --noEmit && pnpm test --run
+cd solve-tracker-frontend && pnpm exec tsc --noEmit && pnpm test --run
 ```
 
 Manual: empty library, library with topics only, library with problems.
@@ -143,7 +143,7 @@ Manual: empty library, library with topics only, library with problems.
 
 - After `progress` loads, parallel `GET /problems` calls (max **4**):  
   `untagged=true&pageSize=1` (meta.total), `status=unsolved&pageSize=1`, focus list, recent added, recent solved.
-- Consider `cp-frontend/src/lib/dashboard/dashboard-queries.ts` with typed query presets.
+- Consider `solve-tracker-frontend/src/lib/dashboard/dashboard-queries.ts` with typed query presets.
 - **Do not** mount browse toolbar or pagination controls.
 
 ### 2.3 Components
@@ -183,9 +183,9 @@ Manual: empty library, library with topics only, library with problems.
 
 **Option A (MVP, no backend):** Client aggregates from paginated `GET /problems` (e.g. `pageSize=100`, cap with “100+ problems — open library for full picture”). Acceptable for small libraries only.
 
-**Option B (recommended before large libraries):** `GET /progress/platforms` or extend `GET /progress` with `platforms: { slug, solved, unsolved }[]` computed in SQL (host match via [`platform-catalog`](../../backend/src/shared/platform-catalog.ts)).
+**Option B (recommended before large libraries):** `GET /progress/platforms` or extend `GET /progress` with `platforms: { slug, solved, unsolved }[]` computed in SQL (host match via [`platform-catalog`](../../src/shared/platform-catalog.ts)).
 
-**Implemented:** Option B — extended [`GET /progress`](../../backend/src/modules/progress/progress.controller.ts) with `platforms[]` (no separate aggregate route).
+**Implemented:** Option B — extended [`GET /progress`](../../src/modules/progress/progress.controller.ts) with `platforms[]` (no separate aggregate route).
 
 ### 3.3 Exit criteria
 

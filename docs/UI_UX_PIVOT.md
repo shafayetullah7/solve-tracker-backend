@@ -4,7 +4,7 @@
 
 **Context:** Core tracker behavior is implemented (Phase 8). The palette is in good shape; the pivot is **information architecture and navigation**: product areas move out of the global top navbar into an **app shell** with a **sidebar**, a **stats-first dashboard home**, a **separate profile page**, and **inline SVG icons** (one file per icon, shared folder + barrel).
 
-**References:** [UI_UX_PIVOT_EXECUTION_PLAN.md](UI_UX_PIVOT_EXECUTION_PLAN.md) (phased work), [FRONTEND_CONVENTIONS.md](../../cp-frontend/FRONTEND_CONVENTIONS.md), [REQUIREMENTS.md](../REQUIREMENTS.md), [PHASE_8_RESULTS.md](PHASE_8_RESULTS.md).
+**References:** [UI_UX_PIVOT_EXECUTION_PLAN.md](UI_UX_PIVOT_EXECUTION_PLAN.md) (phased work), [FRONTEND_CONVENTIONS.md](../../solve-tracker-frontend/FRONTEND_CONVENTIONS.md), [REQUIREMENTS.md](../REQUIREMENTS.md), [PHASE_8_RESULTS.md](PHASE_8_RESULTS.md).
 
 ---
 
@@ -12,9 +12,9 @@
 
 | Area | Today | User impact |
 | --- | --- | --- |
-| Global nav | [`AuthNav.tsx`](../../cp-frontend/src/components/auth/AuthNav.tsx) puts **Library**, **Topics**, **Account** in the top bar. | Reads like a marketing site, not a workspace. |
-| Signed-in home | [`index.tsx`](../../cp-frontend/src/routes/index.tsx) redirects to `/app` (stats). | — |
-| Account | [`/account`](../../cp-frontend/src/routes/account.tsx) mixes “your session” with being a **nav destination** named like product sections. | Profile/settings should be distinct from **Dashboard (stats)**. |
+| Global nav | [`AuthNav.tsx`](../../solve-tracker-frontend/src/components/auth/AuthNav.tsx) puts **Library**, **Topics**, **Account** in the top bar. | Reads like a marketing site, not a workspace. |
+| Signed-in home | [`index.tsx`](../../solve-tracker-frontend/src/routes/index.tsx) redirects to `/app` (stats). | — |
+| Account | [`/account`](../../solve-tracker-frontend/src/routes/account.tsx) mixes “your session” with being a **nav destination** named like product sections. | Profile/settings should be distinct from **Dashboard (stats)**. |
 
 **Requirements (user):**
 
@@ -186,7 +186,7 @@ flowchart TB
 
 | Capability | Backend / API | Frontend today |
 | --- | --- | --- |
-| Title / platform ID search | `q` (case-insensitive) | Search field in [`ProblemBrowseToolbar`](../../cp-frontend/src/components/problems/ProblemBrowseToolbar.tsx) |
+| Title / platform ID search | `q` (case-insensitive) | Search field in [`ProblemBrowseToolbar`](../../solve-tracker-frontend/src/components/problems/ProblemBrowseToolbar.tsx) |
 | Status | `status=solved` \| `unsolved` | Status select |
 | Platform | `platform=codeforces` \| `leetcode` \| `codechef` | Platform select |
 | Topics (any match) | `topicIds` (repeatable) or legacy `topicId` | Topic checkboxes; `?topicId=` from Topics page |
@@ -194,8 +194,8 @@ flowchart TB
 | Sort / order | `sort`, `order` | Sort + order selects |
 | Page size | `pageSize` 25 \| 50 \| 100 | Per-page select |
 | Pagination | `page`, `meta.total` | Previous / next + “Page X · N results” |
-| URL state | Query string | [`browse-query.ts`](../../cp-frontend/src/lib/problems/browse-query.ts) parse/serialize |
-| Progress context | `GET /progress` | [`LibraryProgressStrip`](../../cp-frontend/src/components/problems/LibraryProgressStrip.tsx) — full library vs filtered count |
+| URL state | Query string | [`browse-query.ts`](../../solve-tracker-frontend/src/lib/problems/browse-query.ts) parse/serialize |
+| Progress context | `GET /progress` | [`LibraryProgressStrip`](../../solve-tracker-frontend/src/components/problems/LibraryProgressStrip.tsx) — full library vs filtered count |
 
 Pivot work must **not remove** any of the above. Regression: `browse-query.test.ts`, `verify:phase-7`, problems integration script.
 
@@ -255,7 +255,7 @@ These are in scope for the pivot alongside the app shell — the library is the 
 
 **FR-UX-07:** Profile is a **dedicated route**, not a tab on the stats page.
 
-### Content (migrate from [`account.tsx`](../../cp-frontend/src/routes/account.tsx))
+### Content (migrate from [`account.tsx`](../../solve-tracker-frontend/src/routes/account.tsx))
 
 - Display **name** and **email** (read-only for MVP).
 - **Sign out** button (+ pending state, revocation retry messaging).
@@ -264,7 +264,7 @@ These are in scope for the pivot alongside the app shell — the library is the 
 ### Layout
 
 - Inside app shell (sidebar visible).
-- Drop standalone [`AuthLayout`](../../cp-frontend/src/components/auth/AuthLayout.tsx) wrapper for this page; use shell main + `Panel` if needed.
+- Drop standalone [`AuthLayout`](../../solve-tracker-frontend/src/components/auth/AuthLayout.tsx) wrapper for this page; use shell main + `Panel` if needed.
 
 ### Post-login default
 
@@ -278,8 +278,8 @@ These are in scope for the pivot alongside the app shell — the library is the 
 
 - **No third-party icon package** for sidebar v1.
 - Each icon is a **small Solid component** rendering **inline SVG** (stroke style, consistent 24×24 viewBox, `currentColor` for `stroke`/`fill` so `text-brand` / `text-muted` on parent works).
-- **One icon per file** under **`cp-frontend/src/icons/`**.
-- **Barrel:** `cp-frontend/src/icons/index.ts` re-exports all icons.
+- **One icon per file** under **`solve-tracker-frontend/src/icons/`**.
+- **Barrel:** `solve-tracker-frontend/src/icons/index.ts` re-exports all icons.
 - Decorative icons in nav: **`aria-hidden="true"`** when paired with visible text; icon-only controls need **`aria-label`**.
 
 ### 7.2 File naming
@@ -300,7 +300,7 @@ Add new icons only as new files + one line in `index.ts` (do not combine multipl
 ### 7.3 Component contract (sketch)
 
 ```tsx
-// cp-frontend/src/icons/IconLibrary.tsx
+// solve-tracker-frontend/src/icons/IconLibrary.tsx
 import type { JSX } from "solid-js";
 
 export function IconLibrary(props: { class?: string }): JSX.Element {
@@ -325,7 +325,7 @@ export function IconLibrary(props: { class?: string }): JSX.Element {
 ```
 
 ```ts
-// cp-frontend/src/icons/index.ts
+// solve-tracker-frontend/src/icons/index.ts
 export { IconDashboard } from "./IconDashboard";
 export { IconLibrary } from "./IconLibrary";
 // …
@@ -377,7 +377,7 @@ export { IconLibrary } from "./IconLibrary";
 
 ### Icons
 
-- [ ] Create `cp-frontend/src/icons/` + eight icon files + `index.ts`.
+- [ ] Create `solve-tracker-frontend/src/icons/` + eight icon files + `index.ts`.
 - [ ] Wire icons into sidebar and mobile chrome.
 
 ### Dashboard stats
@@ -400,7 +400,7 @@ export { IconLibrary } from "./IconLibrary";
 ### Quality
 
 - [ ] `nav-active.ts` helper tests (prefix rules §3.2).
-- [ ] `pnpm exec tsc`, `lint`, `test --run` in `cp-frontend`.
+- [ ] `pnpm exec tsc`, `lint`, `test --run` in `solve-tracker-frontend`.
 - [ ] Update `FRONTEND_CONVENTIONS.md` (shell + icons).
 
 ---

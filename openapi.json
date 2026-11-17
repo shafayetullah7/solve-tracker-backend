@@ -41,7 +41,7 @@
                   },
                   "password": {
                     "type": "string",
-                    "description": "15–128 Unicode code points; spaces are preserved."
+                    "description": "8–128 Unicode code points; spaces are preserved."
                   }
                 },
                 "required": [
@@ -526,7 +526,7 @@
                   },
                   "password": {
                     "type": "string",
-                    "description": "15–128 Unicode code points; spaces are preserved."
+                    "description": "8–128 Unicode code points; spaces are preserved."
                   }
                 },
                 "required": [
@@ -593,7 +593,7 @@
                   },
                   "newPassword": {
                     "type": "string",
-                    "description": "15–128 Unicode code points; spaces are preserved."
+                    "description": "8–128 Unicode code points; spaces are preserved."
                   }
                 },
                 "required": [

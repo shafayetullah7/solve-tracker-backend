@@ -1,12 +1,23 @@
 import { z } from 'zod';
 import { userNameSchema } from '../../../common/schemas/user-name.schema.js';
 
+export const PASSWORD_MIN_CODE_POINTS = 8;
+export const PASSWORD_MAX_CODE_POINTS = 128;
+
 const length = (min: number, max: number) => (value: string) =>
   Array.from(value).length >= min && Array.from(value).length <= max;
+
+export const PASSWORD_LENGTH_MESSAGE = `Password must contain ${PASSWORD_MIN_CODE_POINTS}–${PASSWORD_MAX_CODE_POINTS} characters`;
+
 export const passwordSchema = z
   .string()
-  .refine(length(15, 128), 'Password must contain 15–128 characters')
-  .meta({ description: '15–128 Unicode code points; spaces are preserved.' });
+  .refine(
+    length(PASSWORD_MIN_CODE_POINTS, PASSWORD_MAX_CODE_POINTS),
+    PASSWORD_LENGTH_MESSAGE,
+  )
+  .meta({
+    description: `${PASSWORD_MIN_CODE_POINTS}–${PASSWORD_MAX_CODE_POINTS} Unicode code points; spaces are preserved.`,
+  });
 export const emailSchema = z
   .email()
   .max(254)
@@ -19,7 +30,10 @@ export const registerSchema = z.strictObject({
 });
 export const loginSchema = z.strictObject({
   email: inputEmail,
-  password: z.string().min(1).refine(length(1, 128), 'Password is too long'),
+  password: z
+    .string()
+    .min(1)
+    .refine(length(1, PASSWORD_MAX_CODE_POINTS), 'Password is too long'),
 });
 export const forgotSchema = z.strictObject({ email: inputEmail });
 export const resetSchema = z.strictObject({
@@ -30,7 +44,7 @@ export const changePasswordSchema = z.strictObject({
   currentPassword: z
     .string()
     .min(1)
-    .refine(length(1, 128), 'Password is too long'),
+    .refine(length(1, PASSWORD_MAX_CODE_POINTS), 'Password is too long'),
   newPassword: passwordSchema,
 });
 export const userSchema = z.strictObject({

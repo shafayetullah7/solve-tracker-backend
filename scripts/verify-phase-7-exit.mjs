@@ -9,7 +9,7 @@ import path from "node:path";
 import fs from "node:fs";
 
 const backendRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const frontendRoot = path.resolve(backendRoot, "..", "cp-frontend");
+const frontendRoot = path.resolve(backendRoot, "..", "solve-tracker-frontend");
 const criteria = [
   {
     id: 1,

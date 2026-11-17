@@ -34,7 +34,7 @@ Each row starts **proposed** unless identified as a current documented requireme
 | A04 | Logout invalidation | Retain immediate revocation via the PostgreSQL session row; no Redis or independent denylist | Auth guard/session schema |
 | A05 | Signing | HS256 for the single Nest issuer/verifier, with independent randomly generated access/refresh secrets of at least 32 bytes each; allowlist the algorithm | JWT service/config |
 | A06 | JWT identity | Server-controlled subject/user ID, session ID, token purpose, issuer/audience, issued/expiry times; refresh generation/identity supports rotation | JWT/session contract |
-| A07 | Password policy | 15–128 Unicode code points, allow spaces/paste/password managers, no silent trimming/truncation, no arbitrary composition rules or scheduled changes | Registration/reset schemas |
+| A07 | Password policy | 8–128 Unicode code points, allow spaces/paste/password managers, no silent trimming/truncation, no arbitrary composition rules or scheduled changes | Registration/reset schemas |
 | A08 | Hash cost | Start at Argon2id memoryCost=19456 KiB, timeCost=2, parallelism=1; benchmark before production and increase if practical | Hashing implementation and deployment sizing |
 | A09 | Credential digests | Hash high-entropy refresh/reset tokens with SHA-256 for lookup/comparison; Argon2id is for human passwords | Session/reset persistence |
 | E01 | Email sender | User supplies the intended verified sending domain/address and display name; no invented production sender | Live Resend verification |
@@ -96,7 +96,7 @@ Deliverable: configuration contract and a topology sketch. Exact hosting provide
 Update the source documents together so they do not contradict one another:
 
 1. `backend/REQUIREMENTS.md`: accepted scope and auth lifecycle; remove resolved questions.
-2. `cp-frontend/AUTH_CONVENTIONS.md`: token lifetimes/transport and recovery decisions where relevant.
+2. `solve-tracker-frontend/AUTH_CONVENTIONS.md`: token lifetimes/transport and recovery decisions where relevant.
 3. Backend/frontend conventions: only changed implementation boundaries or policies.
 4. This decision register: accepted/proposed/deferred status, selected values, and brief rationale.
 5. `PROJECT_EXECUTION_PLAN.md`: Phase 0 outcome and remaining dependent blockers.

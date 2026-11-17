@@ -2,7 +2,7 @@
 
 Status: **executed in part; live Docker/PostgreSQL checks blocked by OS permissions**. See [PHASE_1_RESULTS.md](PHASE_1_RESULTS.md) for evidence and resume instructions. This phase verifies the existing setup and fixes only infrastructure defects uncovered by those checks. It does not implement authentication, the API client, or product features.
 
-References: [execution plan](../PROJECT_EXECUTION_PLAN.md), [Phase 0 decisions](PHASE_0_DECISIONS.md), [backend setup](../backend/README.md), [frontend setup](../cp-frontend/README.md), and both projects' conventions/AGENTS files.
+References: [execution plan](../PROJECT_EXECUTION_PLAN.md), [Phase 0 decisions](PHASE_0_DECISIONS.md), [backend setup](../README.md), [frontend setup](../solve-tracker-frontend/README.md), and both projects' conventions/AGENTS files.
 
 ## Outcome
 
@@ -50,7 +50,7 @@ pnpm install --frozen-lockfile
 
 ## Step 1.3 — Static and existing test baseline
 
-From `backend/`:
+From repo root (`solve-tracker-backend/`):
 
 ```bash
 pnpm build
@@ -61,7 +61,7 @@ pnpm test:e2e
 pnpm db:check
 ```
 
-From `cp-frontend/`:
+From `solve-tracker-frontend/`:
 
 ```bash
 pnpm exec tsc --noEmit
@@ -79,7 +79,7 @@ pnpm build
 
 ## Step 1.4 — Start PostgreSQL and inspect existing state
 
-From `backend/`:
+From repo root (`solve-tracker-backend/`):
 
 ```bash
 pnpm db:start:docker
@@ -167,7 +167,7 @@ pnpm start:dev
 
 ## Step 1.9 — Frontend alongside the backend
 
-From `cp-frontend/`:
+From `solve-tracker-frontend/`:
 
 ```bash
 pnpm dev

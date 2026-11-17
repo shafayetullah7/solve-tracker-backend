@@ -267,7 +267,7 @@ Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 
 ## OpenAPI contract snapshot
 
-Run `pnpm api:export` to build and export real controller metadata to `openapi.json` without connecting to PostgreSQL (DatabaseService is replaced only in the exporter). Configuration is still validated. `pnpm api:check` verifies the committed snapshot. This is not live endpoint/database verification. From the frontend, `pnpm api:generate` / `pnpm api:check` generate/verify TypeScript contracts using the backend-owned toolchain. See [API_CLIENT.md](../cp-frontend/API_CLIENT.md) for versions and usage.
+Run `pnpm api:export` to build and export real controller metadata to `openapi.json` without connecting to PostgreSQL (DatabaseService is replaced only in the exporter). Configuration is still validated. `pnpm api:check` verifies the committed snapshot. This is not live endpoint/database verification. From the frontend, `pnpm api:generate` / `pnpm api:check` generate/verify TypeScript contracts using the backend-owned toolchain. See [API_CLIENT.md](../solve-tracker-frontend/API_CLIENT.md) for versions and usage.
 
 ## Authentication (Phase 3)
 

@@ -2,7 +2,7 @@
 
 This document is the **long-lived contract** for user-owned images in the coding practice tracker. It applies to backend persistence, APIs, background jobs, and frontend upload/link flows. Do not invent parallel storage fields (for example `avatar_url` blobs in Postgres or per-feature S3 keys without a `media` row).
 
-**Related:** [BACKEND_CONVENTIONS.md](./BACKEND_CONVENTIONS.md), [DRIZZLE_CONVENTIONS.md](./DRIZZLE_CONVENTIONS.md), [cp-frontend/FRONTEND_CONVENTIONS.md](../cp-frontend/FRONTEND_CONVENTIONS.md) §8.1 (profile UI), [REQUIREMENTS.md](./REQUIREMENTS.md) (auth `users` vs public profile).
+**Related:** [BACKEND_CONVENTIONS.md](./BACKEND_CONVENTIONS.md), [DRIZZLE_CONVENTIONS.md](./DRIZZLE_CONVENTIONS.md), [solve-tracker-frontend/FRONTEND_CONVENTIONS.md](../solve-tracker-frontend/FRONTEND_CONVENTIONS.md) §8.1 (profile UI), [REQUIREMENTS.md](./REQUIREMENTS.md) (auth `users` vs public profile).
 
 ---
 
@@ -174,7 +174,7 @@ Every read/link/unlink/delete must verify **`media.user_id === session.user.id`*
 - **Link** profile (or gallery) only on **successful save** / explicit gallery action — **no optimistic** `usage_count` or avatar URL on the server before commit.
 - Gallery UI must not show **`usage_count === 0`** items (they are not returned by list APIs).
 - **Remove from gallery** control only when the API indicates gallery-only (or infer: count 1 and not current avatar).
-- Avatar editor: [`ProfileAvatarEditorDialog`](../cp-frontend/src/components/profile/ProfileAvatarEditorDialog.tsx) pattern — upload in modal, **`onSave`** links; until APIs land, mock client does not replace this contract.
+- Avatar editor: [`ProfileAvatarEditorDialog`](../solve-tracker-frontend/src/components/profile/ProfileAvatarEditorDialog.tsx) pattern — upload in modal, **`onSave`** links; until APIs land, mock client does not replace this contract.
 
 When OpenAPI lands, add `profile.api.ts` / `media.api.ts` under `src/lib/api/modules/` per existing module patterns; do not bypass `media` with direct Cloudinary from the browser for permanent storage (unsigned upload policies are a separate security decision if ever added).
 

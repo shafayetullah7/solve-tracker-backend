@@ -33,15 +33,15 @@ Both responses set `Cache-Control: no-store`.
 
 The Vite dev proxy is development-only. In production, terminate TLS at your edge and forward:
 
-- Static assets → built `cp-frontend` client bundle
-- `/api/*` → backend (strip or rewrite prefix per [`AUTH_CONVENTIONS.md`](../cp-frontend/AUTH_CONVENTIONS.md))
+- Static assets → built `solve-tracker-frontend` client bundle
+- `/api/*` → backend (strip or rewrite prefix per [`AUTH_CONVENTIONS.md`](../solve-tracker-frontend/AUTH_CONVENTIONS.md))
 
 Set backend `FRONTEND_ORIGIN` to the public browser origin.
 
 ## Verification
 
 ```bash
-cd backend
+cd solve-tracker-backend
 pnpm verify:phase-9
 ```
 

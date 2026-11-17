@@ -23,7 +23,7 @@ Unverified registration does not establish email ownership. A mistyped/preclaime
 | Signing | HS256, explicitly allowlisted, independent access and refresh secrets with at least 32 random bytes each |
 | JWT claims | `sub` user ID, `sid` session ID, `jti` token ID, `purpose`, `iss`, `aud`, `iat`, `exp`; refresh identity checked against server state |
 | JWT purpose | Distinct `access` and `refresh`; never accept refresh JWTs on product endpoints |
-| Password | 15–128 Unicode code points; preserve spaces and case; no trimming/truncation/composition rules |
+| Password | 8–128 Unicode code points; preserve spaces and case; no trimming/truncation/composition rules |
 | Password hashing | Argon2id; memoryCost 19456 KiB, timeCost 2, parallelism 1; library-generated random salt |
 | Refresh/reset storage | SHA-256 digest of high-entropy credential; never raw token values |
 | Reset credential | Opaque cryptographically random token with at least 32 random bytes; not an access/refresh JWT |

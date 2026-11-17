@@ -4,7 +4,7 @@ Status: **complete** — Steps **7.1–7.8** executed. Exit: `pnpm verify:phase-
 
 Outcome: an authenticated user can **mark problems solved or revert to unsolved** with correct `solved_at` semantics; **search and combine filters** on the library (title, platform id, status, platform, topics, untagged); **sort and paginate** results; and see **overall and per-topic progress** that count each problem once while filtered views show accurate result totals. All behavior is owner-scoped, typed through the shared client, and backed by PostgreSQL integration tests—not mocks alone.
 
-References: [execution plan](../PROJECT_EXECUTION_PLAN.md), [requirements](../backend/REQUIREMENTS.md) (FR-03, FR-04, FR-05), [Phase 6 results](PHASE_6_RESULTS.md), [Phase 6 plan](PHASE_6_PLAN.md), [Phase 5 plan](PHASE_5_PLAN.md), [backend conventions](../backend/BACKEND_CONVENTIONS.md), [Drizzle conventions](../backend/DRIZZLE_CONVENTIONS.md), [frontend conventions](../cp-frontend/FRONTEND_CONVENTIONS.md), [API client](../cp-frontend/API_CLIENT.md).
+References: [execution plan](../PROJECT_EXECUTION_PLAN.md), [requirements](../REQUIREMENTS.md) (FR-03, FR-04, FR-05), [Phase 6 results](PHASE_6_RESULTS.md), [Phase 6 plan](PHASE_6_PLAN.md), [Phase 5 plan](PHASE_5_PLAN.md), [backend conventions](../BACKEND_CONVENTIONS.md), [Drizzle conventions](../DRIZZLE_CONVENTIONS.md), [frontend conventions](../solve-tracker-frontend/FRONTEND_CONVENTIONS.md), [API client](../solve-tracker-frontend/API_CLIENT.md).
 
 ## 1. Scope, prerequisites, and boundaries
 
@@ -63,7 +63,7 @@ flowchart TB
 ## 2. Intended organization
 
 ```text
-backend/src/modules/
+src/modules/
   problems/
     problems.repository.ts     # filter/sort builders, completion patch
     problems.service.ts        # FR-03 transition rules
@@ -75,7 +75,7 @@ backend/src/modules/
     progress.repository.ts
     schemas/progress.schema.ts
 
-cp-frontend/src/
+solve-tracker-frontend/src/
   lib/api/modules/
     problems.api.ts            # list query types, completion patch
     progress.api.ts              # new
@@ -223,16 +223,16 @@ cp-frontend/src/
 
 ### Work
 
-- Run full matrices: backend/frontend build, typecheck, lint, unit, e2e (mocked), `api:check`.
-- Add or extend `backend/scripts/test-problems-phase7-integration.mjs` (or grow `test-problems-integration.mjs`) on `TEST_DATABASE_URL` `*_test`: completion, filters, progress, ownership.
-- Add `backend/scripts/verify-phase-7-exit.mjs` + `pnpm verify:phase-7` mapping plan exit criteria.
+- Run full matrices: solve-tracker-backend / solve-tracker-frontend build, typecheck, lint, unit, e2e (mocked), `api:check`.
+- Add or extend `scripts/test-problems-phase7-integration.mjs` (or grow `test-problems-integration.mjs`) on `TEST_DATABASE_URL` `*_test`: completion, filters, progress, ownership.
+- Add `scripts/verify-phase-7-exit.mjs` + `pnpm verify:phase-7` mapping plan exit criteria.
 - `docs/PHASE_7_RESULTS.md`: commands, samples, browser checklist, known limits.
 - Update `PROJECT_EXECUTION_PLAN.md` Phase 7 status when exit criteria met.
 - Re-run `verify:phase-5` / `verify:phase-6` smoke if touch regression-sensitive paths.
 
 ### Phase 7 exit criteria (overall)
 
-Automated target: `cd backend && TEST_DATABASE_URL=…/practice_tracker_test pnpm verify:phase-7` (to be added in Step 7.8).
+Automated target: `cd solve-tracker-backend && TEST_DATABASE_URL=…/practice_tracker_test pnpm verify:phase-7` (to be added in Step 7.8).
 
 1. **Completion:** solve, idempotent solved, revert, solve-again-new-timestamp; consistent across list/detail after reload.
 2. **Search/filter:** title and platform id search; combined status/platform/topic/untagged filters; **any** multi-topic; stable sort; paginated totals consistent.
