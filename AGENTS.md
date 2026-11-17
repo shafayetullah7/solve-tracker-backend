@@ -9,6 +9,11 @@ and testing conventions. Check [REQUIREMENTS.md](./REQUIREMENTS.md) for product
 scope and unresolved decisions. Update the relevant documents when a change
 alters an established convention or workflow.
 
+Before implementing uploads, gallery, or profile avatars, read
+[MEDIA_CONVENTIONS.md](./MEDIA_CONVENTIONS.md). All user images use the
+`media` table, Cloudinary storage, and `usage_count` slot rules (gallery +
+profile); do not add ad hoc image columns or client-direct permanent uploads.
+
 ## Database conventions
 
 Before changing database schemas, queries, seeds, or migrations, read

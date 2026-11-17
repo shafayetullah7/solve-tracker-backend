@@ -9,6 +9,7 @@ This plan defines the order for completing the coding practice tracker MVP. Phas
 - [Drizzle conventions](backend/DRIZZLE_CONVENTIONS.md)
 - [Frontend conventions and UI scheme](cp-frontend/FRONTEND_CONVENTIONS.md)
 - [Authentication and refresh conventions](cp-frontend/AUTH_CONVENTIONS.md)
+- [Media, gallery, and profile photo conventions](MEDIA_CONVENTIONS.md)
 
 Repository foundations already exist: NestJS, PostgreSQL development Compose, environment validation, Swagger setup, Drizzle ORM/Kit 1.0.0-rc.5, pnpm scripts, Solid 2 Vite Start-mode CSR, Tailwind 4, UI primitives, and conventions. A platform schema/migration and seed exist. Product features and authentication are not complete. Live Docker/PostgreSQL verification was previously blocked by Docker access; it remains a verification task, not a passed check.
 

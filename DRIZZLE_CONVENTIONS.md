@@ -49,7 +49,13 @@ src/database/
       index.ts
       topics.table.ts
       topics.relations.ts
+    media/                       # user uploads — see MEDIA_CONVENTIONS.md
+      index.ts
+      media.table.ts
+      media-resource-type.enum.ts
 ```
+
+Profile and gallery behavior for `media.usage_count` and `users.avatar_media_id` is defined in [MEDIA_CONVENTIONS.md](./MEDIA_CONVENTIONS.md); do not encode slot rules only in application code without that document staying accurate.
 
 Only `platforms/` is implemented initially. Future folders above illustrate organization, not an implemented problem-tracking schema.
 

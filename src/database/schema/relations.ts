@@ -9,6 +9,9 @@ import { passwordResetTokens } from './auth/password-reset-tokens.table.js';
 import { topics } from './topics/topics.table.js';
 import { problems } from './problems/problems.table.js';
 import { problemTopics } from './problems/problem-topics.table.js';
+import { media } from './media/media.table.js';
+import { userWorkEntries } from './profile/user-work-entries.table.js';
+import { userEducationEntries } from './profile/user-education-entries.table.js';
 
 const tables = {
   platforms,
@@ -18,6 +21,9 @@ const tables = {
   topics,
   problems,
   problemTopics,
+  media,
+  userWorkEntries,
+  userEducationEntries,
 };
 
 export const relations = defineRelations(tables);

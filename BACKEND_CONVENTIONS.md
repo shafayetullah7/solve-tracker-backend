@@ -9,6 +9,7 @@ This is the project-wide reference for implementing and reviewing the coding pra
 | [REQUIREMENTS.md](./REQUIREMENTS.md) | Product behavior, scope, acceptance criteria, and open decisions |
 | This document | Architecture, naming, API contracts, configuration, testing, and development workflow |
 | [DRIZZLE_CONVENTIONS.md](./DRIZZLE_CONVENTIONS.md) | Version-specific database APIs, schema barrels, queries, migrations, and seeds |
+| [MEDIA_CONVENTIONS.md](./MEDIA_CONVENTIONS.md) | User media (`media` table), Cloudinary, gallery visibility, `usage_count` slots, profile avatar linking |
 | [README.md](./README.md) | Setup and runnable commands |
 | `package.json` and `pnpm-lock.yaml` | Selected dependencies, scripts, and reproducible installed versions |
 
