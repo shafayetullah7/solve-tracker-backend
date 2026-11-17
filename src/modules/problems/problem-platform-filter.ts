@@ -1,5 +1,3 @@
-import { ilike, type SQLWrapper } from 'drizzle-orm';
-import { problems } from '../../database/schema/index.js';
 import {
   PLATFORM_SLUGS,
   type PlatformSlug,
@@ -7,14 +5,11 @@ import {
 
 export { PLATFORM_SLUGS, type PlatformSlug };
 
-export function hostnameFromPlatformBaseUrl(baseUrl: string): string {
-  return new URL(baseUrl).hostname.toLowerCase();
-}
+/** Allowed `GET /problems?platform=` values (catalog + other). */
+export const LIST_PLATFORM_FILTER_SLUGS = [
+  ...PLATFORM_SLUGS,
+  'other',
+] as const;
 
-/** Match stored problem URLs whose host contains the platform hostname (case-insensitive). */
-export function platformUrlMatchesColumn(
-  urlColumn: SQLWrapper = problems.url,
-  hostname: string,
-) {
-  return ilike(urlColumn, `%${hostname.toLowerCase()}%`);
-}
+export type ListPlatformFilterSlug =
+  (typeof LIST_PLATFORM_FILTER_SLUGS)[number];

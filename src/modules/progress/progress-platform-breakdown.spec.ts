@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   aggregatePlatformProgress,
   buildPlatformProgress,
+  buildPlatformProgressFromSlugCounts,
   toPlatformProgressArray,
 } from './progress-platform-breakdown.js';
 
@@ -43,6 +44,34 @@ describe('progress-platform-breakdown', () => {
       solved: 1,
       unsolved: 1,
     });
+  });
+
+  it('builds from SQL slug aggregates', () => {
+    const platforms = buildPlatformProgressFromSlugCounts([
+      { platformSlug: 'leetcode', total: 3, solved: 2 },
+      { platformSlug: 'other', total: 1, solved: 0 },
+    ]);
+    expect(platforms).toHaveLength(2);
+    expect(platforms[0]).toMatchObject({
+      slug: 'leetcode',
+      total: 3,
+      solved: 2,
+      unsolved: 1,
+    });
+    expect(platforms[1]).toMatchObject({
+      slug: 'other',
+      name: 'Other',
+      total: 1,
+    });
+  });
+
+  it('folds unknown stored slug into other bucket', () => {
+    const platforms = buildPlatformProgressFromSlugCounts([
+      { platformSlug: 'not-a-real-slug', total: 2, solved: 1 },
+    ]);
+    expect(platforms).toHaveLength(1);
+    expect(platforms[0]?.slug).toBe('other');
+    expect(platforms[0]?.total).toBe(2);
   });
 
   it('omits empty catalog slugs and sorts other last', () => {

@@ -121,13 +121,24 @@ try {
   check(created.body.topics.length === 2, 'Create links topics');
   const problemId = created.body.id;
 
+  const slugAfterCreate = await pool.query(
+    'select platform_slug from problems where id=$1',
+    [problemId],
+  );
+  check(
+    slugAfterCreate.rows[0].platform_slug === 'leetcode',
+    'Create sets platform_slug from URL',
+  );
+
   const byId = await request(server)
     .get(`/problems/${problemId}`)
     .set(headers)
     .set('Cookie', userA.cookie)
     .expect(200);
   check(byId.body.title === 'Two Sum', 'Get by id');
+  check(byId.body.platformSlug === 'leetcode', 'Get by id includes platformSlug');
   check(byId.body.status === 'unsolved' && byId.body.solvedAt === null, 'Create unsolved');
+  check(created.body.platformSlug === 'leetcode', 'Create response includes platformSlug');
 
   const solvedOnce = await request(server)
     .patch(`/problems/${problemId}`)
@@ -244,6 +255,27 @@ try {
     'Platform + status filter',
   );
 
+  const ownerRow = await pool.query(
+    'select user_id from problems where id=$1',
+    [problemId],
+  );
+  const userAId = ownerRow.rows[0].user_id;
+
+  const leetcodeSql = await pool.query(
+    `select count(*)::int as count from problems
+     where user_id=$1 and platform_slug='leetcode'`,
+    [userAId],
+  );
+  const leetcodeListTotal = await request(server)
+    .get('/problems?platform=leetcode&pageSize=100')
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(
+    leetcodeListTotal.body.meta.total === leetcodeSql.rows[0].count,
+    'platform=leetcode meta.total matches platform_slug SQL count',
+  );
+
   const combinedQPlatformStatus = await request(server)
     .get(
       '/problems?q=Binary&platform=leetcode&status=unsolved&pageSize=100',
@@ -293,6 +325,37 @@ try {
   const sortIdx = sortIds.indexOf(solvedForSort.body.id);
   check(sortIdx >= 0, 'Sort solvedAt includes solved row');
 
+  const otherPlatformList = await request(server)
+    .get('/problems?platform=other&pageSize=100')
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(
+    otherPlatformList.body.items.some((p) => p.id === solvedForSort.body.id),
+    'platform=other includes non-catalog host problem',
+  );
+  check(
+    !otherPlatformList.body.items.some((p) => p.id === problemId),
+    'platform=other excludes leetcode problem',
+  );
+
+  const cfUrl = `https://codeforces.com/problemset/problem/1000/A-${randomUUID()}`;
+  const cfProblem = await request(server)
+    .post('/problems')
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ title: 'CF slug probe', url: cfUrl, topicIds: [] })
+    .expect(201);
+  const cfList = await request(server)
+    .get('/problems?platform=codeforces&pageSize=100')
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(
+    cfList.body.items.some((p) => p.id === cfProblem.body.id),
+    'platform=codeforces matches stored platform_slug',
+  );
+
   await request(server)
     .get('/problems?platform=not-a-real-slug')
     .set(headers)
@@ -323,6 +386,27 @@ try {
       progressBefore.body.overall.total,
     'Progress overall counts consistent',
   );
+
+  const leetcodeSqlBeforeProgress = await pool.query(
+    `select count(*)::int as count,
+            count(*) filter (where status='solved')::int as solved
+     from problems
+     where user_id=$1 and platform_slug='leetcode'`,
+    [userAId],
+  );
+  const leetcodeProgressRow = progressBefore.body.platforms.find(
+    (p) => p.slug === 'leetcode',
+  );
+  if (leetcodeSqlBeforeProgress.rows[0].count > 0) {
+    check(
+      leetcodeProgressRow &&
+        leetcodeProgressRow.total === leetcodeSqlBeforeProgress.rows[0].count &&
+        leetcodeProgressRow.solved === leetcodeSqlBeforeProgress.rows[0].solved,
+      'GET /progress leetcode bucket matches platform_slug SQL',
+    );
+  } else {
+    check(!leetcodeProgressRow, 'No leetcode progress row when SQL count is 0');
+  }
 
   const topicPr1 = await request(server)
     .post('/topics')
@@ -584,6 +668,40 @@ try {
     .set('Cookie', userA.cookie)
     .send({ title: 'URL target', url: otherUrl, topicIds: [] })
     .expect(201);
+
+  const otherSlugAfterCreate = await pool.query(
+    'select platform_slug from problems where id=$1',
+    [urlChangeTarget.body.id],
+  );
+  check(
+    otherSlugAfterCreate.rows[0].platform_slug === 'other',
+    'Create with unknown host sets platform_slug other',
+  );
+
+  const slugProbeUrl = `https://leetcode.com/problems/slug-patch-${randomUUID()}/`;
+  const slugProbe = await request(server)
+    .post('/problems')
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ title: 'Slug probe', url: slugProbeUrl, topicIds: [] })
+    .expect(201);
+
+  const slugMovedUrl = `https://example.com/slug-moved-${randomUUID()}/`;
+  await request(server)
+    .patch(`/problems/${slugProbe.body.id}`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ url: slugMovedUrl })
+    .expect(200);
+
+  const slugAfterUrlPatch = await pool.query(
+    'select platform_slug from problems where id=$1',
+    [slugProbe.body.id],
+  );
+  check(
+    slugAfterUrlPatch.rows[0].platform_slug === 'other',
+    'Patch url updates platform_slug',
+  );
 
   const patchDup = await request(server)
     .patch(`/problems/${urlChangeTarget.body.id}`)

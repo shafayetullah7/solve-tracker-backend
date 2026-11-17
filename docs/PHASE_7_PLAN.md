@@ -36,7 +36,7 @@ References: [execution plan](../PROJECT_EXECUTION_PLAN.md), [requirements](../RE
 | Topic | Proposal |
 | --- | --- |
 | Completion API shape | Extend existing `PATCH /problems/:problemId` with optional `status: "solved" \| "unsolved"` only (no separate completion resource unless PATCH becomes awkward) |
-| Platform filter | `platform` query = `platforms.slug`; match when problem `url` host is the same as parsed `platforms.base_url` host (case-insensitive). Unknown hosts → **no platform**; optional filter value `unknown` or omit |
+| Platform filter | Historical (Phase 7 ship): hostname match via `platforms.base_url`. **After PLATFORM-CLS P3:** `platform` query filters `problems.platform_slug` (catalog slugs + `other`); see [PLATFORM_CLASSIFICATION_PHASED_PLAN.md](PLATFORM_CLASSIFICATION_PHASED_PLAN.md). |
 | Multi-topic filter | `topicIds` repeated query or array; semantics **any** selected topic (FR-04 default) |
 | Untagged | `untagged=true` → problems with zero `problem_topics` rows |
 | Progress scope | New read-only `GET /progress` (or `/problems/progress`) returning overall + per-owned-topic aggregates in one response for the topics screen |

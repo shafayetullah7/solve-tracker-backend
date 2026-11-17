@@ -147,7 +147,7 @@ The initial platform migration was regenerated directly from the current schema 
 
 ## Seeds and verification
 
-`scripts/seed.ts` uses the same schema barrel and the node-postgres adapter. The initial seed inserts three supported-platform references inside a transaction with `onConflictDoNothing`, preserving existing records. Do not mix automatic demo/user-data insertion into schema migrations.
+`scripts/seed.ts` uses the same schema barrel and the node-postgres adapter. The seed inserts catalog platform reference rows inside a transaction with `onConflictDoNothing`, preserving existing records, then runs the shared `backfillProblemPlatformSlugs` helper (`src/database/seed/backfill-problem-platform-slugs.ts`) so existing problems get `platform_slug` from URL. Repeatable; no demo users or sample problems. Do not mix automatic demo/user-data insertion into schema migrations. For catalog-only re-slugging without re-running platform seed, use `pnpm db:backfill:platform-slugs`.
 
 Before merging database changes, build and type-check, run relevant tests, run `db:check`, and confirm a second `db:generate` reports no unexpected schema changes. Against PostgreSQL, test migration application on an empty database with the current schema. Apply migrations and seeds twice to check repeatability, and confirm data survives container recreation. SQL generation/type-checking alone cannot establish database integration correctness.
 

@@ -17,9 +17,10 @@ export type RawTopicCounts = {
 
 export type OwnedTopicRow = { id: string; name: string };
 
-export type ProblemUrlStatus = {
-  url: string;
-  status: 'solved' | 'unsolved';
+export type RawPlatformSlugCounts = {
+  platformSlug: string;
+  total: number;
+  solved: number;
 };
 
 export type RawWeeklyCount = {
@@ -84,14 +85,24 @@ export class ProgressRepository {
     }));
   }
 
-  async loadProblemUrlStatuses(userId: string): Promise<ProblemUrlStatus[]> {
+  async loadPlatformSlugCounts(
+    userId: string,
+  ): Promise<RawPlatformSlugCounts[]> {
     const rows = await this.db
-      .select({ url: problems.url, status: problems.status })
+      .select({
+        platformSlug: problems.platformSlug,
+        total: count(),
+        solved: count(
+          sql`case when ${problems.status} = 'solved' then 1 end`,
+        ),
+      })
       .from(problems)
-      .where(eq(problems.userId, userId));
+      .where(eq(problems.userId, userId))
+      .groupBy(problems.platformSlug);
     return rows.map((r) => ({
-      url: r.url,
-      status: r.status,
+      platformSlug: r.platformSlug,
+      total: Number(r.total),
+      solved: Number(r.solved),
     }));
   }
 

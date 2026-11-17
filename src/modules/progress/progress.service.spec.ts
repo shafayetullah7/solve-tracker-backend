@@ -16,15 +16,8 @@ describe('ProgressService', () => {
       loadTopicAssociationCounts: vi.fn().mockResolvedValue([
         { topicId, total: 1, solved: 1 },
       ]),
-      loadProblemUrlStatuses: vi.fn().mockResolvedValue([
-        {
-          url: 'https://leetcode.com/problems/two-sum/',
-          status: 'solved',
-        },
-        {
-          url: 'https://leetcode.com/problems/three-sum/',
-          status: 'unsolved',
-        },
+      loadPlatformSlugCounts: vi.fn().mockResolvedValue([
+        { platformSlug: 'leetcode', total: 2, solved: 1 },
       ]),
     } as unknown as ProgressRepository;
     const service = new ProgressService(repo);

@@ -1098,7 +1098,8 @@
                 "topcoder",
                 "projecteuler",
                 "uva",
-                "aizu"
+                "aizu",
+                "other"
               ]
             }
           },
@@ -1190,6 +1191,37 @@
                           "url": {
                             "type": "string"
                           },
+                          "platformSlug": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "codeforces",
+                                  "leetcode",
+                                  "codechef",
+                                  "atcoder",
+                                  "hackerrank",
+                                  "geeksforgeeks",
+                                  "kattis",
+                                  "spoj",
+                                  "cses",
+                                  "beecrowd",
+                                  "codewars",
+                                  "hackerearth",
+                                  "topcoder",
+                                  "projecteuler",
+                                  "uva",
+                                  "aizu"
+                                ]
+                              },
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "other"
+                                ]
+                              }
+                            ]
+                          },
                           "platformProblemId": {
                             "nullable": true,
                             "type": "string"
@@ -1257,6 +1289,7 @@
                           "id",
                           "title",
                           "url",
+                          "platformSlug",
                           "platformProblemId",
                           "difficulty",
                           "rating",
@@ -1415,6 +1448,37 @@
                     "url": {
                       "type": "string"
                     },
+                    "platformSlug": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "codeforces",
+                            "leetcode",
+                            "codechef",
+                            "atcoder",
+                            "hackerrank",
+                            "geeksforgeeks",
+                            "kattis",
+                            "spoj",
+                            "cses",
+                            "beecrowd",
+                            "codewars",
+                            "hackerearth",
+                            "topcoder",
+                            "projecteuler",
+                            "uva",
+                            "aizu"
+                          ]
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "other"
+                          ]
+                        }
+                      ]
+                    },
                     "platformProblemId": {
                       "nullable": true,
                       "type": "string"
@@ -1482,6 +1546,7 @@
                     "id",
                     "title",
                     "url",
+                    "platformSlug",
                     "platformProblemId",
                     "difficulty",
                     "rating",
@@ -1563,6 +1628,37 @@
                     "url": {
                       "type": "string"
                     },
+                    "platformSlug": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "codeforces",
+                            "leetcode",
+                            "codechef",
+                            "atcoder",
+                            "hackerrank",
+                            "geeksforgeeks",
+                            "kattis",
+                            "spoj",
+                            "cses",
+                            "beecrowd",
+                            "codewars",
+                            "hackerearth",
+                            "topcoder",
+                            "projecteuler",
+                            "uva",
+                            "aizu"
+                          ]
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "other"
+                          ]
+                        }
+                      ]
+                    },
                     "platformProblemId": {
                       "nullable": true,
                       "type": "string"
@@ -1630,6 +1726,7 @@
                     "id",
                     "title",
                     "url",
+                    "platformSlug",
                     "platformProblemId",
                     "difficulty",
                     "rating",
@@ -1761,6 +1858,37 @@
                     "url": {
                       "type": "string"
                     },
+                    "platformSlug": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "codeforces",
+                            "leetcode",
+                            "codechef",
+                            "atcoder",
+                            "hackerrank",
+                            "geeksforgeeks",
+                            "kattis",
+                            "spoj",
+                            "cses",
+                            "beecrowd",
+                            "codewars",
+                            "hackerearth",
+                            "topcoder",
+                            "projecteuler",
+                            "uva",
+                            "aizu"
+                          ]
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "other"
+                          ]
+                        }
+                      ]
+                    },
                     "platformProblemId": {
                       "nullable": true,
                       "type": "string"
@@ -1828,6 +1956,7 @@
                     "id",
                     "title",
                     "url",
+                    "platformSlug",
                     "platformProblemId",
                     "difficulty",
                     "rating",

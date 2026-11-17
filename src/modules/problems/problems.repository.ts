@@ -16,13 +16,11 @@ import {
 import { escapeIlikePattern } from '../../common/ilike-escape.js';
 import { DatabaseService } from '../../database/database.service.js';
 import {
-  platforms,
   problemTopics,
   problems,
   topics,
   type Problem,
 } from '../../database/schema/index.js';
-import { hostnameFromPlatformBaseUrl, platformUrlMatchesColumn } from './problem-platform-filter.js';
 
 export type ProblemTopicSummary = { id: string; name: string };
 
@@ -37,7 +35,7 @@ export type ListProblemsFilters = {
   pageSize: number;
   q?: string;
   status?: 'solved' | 'unsolved';
-  platformHostname?: string;
+  platformSlug?: string;
   topicIds?: string[];
   untagged?: boolean;
   sort: 'title' | 'createdAt' | 'solvedAt';
@@ -48,6 +46,7 @@ export type ProblemInsertRow = {
   title: string;
   url: string;
   normalizedUrl: string;
+  platformSlug: string;
   platformProblemId: string | null;
   difficulty: string | null;
   rating: number | null;
@@ -95,17 +94,6 @@ export class ProblemsRepository {
     return Number(row?.total ?? 0);
   }
 
-  async findPlatformHostname(slug: string): Promise<string | undefined> {
-    const rows = await this.db
-      .select({ baseUrl: platforms.baseUrl })
-      .from(platforms)
-      .where(eq(platforms.slug, slug))
-      .limit(1);
-    const row = rows[0];
-    if (!row) return undefined;
-    return hostnameFromPlatformBaseUrl(row.baseUrl);
-  }
-
   private buildListWhere(filters: ListProblemsFilters): SQL | undefined {
     const conditions: SQL[] = [eq(problems.userId, filters.userId)];
 
@@ -123,10 +111,8 @@ export class ProblemsRepository {
       conditions.push(eq(problems.status, filters.status));
     }
 
-    if (filters.platformHostname) {
-      conditions.push(
-        platformUrlMatchesColumn(problems.url, filters.platformHostname),
-      );
+    if (filters.platformSlug) {
+      conditions.push(eq(problems.platformSlug, filters.platformSlug));
     }
 
     if (filters.untagged) {
@@ -311,6 +297,7 @@ export class ProblemsRepository {
         'title',
         'url',
         'normalizedUrl',
+        'platformSlug',
         'platformProblemId',
         'difficulty',
         'rating',

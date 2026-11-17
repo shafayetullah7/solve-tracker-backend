@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   createProblemSchema,
   listProblemsQuerySchema,
+  problemResponseSchema,
   updateProblemSchema,
 } from './problems.schema.js';
 
@@ -49,10 +50,40 @@ describe('problems schemas', () => {
     ).toBe('hackerrank');
   });
 
+  it('list accepts other platform filter', () => {
+    expect(listProblemsQuerySchema.parse({ platform: 'other' }).platform).toBe(
+      'other',
+    );
+  });
+
   it('list rejects invalid platform', () => {
     expect(() =>
       listProblemsQuerySchema.parse({ platform: 'not-a-judge' }),
     ).toThrow();
+  });
+
+  it('problem response accepts catalog and other platformSlug', () => {
+    const base = {
+      id: '11111111-1111-4111-8111-111111111111',
+      title: 'T',
+      url: 'https://example.com/p',
+      platformProblemId: null,
+      difficulty: null,
+      rating: null,
+      notes: null,
+      status: 'unsolved' as const,
+      solvedAt: null,
+      topics: [],
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    };
+    expect(
+      problemResponseSchema.parse({ ...base, platformSlug: 'leetcode' })
+        .platformSlug,
+    ).toBe('leetcode');
+    expect(
+      problemResponseSchema.parse({ ...base, platformSlug: 'other' }).platformSlug,
+    ).toBe('other');
   });
 
   it('create defaults topicIds and status', () => {

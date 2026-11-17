@@ -3,7 +3,8 @@ import { measureCodePoints } from '../../../common/unicode.js';
 import { paginatedListSchema } from '../../../common/pagination.schema.js';
 import { errorSchema } from '../../topics/schemas/topics.schema.js';
 import { uuidQueryArraySchema } from '../../../common/query-arrays.js';
-import { PLATFORM_SLUGS } from '../problem-platform-filter.js';
+import { LIST_PLATFORM_FILTER_SLUGS } from '../problem-platform-filter.js';
+import { PLATFORM_SLUGS } from '../../../shared/platform-catalog.js';
 import {
   PROBLEM_DIFFICULTY_MAX,
   PROBLEM_NOTES_MAX,
@@ -41,7 +42,7 @@ export const listProblemsQuerySchema = z
         return trimmed.length > 0 ? trimmed : undefined;
       }),
     status: problemStatusSchema.optional(),
-    platform: z.enum(PLATFORM_SLUGS).optional(),
+    platform: z.enum(LIST_PLATFORM_FILTER_SLUGS).optional(),
     topicIds: uuidQueryArraySchema().describe(
       'Filter to problems linked to any of these owned topics.',
     ),
@@ -114,10 +115,16 @@ export const problemTopicSummarySchema = z.strictObject({
   name: z.string(),
 });
 
+export const problemPlatformSlugSchema = z.union([
+  z.enum(PLATFORM_SLUGS),
+  z.literal('other'),
+]);
+
 export const problemResponseSchema = z.strictObject({
   id: z.uuid(),
   title: z.string(),
   url: z.string(),
+  platformSlug: problemPlatformSlugSchema,
   platformProblemId: z.string().nullable(),
   difficulty: z.string().nullable(),
   rating: z.number().int().nullable(),

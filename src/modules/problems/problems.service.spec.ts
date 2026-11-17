@@ -9,6 +9,7 @@ const problem = {
   title: 'Two Sum',
   url: 'https://leetcode.com/problems/two-sum/',
   normalizedUrl: 'https://leetcode.com/problems/two-sum/',
+  platformSlug: 'leetcode',
   platformProblemId: null,
   difficulty: null,
   rating: null,
@@ -77,6 +78,77 @@ describe('ProblemsService', () => {
         details: { topicIds: expect.any(String) },
       }),
     });
+  });
+
+  it('sets platformSlug on create for catalog URL', async () => {
+    const createWithTopics = vi.fn().mockResolvedValue({
+      problem: { ...problem, platformSlug: 'leetcode' },
+      topics: [],
+    });
+    const repo = {
+      countOwnedTopics: vi.fn().mockResolvedValue(0),
+      createWithTopics,
+    } as unknown as ProblemsRepository;
+    const service = new ProblemsService(repo);
+    await service.create('u', {
+      title: 'T',
+      url: 'https://leetcode.com/problems/two-sum/',
+      topicIds: [],
+      status: 'unsolved',
+    });
+    const row = createWithTopics.mock.calls[0][1];
+    expect(row.platformSlug).toBe('leetcode');
+  });
+
+  it('sets platformSlug to other for unknown host on create', async () => {
+    const createWithTopics = vi.fn().mockResolvedValue({
+      problem: { ...problem, platformSlug: 'other', url: 'https://example.com/p' },
+      topics: [],
+    });
+    const repo = {
+      countOwnedTopics: vi.fn().mockResolvedValue(0),
+      createWithTopics,
+    } as unknown as ProblemsRepository;
+    const service = new ProblemsService(repo);
+    await service.create('u', {
+      title: 'T',
+      url: 'https://example.com/p',
+      topicIds: [],
+      status: 'unsolved',
+    });
+    expect(createWithTopics.mock.calls[0][1].platformSlug).toBe('other');
+  });
+
+  it('updates platformSlug when url changes', async () => {
+    const updateWithTopics = vi.fn().mockResolvedValue({
+      problem: { ...problem, platformSlug: 'other' },
+      topics: [],
+    });
+    const repo = {
+      updateWithTopics,
+    } as unknown as ProblemsRepository;
+    const service = new ProblemsService(repo);
+    await service.update('u', problem.id, {
+      url: 'https://example.com/new-path',
+    });
+    const patch = updateWithTopics.mock.calls[0][2];
+    expect(patch.url).toBe('https://example.com/new-path');
+    expect(patch.platformSlug).toBe('other');
+  });
+
+  it('omits platformSlug when url is not patched', async () => {
+    const updateWithTopics = vi.fn().mockResolvedValue({
+      problem: { ...problem, title: 'Renamed' },
+      topics: [],
+    });
+    const repo = {
+      updateWithTopics,
+    } as unknown as ProblemsRepository;
+    const service = new ProblemsService(repo);
+    await service.update('u', problem.id, { title: 'Renamed' });
+    const patch = updateWithTopics.mock.calls[0][2];
+    expect(patch.title).toBe('Renamed');
+    expect(patch).not.toHaveProperty('platformSlug');
   });
 
   it('passes solvedAt when creating solved problem', async () => {

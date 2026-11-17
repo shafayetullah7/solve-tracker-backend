@@ -1,0 +1,99 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "0451849e-5272-4676-ae2c-d9543aa856ce",
+  "prevIds": [
+    "103c0eb3-39d8-4fba-a2d3-ad23d2e36f76"
+  ],
+  "footprints": [
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "problems",
+        "platform_slug"
+      ],
+      "writes": [
+        "s|col|public.problems.platform_slug",
+        "n|col|public.problems.platform_slug",
+        "e|col|public.problems.platform_slug"
+      ],
+      "reads": [
+        "n|tbl|public.problems",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "problems",
+        "problems_user_platform_slug_idx"
+      ],
+      "writes": [
+        "s|idx|public.problems_user_platform_slug_idx",
+        "n|idx|public.problems_user_platform_slug_idx",
+        "e|idx|public.problems_user_platform_slug_idx",
+        "n|rel|public.problems_user_platform_slug_idx"
+      ],
+      "reads": [
+        "n|tbl|public.problems",
+        "n|sch|public",
+        "n|col|public.problems.user_id",
+        "n|col|public.problems.platform_slug"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "problems",
+        "name": "platform_slug",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'other'",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "problems",
+        "name": "problems_user_platform_slug_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "user_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "platform_slug",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    }
+  ]
+}

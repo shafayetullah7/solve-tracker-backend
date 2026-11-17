@@ -21,6 +21,7 @@ export const problems = pgTable(
     title: text('title').notNull(),
     url: text('url').notNull(),
     normalizedUrl: text('normalized_url').notNull(),
+    platformSlug: text('platform_slug').notNull().default('other'),
     platformProblemId: text('platform_problem_id'),
     difficulty: text('difficulty'),
     rating: integer('rating'),
@@ -40,6 +41,7 @@ export const problems = pgTable(
       t.normalizedUrl,
     ),
     index('problems_user_idx').on(t.userId),
+    index('problems_user_platform_slug_idx').on(t.userId, t.platformSlug),
   ],
 );
 

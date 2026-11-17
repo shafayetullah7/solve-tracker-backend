@@ -197,6 +197,10 @@ The primary workflow is complete: add a problem, assign topics, practice on its 
 
 All MVP acceptance criteria pass, material failures are fixed, and remaining limitations are documented. No incomplete feature is disguised by sample or placeholder data.
 
+## Post-MVP — platform classification (optional hardening)
+
+Persist and index **`problems.platform_slug`** (derived from URL via the shared catalog) so library filters, progress, and UI use one matcher. Phased steps **P1–P5**: [docs/PLATFORM_CLASSIFICATION_PHASED_PLAN.md](docs/PLATFORM_CLASSIFICATION_PHASED_PLAN.md). Does not block Phase 9 unless product prioritizes it.
+
 ## Phase 9 — Production preparation and release
 
 **Codebase prep (in repo):** health probes (`GET /health`, `GET /health/ready`), stricter production env validation ([`backend/PRODUCTION.md`](backend/PRODUCTION.md)), `pnpm verify:phase-9`. Hosting, secrets, and live smoke remain deploy-time work.

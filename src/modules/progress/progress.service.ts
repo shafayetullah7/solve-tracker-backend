@@ -5,7 +5,7 @@ import {
   buildWeekRange,
   mergeActivityWeeks,
 } from './progress-activity-weeks.js';
-import { buildPlatformProgress } from './progress-platform-breakdown.js';
+import { buildPlatformProgressFromSlugCounts } from './progress-platform-breakdown.js';
 import { percentComplete } from './progress-percent.js';
 import { ProgressRepository } from './progress.repository.js';
 import type { ProgressActivityResponse } from './schemas/activity.schema.js';
@@ -30,11 +30,12 @@ export class ProgressService {
   constructor(private readonly repo: ProgressRepository) {}
 
   async getSummaries(userId: string): Promise<ProgressResponse> {
-    const [overallRaw, ownedTopics, topicAgg, urlStatuses] = await Promise.all([
+    const [overallRaw, ownedTopics, topicAgg, platformSlugCounts] =
+      await Promise.all([
       this.repo.loadOverallCounts(userId),
       this.repo.loadOwnedTopics(userId),
       this.repo.loadTopicAssociationCounts(userId),
-      this.repo.loadProblemUrlStatuses(userId),
+      this.repo.loadPlatformSlugCounts(userId),
     ]);
 
     const byTopicId = new Map(
@@ -55,7 +56,7 @@ export class ProgressService {
     return {
       overall: toCounts(overallRaw.total, overallRaw.solved),
       topics,
-      platforms: buildPlatformProgress(urlStatuses),
+      platforms: buildPlatformProgressFromSlugCounts(platformSlugCounts),
     };
   }
 

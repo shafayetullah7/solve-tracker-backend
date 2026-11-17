@@ -30,6 +30,7 @@
     "db:migrate:create": "drizzle-kit generate --custom",
     "db:seed": "tsx --import dotenv/config scripts/seed.ts",
     "db:seed:docker": "docker compose exec -T backend pnpm db:seed",
+    "db:backfill:platform-slugs": "tsx --import dotenv/config scripts/backfill-problem-platform-slugs.ts",
     "db:generate": "drizzle-kit generate",
     "db:check": "drizzle-kit check",
     "api:export": "pnpm build && node scripts/export-openapi.mjs",
@@ -45,6 +46,11 @@
     "verify:phase-7": "node scripts/verify-phase-7-exit.mjs",
     "verify:phase-8": "node scripts/verify-phase-8-exit.mjs",
     "verify:phase-9": "node scripts/verify-phase-9-exit.mjs",
+    "verify:platform-p1": "node scripts/verify-platform-p1.mjs",
+    "verify:platform-p2": "node scripts/verify-platform-p2.mjs",
+    "verify:platform-p3": "node scripts/verify-platform-p3.mjs",
+    "verify:platform-p4": "node scripts/verify-platform-p4.mjs",
+    "verify:platform-cls": "node scripts/verify-platform-cls.mjs",
     "test:persistence:integration": "pnpm build && node scripts/test-backend-restart-persistence.mjs"
   },
   "dependencies": {

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { applyCompletionTransition } from './problem-completion.js';
 import { prepareProblemTitle, ProblemTitleError } from './problem-title.js';
+import { storedPlatformSlugFromUrl } from './problem-platform-slug.js';
 import { prepareProblemUrl, ProblemUrlError } from './problem-url.js';
 import { problemError } from './problems.errors.js';
 import {
@@ -37,6 +38,7 @@ export function toProblemResponse(detail: ProblemDetail) {
     id: problem.id,
     title: problem.title,
     url: problem.url,
+    platformSlug: problem.platformSlug,
     platformProblemId: problem.platformProblemId,
     difficulty: problem.difficulty,
     rating: problem.rating,
@@ -127,23 +129,13 @@ export class ProblemsService {
     if (effectiveTopicIds.length > 0)
       await this.assertTopicIdsOwned(userId, effectiveTopicIds);
 
-    let platformHostname: string | undefined;
-    if (query.platform) {
-      platformHostname = await this.repo.findPlatformHostname(query.platform);
-      if (!platformHostname) {
-        throw problemError(400, 'VALIDATION_ERROR', 'Invalid input.', {
-          platform: 'Unknown platform.',
-        });
-      }
-    }
-
     const { items, total } = await this.repo.list({
       userId,
       page: query.page,
       pageSize: query.pageSize,
       q: query.q,
       status: query.status,
-      platformHostname,
+      platformSlug: query.platform,
       topicIds:
         effectiveTopicIds.length > 0 ? effectiveTopicIds : undefined,
       untagged: query.untagged,
@@ -177,6 +169,7 @@ export class ProblemsService {
       title,
       url,
       normalizedUrl,
+      platformSlug: storedPlatformSlugFromUrl(url),
       platformProblemId: input.platformProblemId ?? null,
       difficulty: input.difficulty ?? null,
       rating: input.rating ?? null,
@@ -227,6 +220,7 @@ export class ProblemsService {
       const prepared = this.urlFromRaw(input.url);
       patch.url = prepared.url;
       patch.normalizedUrl = prepared.normalizedUrl;
+      patch.platformSlug = storedPlatformSlugFromUrl(prepared.url);
       normalizedUrl = prepared.normalizedUrl;
     }
     if (input.platformProblemId !== undefined)

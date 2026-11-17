@@ -111,6 +111,8 @@ pnpm db:migrate:docker
 
 Drizzle Kit generates timestamped folders under `drizzle/`, each containing `migration.sql` and `snapshot.json`; commit both. Generate on the host because this folder is mounted read-only in Docker. Use `pnpm db:migrate:create --name=data-backfill` for custom SQL. Rollbacks use new corrective migrations; there is no automatic down command. Do not edit applied migrations.
 
+After applying migrations that add `problems.platform_slug`, run `pnpm db:seed` (or `db:seed:docker`) to backfill slugs on existing problems, or `pnpm db:backfill:platform-slugs` when you only need to re-derive slugs after catalog changes. Full PLATFORM-CLS gate: `TEST_DATABASE_URL=…/_test pnpm verify:platform-cls` (chains P1–P4 + frontend catalog). See [docs/PLATFORM_CLASSIFICATION_PHASED_PLAN.md](docs/PLATFORM_CLASSIFICATION_PHASED_PLAN.md).
+
 The initial platform migration was regenerated from the current schema. It contains generated table creation SQL without legacy compatibility logic. Generating migrations does not apply them or change database history.
 
 ## Verification
