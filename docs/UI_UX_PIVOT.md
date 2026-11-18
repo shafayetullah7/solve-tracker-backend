@@ -1,10 +1,10 @@
 # UI/UX pivot — authenticated app shell (dashboard + sidebar)
 
-**Status:** planned (post–MVP). **Scope:** frontend product chrome and navigation; no new backend capabilities unless routing or auth return URLs need adjustment.
+**Status:** **complete** (2026-11-18). **Results:** [UI_UX_PIVOT_RESULTS.md](UI_UX_PIVOT_RESULTS.md). **Scope:** frontend product chrome and navigation; no new backend capabilities unless routing or auth return URLs need adjustment.
 
 **Context:** Core tracker behavior is implemented (Phase 8). The palette is in good shape; the pivot is **information architecture and navigation**: product areas move out of the global top navbar into an **app shell** with a **sidebar**, a **stats-first dashboard home**, a **separate profile page**, and **inline SVG icons** (one file per icon, shared folder + barrel).
 
-**References:** [UI_UX_PIVOT_EXECUTION_PLAN.md](UI_UX_PIVOT_EXECUTION_PLAN.md) (phased work), [FRONTEND_CONVENTIONS.md](../../solve-tracker-frontend/FRONTEND_CONVENTIONS.md), [REQUIREMENTS.md](../REQUIREMENTS.md), [PHASE_8_RESULTS.md](PHASE_8_RESULTS.md).
+**References:** [UI_UX_PIVOT_RESULTS.md](UI_UX_PIVOT_RESULTS.md) (handoff), [UI_UX_PIVOT_EXECUTION_PLAN.md](UI_UX_PIVOT_EXECUTION_PLAN.md) (phased work), [FRONTEND_CONVENTIONS.md](../../solve-tracker-frontend/FRONTEND_CONVENTIONS.md), [REQUIREMENTS.md](../REQUIREMENTS.md), [PHASE_8_RESULTS.md](PHASE_8_RESULTS.md).
 
 ---
 
@@ -359,49 +359,14 @@ export { IconLibrary } from "./IconLibrary";
 - **Global top bar:** brand (+ mobile menu trigger inside shell header); **no** Library/Topics/Account links.
 - **Dashboard vs Profile:** user always knows stats live at **Dashboard**, identity/session at **Profile**.
 - **Icons + labels** aid scan; labels remain for accessibility (not icon-only primary nav except menu on small screens with labels in drawer).
-- **Logo** when signed in → `/dashboard` (stats home).
+- **Logo** when signed in → `/app` (stats home).
 - Mobile: drawer per prior spec; icons remain beside labels.
 
 ---
 
 ## 10. Implementation checklist
 
-### Shell & routes
-
-- [ ] App shell layout (`AppShell`, `AppSidebar`) with icon nav from §3.2.
-- [ ] `routes/dashboard/index.tsx` — stats page.
-- [ ] `routes/profile.tsx` — profile page; migrate account content.
-- [ ] Redirect `/account` → `/profile`.
-- [ ] Wrap `problems/*`, `topics/*` under same shell.
-- [ ] Slim guest `AuthNav`; remove signed-in product links.
-
-### Icons
-
-- [ ] Create `solve-tracker-frontend/src/icons/` + eight icon files + `index.ts`.
-- [ ] Wire icons into sidebar and mobile chrome.
-
-### Dashboard stats
-
-- [ ] `createProgressApi` on dashboard; topic summaries.
-- [ ] No profile fields on dashboard.
-
-### Auth flows
-
-- [ ] `/` → `/dashboard` when authenticated.
-- [ ] Login/register default landing `/dashboard`.
-
-### Library browse (§5)
-
-- [ ] Tiered toolbar: primary filters + collapsible “More filters”.
-- [ ] Active filter summary or chips + clear all.
-- [ ] Combined `q` + `platform` + `status` verified in UI and integration test.
-- [ ] Sticky toolbar optional pass; empty/error states preserved in shell.
-
-### Quality
-
-- [ ] `nav-active.ts` helper tests (prefix rules §3.2).
-- [ ] `pnpm exec tsc`, `lint`, `test --run` in `solve-tracker-frontend`.
-- [ ] Update `FRONTEND_CONVENTIONS.md` (shell + icons).
+**Shipped (UX-1–UX-6).** See [UI_UX_PIVOT_RESULTS.md](UI_UX_PIVOT_RESULTS.md) and [UI_UX_PIVOT_EXECUTION_PLAN.md](UI_UX_PIVOT_EXECUTION_PLAN.md) for phase detail and manual smoke. Product routes live under **`/app`** (not legacy `/dashboard` paths in early drafts).
 
 ---
 
@@ -427,11 +392,11 @@ Library **row** simplification (actions, badges, chips), problem **detail** acti
 
 | Item | Decision |
 | --- | --- |
-| Stats home | **`/dashboard`** (`dashboard/index.tsx`) |
-| Profile | **`/profile`** (separate from dashboard) |
-| Legacy account URL | Redirect **`/account` → `/profile`** |
+| Stats home | **`/app`** ([`routes/app/index.tsx`](../../solve-tracker-frontend/src/routes/app/index.tsx)) |
+| Profile | **`/app/profile`** (separate from dashboard) |
+| Legacy account URL | Redirect **`/account` → `/app/profile`** |
 | Sidebar routes | Dashboard, Library, Topics, Profile + Add problem CTA + Sign out |
 | Icons | **`src/icons/`**, one SVG component per file, **`index.ts` barrel** |
-| Problem list | **Full search/filter on `/problems`** (§5); dashboard = stats only |
+| Problem list | **Full search/filter on `/app/problems`** (§5); `/app` = stats only |
 
-**Next implementation step:** App shell + icons + dashboard + profile; then library toolbar tiers, active filter chips, and combined-filter verification.
+**Handoff:** Pivot complete; follow [UI_UX_PIVOT_RESULTS.md](UI_UX_PIVOT_RESULTS.md) for verification.

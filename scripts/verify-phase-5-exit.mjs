@@ -12,7 +12,7 @@ import path from "node:path";
 import fs from "node:fs";
 
 const backendRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const frontendRoot = path.resolve(backendRoot, "..", "cp-frontend");
+const frontendRoot = path.resolve(backendRoot, "..", "solve-tracker-frontend");
 
 const runPhase6Retest = (process.env.VERIFY_PHASE6_TOPIC_DELETE ?? "1") !== "0";
 
@@ -53,8 +53,8 @@ function run(command, args, cwd) {
 }
 
 function checkNoRawFetchInTopicsRoutes() {
-  const routesDir = path.join(frontendRoot, "src", "routes", "topics");
-  const layout = path.join(frontendRoot, "src", "routes", "topics.tsx");
+  const routesDir = path.join(frontendRoot, "src", "routes", "app", "topics");
+  const layout = path.join(frontendRoot, "src", "routes", "app", "topics.tsx");
   for (const filePath of [
     layout,
     ...fs.readdirSync(routesDir).map((f) => path.join(routesDir, f)),
@@ -65,9 +65,9 @@ function checkNoRawFetchInTopicsRoutes() {
   }
   const indexText = fs.readFileSync(path.join(routesDir, "index.tsx"), "utf8");
   if (!indexText.includes("createTopicsApi"))
-    throw new Error("routes/topics/index.tsx should use createTopicsApi");
+    throw new Error("routes/app/topics/index.tsx should use createTopicsApi");
   gates["no-raw-fetch"] = true;
-  console.log("OK: criterion 4 — no raw fetch in routes/topics");
+  console.log("OK: criterion 4 — no raw fetch in routes/app/topics");
 }
 
 async function main() {
@@ -100,7 +100,7 @@ async function main() {
   }
 
   console.log("Phase 5 exit verification — frontend …");
-  await run("pnpm", ["exec", "tsc", "--noEmit"], frontendRoot);
+  await run("pnpm", ["typecheck"], frontendRoot);
   await run("pnpm", ["lint"], frontendRoot);
   await run("pnpm", ["test", "--run"], frontendRoot);
   await run("pnpm", ["api:check"], frontendRoot);

@@ -25,6 +25,11 @@ export class AuthRepository {
       await this.db.select().from(users).where(eq(users.email, email)).limit(1)
     )[0];
   }
+  async findUserById(id: string) {
+    return (
+      await this.db.select().from(users).where(eq(users.id, id)).limit(1)
+    )[0];
+  }
   async createUser(values: typeof users.$inferInsert) {
     return (await this.db.insert(users).values(values).returning())[0]!;
   }

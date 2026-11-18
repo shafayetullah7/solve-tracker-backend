@@ -220,7 +220,7 @@ The authorized production release passes its smoke checks, has documented operat
 
 ## UI/UX pivot (post–MVP)
 
-**Status:** planned. Design: [UI_UX_PIVOT.md](docs/UI_UX_PIVOT.md). Phased execution: [UI_UX_PIVOT_EXECUTION_PLAN.md](docs/UI_UX_PIVOT_EXECUTION_PLAN.md) (UX-1 … UX-7).
+**Status:** complete (2026-11-18). Design: [UI_UX_PIVOT.md](docs/UI_UX_PIVOT.md). Execution: [UI_UX_PIVOT_EXECUTION_PLAN.md](docs/UI_UX_PIVOT_EXECUTION_PLAN.md). Results: [UI_UX_PIVOT_RESULTS.md](docs/UI_UX_PIVOT_RESULTS.md).
 
 ## Deferred work
 

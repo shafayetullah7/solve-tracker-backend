@@ -1,6 +1,6 @@
 # UI/UX pivot — phased execution plan
 
-**Status:** not started. **Design reference:** [UI_UX_PIVOT.md](UI_UX_PIVOT.md). **Prerequisites:** Phase 8 complete (`pnpm verify:phase-8`); `solve-tracker-frontend` builds and tests green.
+**Status:** **complete** (UX-1–UX-7, 2026-11-18). **Results:** [UI_UX_PIVOT_RESULTS.md](UI_UX_PIVOT_RESULTS.md). **Design reference:** [UI_UX_PIVOT.md](UI_UX_PIVOT.md). **Prerequisites:** Phase 8 complete (`pnpm verify:phase-8`); `solve-tracker-frontend` builds and tests green.
 
 **Outcome:** Signed-in users work inside an **app shell** (sidebar + icons), land on **`/app` (stats)**, manage identity on **`/app/profile`**, and use **`/app/problems`** with **sufficient** search/filter UX. Global top nav no longer lists product sections.
 
@@ -15,7 +15,7 @@
 | **UX-1** | Icons & navigation primitives | — | `src/icons/`, `nav-active` helper, tests |
 | **UX-2** | App shell layout | UX-1 | `AppShell`, `AppSidebar`, mobile drawer shell |
 | **UX-3** | Routes, guest chrome, redirects | UX-2 | Shell wraps product routes; `/account` → `/profile` |
-| **UX-4** | Dashboard & profile pages | UX-3 | `/dashboard` stats; `/profile`; auth landing |
+| **UX-4** | Dashboard & profile pages | UX-3 | `/app` stats; `/app/profile`; auth landing `/app` |
 | **UX-5** | Library browse UX | UX-3 | Tiered filters, active chips, combined-filter proof |
 | **UX-6** | Polish & list/detail UX | UX-4, UX-5 | Sticky toolbar, row actions, badges (optional scope) |
 | **UX-7** | Verification & handoff | UX-1–6 | Docs, results file, regression gates |
@@ -201,6 +201,8 @@ Manual checklist in results doc; frontend tests updated for changed components.
 
 ## UX-7 — Verification and documentation
 
+**Status (2026-11-18):** Done — [UI_UX_PIVOT_RESULTS.md](UI_UX_PIVOT_RESULTS.md).
+
 ### Work
 
 - Create [`UI_UX_PIVOT_RESULTS.md`](UI_UX_PIVOT_RESULTS.md): phases completed, manual checklist, known limits.
@@ -231,7 +233,7 @@ cd ../solve-tracker-backend && TEST_DATABASE_URL=.../practice_tracker_test pnpm 
 - [x] UX-4 Dashboard stats + profile + auth landing
 - [x] UX-5 Library browse tiers + chips + combined filter
 - [x] UX-6 Polish (mobile, list rows, detail bar) — optional
-- [ ] UX-7 RESULTS + conventions + execution plan status
+- [x] UX-7 RESULTS + conventions + execution plan status
 
 ---
 

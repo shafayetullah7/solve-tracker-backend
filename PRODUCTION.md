@@ -38,6 +38,35 @@ The Vite dev proxy is development-only. In production, terminate TLS at your edg
 
 Set backend `FRONTEND_ORIGIN` to the public browser origin.
 
+## Google OAuth (optional)
+
+Enable only when Google Cloud credentials and redirect URIs are configured. Full behavior: [docs/GOOGLE_OAUTH_RESULTS.md](docs/GOOGLE_OAUTH_RESULTS.md).
+
+### Google Cloud Console
+
+- Create an **OAuth 2.0 Web client**.
+- **Authorized redirect URI** must match `GOOGLE_OAUTH_REDIRECT_URI` exactly, typically  
+  `https://<public-origin>/api/auth/google/callback` (browser uses the same origin; the edge proxies `/api` to Nest).
+
+### Environment
+
+| Variable | Production notes |
+| --- | --- |
+| `GOOGLE_OAUTH_ENABLED` | `true` only when client id/secret and redirect URI are set |
+| `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET` | From secret store; never commit |
+| `GOOGLE_OAUTH_REDIRECT_URI` | `https` origin aligned with `FRONTEND_ORIGIN` + `/api/auth/google/callback` |
+| `FRONTEND_ORIGIN` | Public browser origin (no path); must match cookie `Secure` policy |
+| `AUTH_COOKIE_SECURE` | Must be `true` in production |
+| `SWAGGER_ENABLED` | `false` (OAuth redirect routes are not in OpenAPI either) |
+
+### Frontend build
+
+Rebuild the SPA with `VITE_GOOGLE_OAUTH_ENABLED=true` when the backend flag is on. Mismatched flags hide or show Google UI without matching server support.
+
+### Rollback
+
+Set `GOOGLE_OAUTH_ENABLED=false` and rebuild frontend with `VITE_GOOGLE_OAUTH_ENABLED=false`. OAuth routes return 404; password auth and existing identity rows are unaffected.
+
 ## Verification
 
 ```bash

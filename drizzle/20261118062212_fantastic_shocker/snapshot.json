@@ -1,0 +1,392 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "cf1a2d4f-503d-4f1d-ae78-1d5fd0d89673",
+  "prevIds": [
+    "0451849e-5272-4676-ae2c-d9543aa856ce"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "auth_provider_identities"
+      ],
+      "writes": [
+        "s|tbl|public.auth_provider_identities",
+        "n|tbl|public.auth_provider_identities",
+        "e|tbl|public.auth_provider_identities",
+        "n|rel|public.auth_provider_identities",
+        "n|type|public.auth_provider_identities",
+        "n|rel|public.auth_provider_identities_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "users",
+        "password_hash"
+      ],
+      "writes": [
+        "s|colprop|public.users.password_hash.notNull"
+      ],
+      "reads": [
+        "n|tbl|public.users",
+        "n|sch|public",
+        "n|col|public.users.password_hash"
+      ],
+      "sqlHash": "f270f2b5471b1686"
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "auth_provider_identities",
+        "auth_provider_identities_provider_subject_uniq"
+      ],
+      "writes": [
+        "s|idx|public.auth_provider_identities_provider_subject_uniq",
+        "n|idx|public.auth_provider_identities_provider_subject_uniq",
+        "e|idx|public.auth_provider_identities_provider_subject_uniq",
+        "n|rel|public.auth_provider_identities_provider_subject_uniq"
+      ],
+      "reads": [
+        "n|tbl|public.auth_provider_identities",
+        "n|sch|public",
+        "n|col|public.auth_provider_identities.provider",
+        "n|col|public.auth_provider_identities.provider_subject"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "auth_provider_identities",
+        "auth_provider_identities_user_provider_uniq"
+      ],
+      "writes": [
+        "s|idx|public.auth_provider_identities_user_provider_uniq",
+        "n|idx|public.auth_provider_identities_user_provider_uniq",
+        "e|idx|public.auth_provider_identities_user_provider_uniq",
+        "n|rel|public.auth_provider_identities_user_provider_uniq"
+      ],
+      "reads": [
+        "n|tbl|public.auth_provider_identities",
+        "n|sch|public",
+        "n|col|public.auth_provider_identities.user_id",
+        "n|col|public.auth_provider_identities.provider"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "auth_provider_identities",
+        "auth_provider_identities_user_idx"
+      ],
+      "writes": [
+        "s|idx|public.auth_provider_identities_user_idx",
+        "n|idx|public.auth_provider_identities_user_idx",
+        "e|idx|public.auth_provider_identities_user_idx",
+        "n|rel|public.auth_provider_identities_user_idx"
+      ],
+      "reads": [
+        "n|tbl|public.auth_provider_identities",
+        "n|sch|public",
+        "n|col|public.auth_provider_identities.user_id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "auth_provider_identities"
+      ],
+      "writes": [
+        "s|fk|public.auth_provider_identities.auth_provider_identities_user_id_users_id_fkey",
+        "n|fk|public.auth_provider_identities.auth_provider_identities_user_id_users_id_fkey",
+        "e|fk|public.auth_provider_identities.auth_provider_identities_user_id_users_id_fkey",
+        "n|con|public.auth_provider_identities.auth_provider_identities_user_id_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.auth_provider_identities",
+        "n|sch|public",
+        "n|tbl|public.users",
+        "n|sch|public",
+        "n|col|public.auth_provider_identities.user_id",
+        "n|col|public.users.id",
+        "e|uniqueness|public.users.id"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "auth_provider_identities",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "auth_provider_identities",
+        "name": "id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "gen_random_uuid()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "auth_provider_identities",
+        "name": "user_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "auth_provider_identities",
+        "name": "provider",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "auth_provider_identities",
+        "name": "provider_subject",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "auth_provider_identities",
+        "name": "provider_email",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "auth_provider_identities",
+        "name": "linked_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "auth_provider_identities",
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "auth_provider_identities",
+        "name": "auth_provider_identities_provider_subject_uniq",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "provider",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "provider_subject",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": true,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "auth_provider_identities",
+        "name": "auth_provider_identities_user_provider_uniq",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "user_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "provider",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": true,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "auth_provider_identities",
+        "name": "auth_provider_identities_user_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "user_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "auth_provider_identities",
+        "name": "auth_provider_identities_user_id_users_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "user_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "users",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "auth_provider_identities",
+        "name": "auth_provider_identities_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "auth_provider_identities",
+        "name": "auth_provider_identities_provider_google",
+        "value": "\"provider\" = 'google'",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"users\",\"password_hash\"]",
+      "set": {
+        "notNull": false
+      }
+    }
+  ]
+}

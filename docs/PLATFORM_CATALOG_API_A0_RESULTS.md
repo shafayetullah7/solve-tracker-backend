@@ -11,7 +11,7 @@
 | Auth | **Public** (no `AccessGuard`) |
 | Response shape | `{ items: [{ slug, name, baseUrl, urlHosts }] }` |
 | Synthetic `other` | **Omit** from API; library filter appends `other` client-side (same as `LIST_PLATFORM_FILTER_SLUGS`) |
-| SSR | Client fetch after hydrate for `/app`; landing may use public `GET /platforms` later (A3) |
+| SSR | Client fetch after hydrate for `/app` and guest landing (`LandingPlatforms` → public `GET /platforms`) |
 | Production fallback | No bundled catalog snapshot after A5 |
 
 ## Hygiene deliverables

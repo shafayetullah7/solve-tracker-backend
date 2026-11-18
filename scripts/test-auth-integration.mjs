@@ -346,9 +346,15 @@ try {
     'Cookie clearing matches identity and expires immediately',
   );
   const doc = createApiDocument(app);
+  const authPaths = Object.keys(doc.paths).filter((p) => p.startsWith('/auth/'));
+  check(authPaths.length === 9, 'Nine documented auth routes');
+  const sessionSchema =
+    doc.paths['/auth/session']?.get?.responses?.['200']?.content?.[
+      'application/json'
+    ]?.schema;
   check(
-    Object.keys(doc.paths).filter((p) => p.startsWith('/auth/')).length === 7,
-    'Seven documented auth routes',
+    sessionSchema?.properties?.account?.properties?.googleLinked,
+    'Session OpenAPI includes account flags',
   );
   console.log(
     `Passed ${count} PostgreSQL/HTTP authentication assertions. No real emails sent.`,

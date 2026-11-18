@@ -267,10 +267,27 @@
                         "email"
                       ],
                       "additionalProperties": false
+                    },
+                    "account": {
+                      "type": "object",
+                      "properties": {
+                        "googleLinked": {
+                          "type": "boolean"
+                        },
+                        "hasPassword": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "googleLinked",
+                        "hasPassword"
+                      ],
+                      "additionalProperties": false
                     }
                   },
                   "required": [
-                    "user"
+                    "user",
+                    "account"
                   ],
                   "additionalProperties": false
                 }
@@ -608,6 +625,68 @@
         "responses": {
           "204": {
             "description": "Password changed; all sessions revoked"
+          },
+          "4XX": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "statusCode",
+                    "code",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/set-password": {
+      "post": {
+        "operationId": "AuthController_setPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "newPassword": {
+                    "type": "string",
+                    "description": "8–128 Unicode code points; spaces are preserved."
+                  }
+                },
+                "required": [
+                  "newPassword"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Initial password set for Google-only account; current session retained (unlike change-password). Errors: PASSWORD_ALREADY_SET, VALIDATION_ERROR."
           },
           "4XX": {
             "description": "",

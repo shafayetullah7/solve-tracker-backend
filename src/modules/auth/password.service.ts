@@ -17,7 +17,7 @@ export class PasswordService {
       }),
     });
   }
-  async verify(value: string, hash?: string): Promise<boolean> {
+  async verify(value: string, hash?: string | null): Promise<boolean> {
     if (!hash) {
       this.dummy ??= this.hash(randomBytes(32).toString('hex'));
       await argon2.verify(await this.dummy, value);

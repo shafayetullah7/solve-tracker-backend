@@ -4,6 +4,10 @@ import { EmailModule } from '../email/email.module.js';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 import { AuthRepository } from './auth.repository.js';
+import { AuthProviderIdentityRepository } from './auth-provider-identity.repository.js';
+import { GoogleJwksCache } from './google-jwks.cache.js';
+import { GoogleOAuthService } from './google-oauth.service.js';
+import { OAuthStateService } from './oauth-state.service.js';
 import { PasswordService } from './password.service.js';
 import { TokenService } from './token.service.js';
 import { AuthCookies } from './auth.cookies.js';
@@ -15,6 +19,10 @@ import { AuthSecurityGuard, AuthLimiter } from './auth-security.guard.js';
   providers: [
     AuthService,
     AuthRepository,
+    AuthProviderIdentityRepository,
+    GoogleJwksCache,
+    GoogleOAuthService,
+    OAuthStateService,
     PasswordService,
     TokenService,
     AuthCookies,
@@ -28,6 +36,10 @@ import { AuthSecurityGuard, AuthLimiter } from './auth-security.guard.js';
     AuthLimiter,
     AuthService,
     AuthRepository,
+    AuthProviderIdentityRepository,
+    GoogleJwksCache,
+    GoogleOAuthService,
+    OAuthStateService,
     AuthCookies,
   ],
 })

@@ -9,12 +9,12 @@ import path from "node:path";
 import fs from "node:fs";
 
 const backendRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const frontendRoot = path.resolve(backendRoot, "..", "cp-frontend");
-const docsRoot = path.resolve(backendRoot, "..", "docs");
+const frontendRoot = path.resolve(backendRoot, "..", "solve-tracker-frontend");
+const docsRoot = path.resolve(backendRoot, "docs");
 
 const routeDirs = [
-  { dir: "problems", markers: ["createProblemsApi"] },
-  { dir: "topics", markers: ["createTopicsApi", "createProgressApi"] },
+  { dir: path.join("app", "problems"), markers: ["createProblemsApi"] },
+  { dir: path.join("app", "topics"), markers: ["createTopicsApi", "createProgressApi"] },
   {
     dir: "",
     files: [
@@ -24,7 +24,7 @@ const routeDirs = [
       "reset-password.tsx",
       "account.tsx",
     ],
-    markers: ["useAuth"],
+    markers: ["useAuth", "RequireSession"],
   },
 ];
 
@@ -82,8 +82,17 @@ function checkClientBoundaries() {
 
   const homeIndex = path.join(frontendRoot, "src/routes/index.tsx");
   const homeText = fs.readFileSync(homeIndex, "utf8");
-  if (!homeText.includes("paths.problems()"))
-    throw new Error("Home route should redirect authenticated users to the library");
+  if (!homeText.includes("paths.app()"))
+    throw new Error("Home route should redirect authenticated users to the app shell");
+
+  for (const file of ["login.tsx", "register.tsx"]) {
+    const text = fs.readFileSync(
+      path.join(frontendRoot, "src", "routes", file),
+      "utf8",
+    );
+    if (!text.includes("isGoogleOAuthEnabled"))
+      throw new Error(`routes/${file} should gate Google OAuth UI`);
+  }
 
   const authNav = path.join(frontendRoot, "src/components/auth/AuthNav.tsx");
   const navText = fs.readFileSync(authNav, "utf8");
@@ -158,6 +167,13 @@ async function main() {
   console.log("\nPhase 8 — auth integration …");
   await run("pnpm", ["test:auth:integration"]);
 
+  console.log("\nPhase 8 — Google OAuth regression …");
+  await run("pnpm", ["verify:google-oauth"]);
+  await run("pnpm", ["verify:google-oauth:exit"]);
+
+  console.log("\nPhase 8 — frontend check (post-Google) …");
+  await run("pnpm", ["check"], frontendRoot);
+
   console.log("\nPhase 8 — schema check …");
   await run("pnpm", ["db:check"]);
 
@@ -167,6 +183,8 @@ async function main() {
   console.log("\n--- Phase 8 automated exit criteria ---");
   console.log("[PASS] Regression: verify:phase-7");
   console.log("[PASS] Auth: test:auth:integration");
+  console.log("[PASS] Google OAuth: verify:google-oauth + verify:google-oauth:exit");
+  console.log("[PASS] Frontend: pnpm check");
   console.log("[PASS] Client boundaries + acceptance workbook");
   console.log("[PASS] Persistence: test-backend-restart-persistence.mjs");
   console.log("[WAIVER] Browser E2E not required for Phase 8 (see PHASE_8_RESULTS.md).");

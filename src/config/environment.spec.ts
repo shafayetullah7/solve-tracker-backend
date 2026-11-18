@@ -92,4 +92,55 @@ describe('environment schema', () => {
       }).success,
     ).toBe(false);
   });
+
+  it('parses with Google OAuth disabled and no Google secrets', () => {
+    expect(environmentSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it('requires Google credentials when OAuth is enabled', () => {
+    expect(
+      environmentSchema.safeParse({
+        ...valid,
+        GOOGLE_OAUTH_ENABLED: 'true',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('accepts enabled Google OAuth with redirect and secrets', () => {
+    const config = environmentSchema.parse({
+      ...valid,
+      GOOGLE_OAUTH_ENABLED: 'true',
+      GOOGLE_OAUTH_CLIENT_ID: 'test.apps.googleusercontent.com',
+      GOOGLE_OAUTH_CLIENT_SECRET: 'test-secret-min-length',
+      GOOGLE_OAUTH_REDIRECT_URI:
+        'http://localhost:3001/api/auth/google/callback',
+    });
+    expect(config.GOOGLE_OAUTH_ENABLED).toBe(true);
+  });
+
+  it('rejects non-HTTPS Google redirect in production when enabled', () => {
+    expect(
+      environmentSchema.safeParse({
+        ...productionEnvironmentFixture,
+        GOOGLE_OAUTH_ENABLED: 'true',
+        GOOGLE_OAUTH_CLIENT_ID: 'prod.apps.googleusercontent.com',
+        GOOGLE_OAUTH_CLIENT_SECRET: 'prod-secret-min-length',
+        GOOGLE_OAUTH_REDIRECT_URI:
+          'http://practice.example.com/api/auth/google/callback',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('accepts HTTPS Google redirect in production when enabled', () => {
+    expect(
+      environmentSchema.safeParse({
+        ...productionEnvironmentFixture,
+        GOOGLE_OAUTH_ENABLED: 'true',
+        GOOGLE_OAUTH_CLIENT_ID: 'prod.apps.googleusercontent.com',
+        GOOGLE_OAUTH_CLIENT_SECRET: 'prod-secret-min-length',
+        GOOGLE_OAUTH_REDIRECT_URI:
+          'https://practice.example.com/api/auth/google/callback',
+      }).success,
+    ).toBe(true);
+  });
 });

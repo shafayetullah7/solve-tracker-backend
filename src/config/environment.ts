@@ -68,6 +68,17 @@ export const cloudinaryEnvironmentSchema = z.object({
   CLOUDINARY_API_KEY: z.string().trim().min(1),
   CLOUDINARY_API_SECRET: z.string().trim().min(1),
 });
+export const googleOAuthEnvironmentSchema = z.object({
+  GOOGLE_OAUTH_ENABLED: z
+    .enum(['true', 'false'])
+    .transform((v) => v === 'true'),
+  GOOGLE_OAUTH_CLIENT_ID: z.string().trim().min(1).optional(),
+  GOOGLE_OAUTH_CLIENT_SECRET: z.string().min(1).optional(),
+  GOOGLE_OAUTH_REDIRECT_URI: z.url().optional(),
+  GOOGLE_OAUTH_SCOPES: z.string().trim().min(1).optional(),
+  GOOGLE_OAUTH_PROMPT: z.string().trim().min(1).optional(),
+  GOOGLE_OAUTH_STATE_TTL_SECONDS: positive.optional(),
+});
 export const environmentSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']),
@@ -88,6 +99,7 @@ export const environmentSchema = z
   })
   .extend(authEnvironmentSchema.shape)
   .extend(cloudinaryEnvironmentSchema.shape)
+  .extend(googleOAuthEnvironmentSchema.shape)
   .superRefine((v, ctx) => {
     const fail = (key: string, message: string) =>
       ctx.addIssue({ code: 'custom', path: [key], message });
@@ -145,6 +157,36 @@ export const environmentSchema = z
       (!v.RESEND_API_KEY || !v.RESEND_FROM)
     )
       fail('RESEND_API_KEY', 'Resend mode requires key and sender');
+    if (v.GOOGLE_OAUTH_ENABLED) {
+      if (!v.GOOGLE_OAUTH_CLIENT_ID)
+        fail('GOOGLE_OAUTH_CLIENT_ID', 'Required when Google OAuth is enabled');
+      if (!v.GOOGLE_OAUTH_CLIENT_SECRET)
+        fail(
+          'GOOGLE_OAUTH_CLIENT_SECRET',
+          'Required when Google OAuth is enabled',
+        );
+      if (!v.GOOGLE_OAUTH_REDIRECT_URI)
+        fail(
+          'GOOGLE_OAUTH_REDIRECT_URI',
+          'Required when Google OAuth is enabled',
+        );
+      if (v.GOOGLE_OAUTH_REDIRECT_URI) {
+        const redirect = new URL(v.GOOGLE_OAUTH_REDIRECT_URI);
+        if (!redirect.pathname.endsWith('/auth/google/callback'))
+          fail(
+            'GOOGLE_OAUTH_REDIRECT_URI',
+            'Path must end with /auth/google/callback',
+          );
+        if (
+          v.NODE_ENV === 'production' &&
+          v.GOOGLE_OAUTH_REDIRECT_URI.startsWith('http://')
+        )
+          fail(
+            'GOOGLE_OAUTH_REDIRECT_URI',
+            'Production requires an HTTPS redirect URI',
+          );
+      }
+    }
   });
 
 export type Environment = z.infer<typeof environmentSchema>;

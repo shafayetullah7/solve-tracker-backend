@@ -9,7 +9,7 @@ Status: **selected for implementation on 2026-11-10**, following the instruction
 - Solved timestamps are assigned by the server. No historical date editing initially.
 - Email verification is deferred. Registration creates an account and returns success; the user then logs in through the login flow. No extra registration fields.
 - All problems, topics, notes, associations, and progress belong to their authenticated user. Only platform reference data may be shared.
-- Keep the current Solid 2 Vite Start-mode CSR frontend, typed API client, Nest backend, and PostgreSQL. No SSR, BFF, Redis, worker, or new auth framework.
+- Keep the current Solid 2 Vite Start-mode CSR frontend, typed API client, Nest backend, and PostgreSQL. No SSR, BFF, Redis, worker, or new auth framework. Optional Google OAuth is an **FR-07 addendum** ([GOOGLE_OAUTH_A0_RESULTS.md](GOOGLE_OAUTH_A0_RESULTS.md)): thin backend OAuth + same JWT cookies, not Passport or a parallel auth stack.
 
 Unverified registration does not establish email ownership. A mistyped/preclaimed address may be recovered by its actual mailbox holder. Treat this as a documented MVP limitation; do not silently merge account data or represent an address as verified. Reassess verification before a broader public launch.
 

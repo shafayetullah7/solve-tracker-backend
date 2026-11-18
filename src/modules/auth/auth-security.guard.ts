@@ -46,6 +46,29 @@ export class AuthSecurityGuard implements CanActivate {
       res = context.switchToHttp().getResponse<Response>();
     res.setHeader('Cache-Control', 'private, no-store');
     res.setHeader('Referrer-Policy', 'no-referrer');
+    const resourcePath = httpResourcePath(req);
+    const oauthLimit =
+      resourcePath === '/auth/google'
+        ? this.limiter.check(
+            `google-start:${req.ip ?? req.socket.remoteAddress}`,
+            30,
+            900_000,
+          )
+        : resourcePath === '/auth/google/callback'
+          ? this.limiter.check(
+              `google-callback:${req.ip ?? req.socket.remoteAddress}`,
+              30,
+              900_000,
+            )
+          : 0;
+    if (oauthLimit) {
+      res.setHeader('Retry-After', String(oauthLimit));
+      throw authError(
+        429,
+        'RATE_LIMITED',
+        'Too many attempts. Please try later.',
+      );
+    }
     if (req.method === 'GET') return true;
     if (
       req.headers.origin !==
@@ -57,7 +80,6 @@ export class AuthSecurityGuard implements CanActivate {
         'CSRF_REJECTED',
         'Request origin or protection header is invalid.',
       );
-    const resourcePath = httpResourcePath(req);
     const allowsMultipart =
       resourcePath === '/media' && req.method === 'POST';
     if (

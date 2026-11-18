@@ -9,7 +9,7 @@ import path from "node:path";
 import fs from "node:fs";
 
 const backendRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const frontendRoot = path.resolve(backendRoot, "..", "cp-frontend");
+const frontendRoot = path.resolve(backendRoot, "..", "solve-tracker-frontend");
 const criteria = [
   {
     id: 1,
@@ -102,11 +102,14 @@ function checkClientBoundaries() {
   if (!fs.existsSync(problemsApi)) throw new Error("Missing problems.api.ts");
   if (!fs.existsSync(progressApi)) throw new Error("Missing progress.api.ts");
 
-  assertNoRawFetchInDir("problems", ["createProblemsApi"]);
-  assertNoRawFetchInDir("topics", ["createTopicsApi", "createProgressApi"]);
+  assertNoRawFetchInDir(path.join("app", "problems"), ["createProblemsApi"]);
+  assertNoRawFetchInDir(path.join("app", "topics"), ["createTopicsApi", "createProgressApi"]);
 
-  const topicsIndex = path.join(frontendRoot, "src/routes/topics/index.tsx");
-  const problemsIndex = path.join(frontendRoot, "src/routes/problems/index.tsx");
+  const topicsIndex = path.join(frontendRoot, "src/routes/app/topics/index.tsx");
+  const problemsIndex = path.join(
+    frontendRoot,
+    "src/routes/app/problems/index.tsx",
+  );
   for (const [label, file, needle] of [
     ["topics/index", topicsIndex, "createProgressApi"],
     ["problems/index", problemsIndex, "createProgressApi"],
@@ -148,9 +151,7 @@ async function main() {
   gates["problems-integration"] = true;
 
   console.log("Phase 7 exit verification — frontend …");
-  await run("pnpm", ["exec", "tsc", "--noEmit"], frontendRoot);
-  await run("pnpm", ["lint"], frontendRoot);
-  await run("pnpm", ["test", "--run"], frontendRoot);
+  await run("pnpm", ["check"], frontendRoot);
   await run("pnpm", ["build"], frontendRoot);
   await run("pnpm", ["api:check"], frontendRoot);
 

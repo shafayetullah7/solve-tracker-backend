@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { and, eq, desc } from 'drizzle-orm';
 import { errors as joseErrors } from 'jose';
@@ -10,8 +10,16 @@ import {
   users,
 } from '../../database/schema/index.js';
 import type { User } from '../../database/schema/index.js';
+import { userNameSchema } from '../../common/schemas/user-name.schema.js';
 import { AuthLimiter } from './auth-security.guard.js';
 import { AuthRepository } from './auth.repository.js';
+import { AuthProviderIdentityRepository } from './auth-provider-identity.repository.js';
+import { AUTH_PROVIDER_GOOGLE } from './auth-providers.js';
+import {
+  GoogleOAuthError,
+  GoogleOAuthErrorCodes,
+} from './google-oauth.errors.js';
+import type { VerifiedGoogleProfile } from './google-oauth.service.js';
 import { PasswordService } from './password.service.js';
 import { TokenService, digest, sameDigest } from './token.service.js';
 import type { Claims, Tokens } from './token.service.js';
@@ -22,6 +30,7 @@ import type {
   LoginInput,
   ResetInput,
   ChangePasswordInput,
+  SetPasswordInput,
 } from './schemas/auth.schema.js';
 const safeUser = (u: User) => ({ id: u.id, name: u.name, email: u.email });
 const usable = (s: { revokedAt: Date | null; expiresAt: Date } | undefined) =>
@@ -30,14 +39,215 @@ export const forgotMessage =
   'If an eligible account exists, password reset instructions will be sent.';
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly repo: AuthRepository,
+    private readonly identities: AuthProviderIdentityRepository,
     private readonly passwords: PasswordService,
     private readonly tokens: TokenService,
     private readonly email: EmailService,
     private readonly config: ConfigService<Environment, true>,
     private readonly limiter: AuthLimiter,
   ) {}
+
+  private googleDisplayName(profile: VerifiedGoogleProfile): string {
+    if (profile.name) {
+      const parsed = userNameSchema.safeParse(profile.name);
+      if (parsed.success) return parsed.data;
+    }
+    const local = profile.email.split('@')[0] ?? 'User';
+    const parsed = userNameSchema.safeParse(local);
+    return parsed.success ? parsed.data : 'User';
+  }
+
+  private isUniqueViolation(error: unknown): boolean {
+    const cause =
+      (error as { cause?: { code?: string } })?.cause ??
+      (error as { code?: string });
+    return cause?.code === '23505';
+  }
+
+  async establishOAuthSession(
+    userId: string,
+    previousRefresh?: string,
+  ): Promise<{ user: ReturnType<typeof safeUser>; tokens: Tokens }> {
+    if (previousRefresh) await this.logout(undefined, previousRefresh);
+    const result = await this.repo.withUser(userId, async (tx, user) => {
+      const id = randomUUID(),
+        expiresAt = new Date(
+          Date.now() +
+            this.config.getOrThrow('AUTH_SESSION_TTL_SECONDS', {
+              infer: true,
+            }) *
+              1000,
+        );
+      const tokens = await this.tokens.issue(user.id, id, expiresAt);
+      await tx.insert(authSessions).values({
+        id,
+        userId: user.id,
+        refreshDigest: digest(tokens.refresh),
+        expiresAt: tokens.expiresAt,
+      });
+      return { user: safeUser(user), tokens };
+    });
+    if (!result)
+      throw authError(404, 'NOT_FOUND', 'Account was not found.');
+    return result;
+  }
+
+  async signInWithGoogle(
+    profile: VerifiedGoogleProfile,
+    previousRefresh?: string,
+  ): Promise<{ user: ReturnType<typeof safeUser>; tokens: Tokens }> {
+    try {
+      const linked = await this.identities.findByProviderSubject(
+        AUTH_PROVIDER_GOOGLE,
+        profile.subject,
+      );
+      if (linked) {
+        const user = await this.repo.findUserById(linked.userId);
+        if (!user)
+          throw new GoogleOAuthError(
+            GoogleOAuthErrorCodes.OAUTH_ACCOUNT_CONFLICT,
+            'Google account link is invalid.',
+          );
+        await this.identities.upsertByProviderSubject({
+          userId: user.id,
+          provider: AUTH_PROVIDER_GOOGLE,
+          providerSubject: profile.subject,
+          providerEmail: profile.email,
+        });
+        const session = await this.establishOAuthSession(
+          user.id,
+          previousRefresh,
+        );
+        this.logger.log(
+          `Google OAuth sign_in userId=${user.id} provider=google outcome=sign_in`,
+        );
+        return session;
+      }
+      const existing = await this.repo.findUser(profile.email);
+      if (existing) {
+        await this.identities.upsertByProviderSubject({
+          userId: existing.id,
+          provider: AUTH_PROVIDER_GOOGLE,
+          providerSubject: profile.subject,
+          providerEmail: profile.email,
+        });
+        const session = await this.establishOAuthSession(
+          existing.id,
+          previousRefresh,
+        );
+        this.logger.log(
+          `Google OAuth sign_in userId=${existing.id} provider=google outcome=link`,
+        );
+        return session;
+      }
+      const user = await this.repo.createUser({
+        name: this.googleDisplayName(profile),
+        email: profile.email,
+        passwordHash: null,
+      });
+      await this.identities.create({
+        userId: user.id,
+        provider: AUTH_PROVIDER_GOOGLE,
+        providerSubject: profile.subject,
+        providerEmail: profile.email,
+      });
+      const session = await this.establishOAuthSession(user.id, previousRefresh);
+      this.logger.log(
+        `Google OAuth sign_in userId=${user.id} provider=google outcome=register`,
+      );
+      return session;
+    } catch (error) {
+      if (error instanceof GoogleOAuthError) throw error;
+      if (this.isUniqueViolation(error))
+        throw new GoogleOAuthError(
+          GoogleOAuthErrorCodes.OAUTH_ACCOUNT_CONFLICT,
+          'Unable to link Google account.',
+        );
+      throw error;
+    }
+  }
+
+  async linkGoogleToUser(
+    userId: string,
+    profile: VerifiedGoogleProfile,
+  ): Promise<void> {
+    const user = await this.repo.findUserById(userId);
+    if (!user)
+      throw authError(404, 'NOT_FOUND', 'Account was not found.');
+    const linked = await this.identities.findByProviderSubject(
+      AUTH_PROVIDER_GOOGLE,
+      profile.subject,
+    );
+    if (linked && linked.userId !== userId)
+      throw new GoogleOAuthError(
+        GoogleOAuthErrorCodes.OAUTH_ACCOUNT_CONFLICT,
+        'This Google account is linked to another user.',
+      );
+    await this.identities.upsertByProviderSubject({
+      userId,
+      provider: AUTH_PROVIDER_GOOGLE,
+      providerSubject: profile.subject,
+      providerEmail: profile.email,
+    });
+    this.logger.log(
+      `Google OAuth link userId=${userId} provider=google outcome=profile_link`,
+    );
+  }
+
+  async unlinkGoogle(userId: string): Promise<void> {
+    const user = await this.repo.findUserById(userId);
+    if (!user)
+      throw authError(404, 'NOT_FOUND', 'Account was not found.');
+    if (user.passwordHash == null)
+      throw authError(
+        400,
+        'PASSWORD_REQUIRED_TO_UNLINK',
+        'Set a password before unlinking Google.',
+      );
+    await this.identities.deleteByUserAndProvider(userId, AUTH_PROVIDER_GOOGLE);
+  }
+
+  async setPassword(userId: string, input: SetPasswordInput): Promise<void> {
+    const updated = await this.repo.withUser(userId, async (tx, user) => {
+      if (user.passwordHash != null)
+        throw authError(
+          400,
+          'PASSWORD_ALREADY_SET',
+          'A password is already set.',
+        );
+      const hash = await this.passwords.hash(input.newPassword);
+      const now = new Date();
+      await tx
+        .update(users)
+        .set({ passwordHash: hash, updatedAt: now })
+        .where(eq(users.id, user.id));
+      return true;
+    });
+    if (!updated)
+      throw authError(404, 'NOT_FOUND', 'Account was not found.');
+  }
+
+  async accountFlags(userId: string): Promise<{
+    googleLinked: boolean;
+    hasPassword: boolean;
+  }> {
+    const user = await this.repo.findUserById(userId);
+    if (!user)
+      throw authError(404, 'NOT_FOUND', 'Account was not found.');
+    const google = await this.identities.findByUserAndProvider(
+      userId,
+      AUTH_PROVIDER_GOOGLE,
+    );
+    return {
+      googleLinked: Boolean(google),
+      hasPassword: user.passwordHash != null,
+    };
+  }
+
   async register(input: RegisterInput) {
     try {
       return {
@@ -85,33 +295,14 @@ export class AuthService {
     );
     if (!candidate || !verified)
       throw authError(401, 'INVALID_CREDENTIALS', 'Invalid email or password.');
-    if (previousRefresh) await this.logout(undefined, previousRefresh);
-    const result = await this.repo.withUser(candidate.id, async (tx, user) => {
-      if (user.passwordHash !== candidate.passwordHash) return null;
-      const id = randomUUID(),
-        expiresAt = new Date(
-          Date.now() +
-            this.config.getOrThrow('AUTH_SESSION_TTL_SECONDS', {
-              infer: true,
-            }) *
-              1000,
-        );
-      const tokens = await this.tokens.issue(user.id, id, expiresAt);
-      await tx.insert(authSessions).values({
-        id,
-        userId: user.id,
-        refreshDigest: digest(tokens.refresh),
-        expiresAt: tokens.expiresAt,
-      });
-      return { user: safeUser(user), tokens };
-    });
-    if (!result)
+    const current = await this.repo.findUserById(candidate.id);
+    if (!current || current.passwordHash !== candidate.passwordHash)
       throw authError(
         401,
         'INVALID_CREDENTIALS',
         'Credentials changed. Please log in again.',
       );
-    return result;
+    return this.establishOAuthSession(candidate.id, previousRefresh);
   }
   async authenticate(raw?: string) {
     if (!raw)

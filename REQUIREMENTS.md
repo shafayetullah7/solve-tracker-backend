@@ -111,6 +111,19 @@ The MVP requirements below add supporting behavior needed to make that core usab
 - Limit registration, login, and password-recovery attempts to reduce abuse. Select concrete limits during API design.
 - Provide accessible form validation, pending states, and actionable errors. Preserve safe input such as name/email on failure; never expose password values in responses.
 
+#### FR-07 addendum: Optional Google sign-in (GOOGLE-AUTH)
+
+Design lock: [docs/GOOGLE_OAUTH_A0_RESULTS.md](docs/GOOGLE_OAUTH_A0_RESULTS.md). Phased implementation: [docs/GOOGLE_OAUTH_PHASED_PLAN.md](docs/GOOGLE_OAUTH_PHASED_PLAN.md).
+
+- When enabled via configuration, offer **Continue with Google** on login and registration in addition to email/password; password registration and login remain fully supported.
+- Google sign-in uses OAuth 2.0 authorization code with PKCE. Authorization codes and tokens are exchanged and validated **only on the backend**; do not expose Google tokens or JWT strings in API JSON or frontend JavaScript.
+- Successful Google authentication issues the **same** HttpOnly access/refresh cookies and server-side session semantics as password login (`../solve-tracker-frontend/AUTH_CONVENTIONS.md`).
+- Accounts may be **Google-only** (no password stored). Password policy applies when the user sets or changes a password. Google-only users cannot use password login until a password is set.
+- **Account linking:** when Google reports `email_verified` and the normalized email matches an existing user, link the Google identity and sign in in one step; when `sub` is already linked, sign in that user; when no user exists, create a Google-only account. Reject unverified Google emails.
+- The registration screen may offer Google alongside the three password fields; Google-first signup does not require a password on first sign-in.
+- OAuth start and callback endpoints use cryptographic `state`, PKCE, safe redirect (`next`) rules, and rate limiting consistent with other auth endpoints.
+- Signing out of the Google account in the browser does **not** end the Practice session; Practice **Sign out** and password reset session revocation behave as for password login.
+
 ### FR-08: Forgot and reset password
 
 - Provide a forgot-password screen and endpoint accepting the account email address.
@@ -120,7 +133,7 @@ The MVP requirements below add supporting behavior needed to make that core usab
 - Do not construct reset URLs from untrusted request headers or user-supplied redirect URLs. Do not log reset tokens or include them in analytics.
 - The reset-password page accepts the token from the link and lets the user enter a new password. A confirmation field may be used for reset UX; it is not an additional registration requirement.
 - Validate token authenticity, expiry, and unused state before changing the password. Consume the token and update the password atomically to prevent replay or concurrent reuse.
-- After a successful reset, invalidate other outstanding reset tokens and existing authenticated sessions for the account, then direct the user to log in using the new password.
+- After a successful reset, invalidate other outstanding reset tokens and existing authenticated sessions for the account, then direct the user to log in using the new password. For Google-only accounts (no password yet), forgot-password applies only after the user has set a password; until then, authentication remains Google-only.
 - Invalid or expired reset links show a clear message and a way to request a new link.
 
 ### FR-09: Resend email delivery

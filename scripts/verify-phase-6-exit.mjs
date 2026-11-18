@@ -9,7 +9,7 @@ import path from "node:path";
 import fs from "node:fs";
 
 const backendRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const frontendRoot = path.resolve(backendRoot, "..", "cp-frontend");
+const frontendRoot = path.resolve(backendRoot, "..", "solve-tracker-frontend");
 
 const criteria = [
   { id: 1, summary: "Two accounts; same URL allowed across accounts", gate: "problems-integration" },
@@ -47,17 +47,17 @@ function run(command, args, cwd) {
 }
 
 function checkNoRawFetchInProblemsRoutes() {
-  const routesDir = path.join(frontendRoot, "src", "routes", "problems");
+  const routesDir = path.join(frontendRoot, "src", "routes", "app", "problems");
   const files = fs.readdirSync(routesDir).filter((f) => f.endsWith(".tsx"));
   for (const file of files) {
     const text = fs.readFileSync(path.join(routesDir, file), "utf8");
     if (/\bfetch\s*\(/.test(text))
-      throw new Error(`Raw fetch in routes/problems/${file}`);
+      throw new Error(`Raw fetch in routes/app/problems/${file}`);
     if (!text.includes("createProblemsApi") && file !== "problems.tsx")
-      throw new Error(`routes/problems/${file} should use createProblemsApi`);
+      throw new Error(`routes/app/problems/${file} should use createProblemsApi`);
   }
   gates["no-raw-fetch"] = true;
-  console.log("OK: criterion 7 — no raw fetch in routes/problems");
+  console.log("OK: criterion 7 — no raw fetch in routes/app/problems");
 }
 
 async function main() {

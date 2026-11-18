@@ -47,12 +47,23 @@ export const changePasswordSchema = z.strictObject({
     .refine(length(1, PASSWORD_MAX_CODE_POINTS), 'Password is too long'),
   newPassword: passwordSchema,
 });
+export const setPasswordSchema = z.strictObject({
+  newPassword: passwordSchema,
+});
+export const accountFlagsSchema = z.strictObject({
+  googleLinked: z.boolean(),
+  hasPassword: z.boolean(),
+});
 export const userSchema = z.strictObject({
   id: z.uuid(),
   name: z.string(),
   email: z.email(),
 });
 export const userResponseSchema = z.strictObject({ user: userSchema });
+export const sessionResponseSchema = z.strictObject({
+  user: userSchema,
+  account: accountFlagsSchema,
+});
 export const messageSchema = z.strictObject({ message: z.string() });
 export const errorSchema = z.object({
   statusCode: z.number(),
@@ -64,3 +75,4 @@ export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type ResetInput = z.infer<typeof resetSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+export type SetPasswordInput = z.infer<typeof setPasswordSchema>;
