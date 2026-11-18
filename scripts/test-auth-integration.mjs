@@ -66,6 +66,33 @@ try {
     return { ...result, email };
   }
   const a = await signup();
+  check(
+    /^u[a-f0-9]{23}$/.test(a.user.handle),
+    'register without handle assigns system handle',
+  );
+  const handleEmail = `handle-${randomUUID()}@example.test`;
+  emails.push(handleEmail);
+  const withHandle = await auth.register({
+    name: 'Handle User',
+    email: handleEmail,
+    password,
+    handle: 'unique_tester',
+  });
+  check(withHandle.user.handle === 'unique_tester', 'register with chosen handle');
+  const dupHandleEmail = `handle-dup-${randomUUID()}@example.test`;
+  emails.push(dupHandleEmail);
+  await assert.rejects(
+    auth.register({
+      name: 'Dup',
+      email: dupHandleEmail,
+      password,
+      handle: 'Unique_Tester',
+    }),
+    (e) =>
+      e.getStatus() === 409 &&
+      e.getResponse().code === 'HANDLE_IN_USE',
+  );
+  count++;
   const stored = (
     await pool.query('select password_hash from users where id=$1', [a.user.id])
   ).rows[0].password_hash;
@@ -290,6 +317,10 @@ try {
       probe.headers['cache-control'] === 'private, no-store',
     'Read-only uncached probe',
   );
+  check(
+    typeof probe.body.user?.handle === 'string' && probe.body.user.handle.length > 0,
+    'session includes handle',
+  );
   await request(app.getHttpServer())
     .post('/auth/logout')
     .set(headers)
@@ -355,6 +386,10 @@ try {
   check(
     sessionSchema?.properties?.account?.properties?.googleLinked,
     'Session OpenAPI includes account flags',
+  );
+  check(
+    sessionSchema?.properties?.user?.properties?.handle,
+    'Session OpenAPI includes user.handle',
   );
   console.log(
     `Passed ${count} PostgreSQL/HTTP authentication assertions. No real emails sent.`,

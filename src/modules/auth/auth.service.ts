@@ -15,6 +15,7 @@ import {
   isUserHandleUniqueViolation,
   systemHandleFromUserId,
 } from '../../common/schemas/user-handle-assign.js';
+import { USER_HANDLE_ERROR } from '../../common/schemas/user-handle.errors.js';
 import { userNameSchema } from '../../common/schemas/user-name.schema.js';
 import { AuthLimiter } from './auth-security.guard.js';
 import { AuthRepository, type AuthTx } from './auth.repository.js';
@@ -115,9 +116,12 @@ export class AuthService {
       } catch (error) {
         if (this.isEmailUniqueViolation(error)) throw error;
         if (values.handle && isUserHandleUniqueViolation(error)) {
-          throw authError(409, 'HANDLE_IN_USE', 'This handle is already taken.', {
-            handle: 'This handle is already taken.',
-          });
+          throw authError(
+            409,
+            USER_HANDLE_ERROR.IN_USE,
+            'This handle is already taken.',
+            { handle: 'This handle is already taken.' },
+          );
         }
         if (!values.handle && isUserHandleUniqueViolation(error)) continue;
         throw error;

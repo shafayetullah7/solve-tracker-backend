@@ -275,6 +275,8 @@ Run `pnpm api:export` to build and export real controller metadata to `openapi.j
 
 Implemented JSON auth routes are documented in OpenAPI: `/auth/register`, `/auth/login`, `/auth/session` (includes `account` flags), `/auth/refresh`, `/auth/logout`, `/auth/forgot-password`, `/auth/reset-password`, `/auth/change-password`, and `/auth/set-password` (Google-only initial password). The frontend development proxy exposes them under `/api/auth/*`. Registration creates an account without login cookies; login establishes the session.
 
+Every account has a unique **handle** (optional at email register, system-assigned when omitted, editable in profile with a 30-day change cooldown); see [docs/USER_HANDLE_RESULTS.md](docs/USER_HANDLE_RESULTS.md).
+
 Optional **Google OAuth** redirect routes (`GET /auth/google`, callback, profile unlink) are env-gated; see [docs/GOOGLE_OAUTH_RESULTS.md](docs/GOOGLE_OAUTH_RESULTS.md). Optional **Google RISC** webhook (`POST /auth/google/risc`, default off): [docs/GOOGLE_RISC_RESULTS.md](docs/GOOGLE_RISC_RESULTS.md). Product ownership guards use `AccessGuard`.
 
 Add the authentication variables documented in `.env.example` before startup/export. Generate independent random signing secrets (at least 32 random bytes each); the example deliberately leaves them blank. Do not copy deterministic test fixture secrets into a real environment. The local ignored `.env` has development-only signing keys and `EMAIL_DELIVERY_MODE=mock`; existing database settings were preserved.

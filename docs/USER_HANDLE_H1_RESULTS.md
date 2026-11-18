@@ -41,8 +41,9 @@ Module: [`src/common/schemas/user-handle.schema.ts`](../src/common/schemas/user-
 
 Unit tests: [`user-handle.schema.spec.ts`](../src/common/schemas/user-handle.schema.spec.ts) (valid/invalid/reserved/case normalization; reserved contract snapshot).
 
-| [`user-handle-assign.ts`](../src/common/schemas/user-handle-assign.ts) | `systemHandleFromUserId`, `generateRandomSystemHandle`, registration auto-assign |
-| Register / profile | Optional chosen handle; else system assign; `PATCH /profile` can change handle (30-day cooldown after first change) |
+| [`user-handle-assign.ts`](../src/common/schemas/user-handle-assign.ts) | `systemHandleFromUserId`, `generateRandomSystemHandle` (used by H2 API) |
+
+**API wiring:** [USER_HANDLE_H2_RESULTS.md](USER_HANDLE_H2_RESULTS.md).
 
 ## Integration
 

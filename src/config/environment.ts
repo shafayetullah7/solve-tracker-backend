@@ -26,6 +26,16 @@ const positive = z
   .regex(/^\d+$/)
   .transform(Number)
   .pipe(z.number().int().positive().max(2147483647));
+
+/** String `"true"` / `"false"` from process.env; missing or empty → default off. */
+const envBooleanFlag = (defaultValue: 'true' | 'false' = 'false') =>
+  z.preprocess(
+    (raw) => {
+      if (raw === undefined || raw === null || raw === '') return defaultValue;
+      return raw;
+    },
+    z.enum(['true', 'false']).transform((v) => v === 'true'),
+  );
 export const authEnvironmentSchema = z.object({
   JWT_ACCESS_SECRET: z.string().min(32),
   JWT_REFRESH_SECRET: z.string().min(32),
@@ -80,9 +90,7 @@ export const googleOAuthEnvironmentSchema = z.object({
   GOOGLE_OAUTH_STATE_TTL_SECONDS: positive.optional(),
 });
 export const googleRiscEnvironmentSchema = z.object({
-  GOOGLE_RISC_ENABLED: z
-    .enum(['true', 'false'])
-    .transform((v) => v === 'true'),
+  GOOGLE_RISC_ENABLED: envBooleanFlag('false'),
   GOOGLE_RISC_AUDIENCE: z.string().trim().min(1).optional(),
   GOOGLE_RISC_JWKS_URL: z.url().optional(),
   GOOGLE_RISC_EVENT_TTL_SECONDS: positive.optional(),

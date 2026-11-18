@@ -137,12 +137,12 @@ Design lock: [docs/GOOGLE_RISC_A0_RESULTS.md](docs/GOOGLE_RISC_A0_RESULTS.md). R
 
 Design lock: [docs/USER_HANDLE_A0_RESULTS.md](docs/USER_HANDLE_A0_RESULTS.md). Phased implementation: [docs/USER_HANDLE_PHASED_PLAN.md](docs/USER_HANDLE_PHASED_PLAN.md).
 
-- Users may claim an optional **handle** at registration or in profile. Handles are **globally unique** (case-insensitive), stored in **canonical lowercase**, and validated for length, charset, and reserved names in the design lock.
+- Every account has a **handle** in the database (`NOT NULL`). Users may supply an optional **handle** at registration; if omitted, the server assigns a **system handle** (see H2 amendments in the design lock).
+- Users may change their handle via profile PATCH subject to validation and the **30-day change cooldown** after a prior successful change (`handle_changed_at`).
+- Handles are **globally unique** (case-insensitive), stored in **canonical lowercase**, and validated for length, charset, and reserved names in the design lock.
 - **Display name** (`name`) and **handle** are independent: display name is not unique; handle is the stable public identifier within the authenticated product.
 - **Login** remains email (+ optional Google); handles are **not** login identifiers in MVP.
-- After a handle is first set, users may change it **at most once per 30 days** (`handle_changed_at` semantics in the design lock).
-- Existing accounts without a handle remain fully functional; claiming a handle is optional and does not block library use.
-- Handle appears in session and profile API responses when set; it is not exposed through forgot-password or other unauthenticated flows.
+- Handle appears in session and profile API responses; it is not exposed through forgot-password or other unauthenticated flows.
 
 ### FR-08: Forgot and reset password
 
@@ -234,7 +234,7 @@ These describe the domain independently of the PostgreSQL storage implementation
 18. Refresh rotates the credential atomically; replay is rejected. Logout revokes the session, and password reset revokes all sessions, including access to protected endpoints.
 19. Two users can independently add the same problem URL, assign different topics, and track different solve states without affecting each other.
 20. Stored password values are Argon2id hashes, and raw passwords, refresh tokens, and signing secrets never appear in logs or public API responses.
-21. A user can register with only name, email, and password and later claim an optional unique handle in profile, or supply an optional handle at registration when USER-HANDLE is enabled, without invalidating existing email-only accounts.
+21. A user can register with only name, email, and password (receiving a system-assigned handle), later customize handle in profile, or supply an optional chosen handle at registration; duplicate handles return a field-aware conflict error.
 
 ## 9. Optional later features
 

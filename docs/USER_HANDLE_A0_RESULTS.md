@@ -142,6 +142,20 @@ Map profile/register field errors in the frontend via [`map-api-field-errors`](.
 | Tests | Vitest: valid/invalid/reserved/case collision; reserved list **byte-for-byte** vs this doc |
 | Backfill | **None** — production users may stay `NULL` |
 
+## H2 amendments (2026-11-18 — API policy)
+
+Supersedes nullable / “NULL until claimed” rows above for **runtime API** after migrations `20261118102214` + `20261118103421`:
+
+| Topic | H2 locked behavior |
+| --- | --- |
+| Storage | `users.handle` **NOT NULL**; JSON always returns **string** `handle` on user + profile |
+| Registration | Request field `handle` **optional**; omit/empty → **system assign** (`u` + 23 hex from user id, else random `r…`) |
+| Google new user | **System assign** at account creation (same as register without handle) |
+| Profile change | `PATCH /users/me/profile` with `handle`; **no cooldown** when `handle_changed_at` is null; **30-day cooldown** after a successful change that sets `handle_changed_at` |
+| Errors | `HANDLE_IN_USE` (409), `HANDLE_CHANGE_COOLDOWN` (409); format/reserved → 400 field `handle` |
+
+H0 nullable wording remains historical context for H0 sign-off only.
+
 ## Next phase
 
-**H1** — complete; see [USER_HANDLE_H1_RESULTS.md](USER_HANDLE_H1_RESULTS.md). **H2** — [USER_HANDLE_PHASED_PLAN.md](USER_HANDLE_PHASED_PLAN.md) § H2: API wiring.
+**H2** — complete; see [USER_HANDLE_H2_RESULTS.md](USER_HANDLE_H2_RESULTS.md). **H3** — [USER_HANDLE_PHASED_PLAN.md](USER_HANDLE_PHASED_PLAN.md) § H3: frontend UX.

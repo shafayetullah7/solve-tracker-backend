@@ -155,6 +155,18 @@ describe('environment schema', () => {
     expect(environmentSchema.safeParse({ ...valid }).success).toBe(true);
   });
 
+  it('defaults GOOGLE_RISC_ENABLED to false when unset or empty', () => {
+    const withoutRisc = { ...valid };
+    delete (withoutRisc as Record<string, unknown>).GOOGLE_RISC_ENABLED;
+    expect(environmentSchema.parse(withoutRisc).GOOGLE_RISC_ENABLED).toBe(
+      false,
+    );
+    expect(
+      environmentSchema.parse({ ...valid, GOOGLE_RISC_ENABLED: '' })
+        .GOOGLE_RISC_ENABLED,
+    ).toBe(false);
+  });
+
   it('rejects RISC enabled without OAuth enabled', () => {
     expect(
       environmentSchema.safeParse({

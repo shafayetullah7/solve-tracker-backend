@@ -42,6 +42,19 @@
                   "password": {
                     "type": "string",
                     "description": "8–128 Unicode code points; spaces are preserved."
+                  },
+                  "handle": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          ""
+                        ]
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
                   }
                 },
                 "required": [
@@ -77,12 +90,16 @@
                           "type": "string",
                           "format": "email",
                           "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                        },
+                        "handle": {
+                          "type": "string"
                         }
                       },
                       "required": [
                         "id",
                         "name",
-                        "email"
+                        "email",
+                        "handle"
                       ],
                       "additionalProperties": false
                     }
@@ -180,12 +197,16 @@
                           "type": "string",
                           "format": "email",
                           "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                        },
+                        "handle": {
+                          "type": "string"
                         }
                       },
                       "required": [
                         "id",
                         "name",
-                        "email"
+                        "email",
+                        "handle"
                       ],
                       "additionalProperties": false
                     }
@@ -259,12 +280,16 @@
                           "type": "string",
                           "format": "email",
                           "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                        },
+                        "handle": {
+                          "type": "string"
                         }
                       },
                       "required": [
                         "id",
                         "name",
-                        "email"
+                        "email",
+                        "handle"
                       ],
                       "additionalProperties": false
                     },
@@ -355,12 +380,16 @@
                           "type": "string",
                           "format": "email",
                           "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                        },
+                        "handle": {
+                          "type": "string"
                         }
                       },
                       "required": [
                         "id",
                         "name",
-                        "email"
+                        "email",
+                        "handle"
                       ],
                       "additionalProperties": false
                     }
@@ -2763,6 +2792,9 @@
                     "bio": {
                       "type": "string"
                     },
+                    "handle": {
+                      "type": "string"
+                    },
                     "avatarUrl": {
                       "type": "string",
                       "format": "uri"
@@ -2827,6 +2859,7 @@
                   "required": [
                     "name",
                     "bio",
+                    "handle",
                     "work",
                     "education"
                   ],
@@ -2889,6 +2922,9 @@
                     "type": "string",
                     "format": "uuid",
                     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "handle": {
+                    "type": "string"
                   }
                 },
                 "additionalProperties": false
@@ -2908,6 +2944,9 @@
                       "type": "string"
                     },
                     "bio": {
+                      "type": "string"
+                    },
+                    "handle": {
                       "type": "string"
                     },
                     "avatarUrl": {
@@ -2974,6 +3013,7 @@
                   "required": [
                     "name",
                     "bio",
+                    "handle",
                     "work",
                     "education"
                   ],

@@ -26,6 +26,7 @@ Both responses set `Cache-Control: no-store`.
 ## Database
 
 - Run `pnpm db:migrate` before starting new backend versions.
+- **User handles:** deploy **both** migrations `drizzle/20261118102214_add-user-handle` (nullable rollout) and `drizzle/20261118103421_backfill-user-handle-not-null` (backfill + `NOT NULL` + unique index) before starting an app build that expects `users.handle` on every row. Skipping the second migration leaves nullable handles and breaks register/session contracts. Details: [docs/USER_HANDLE_RESULTS.md](docs/USER_HANDLE_RESULTS.md).
 - `pnpm db:seed` only inserts shared platform reference rows (idempotent); it does not create users.
 - Use TLS in `DATABASE_URL` when the provider requires it.
 

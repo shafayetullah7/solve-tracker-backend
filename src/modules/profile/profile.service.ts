@@ -4,6 +4,7 @@ import {
   USER_HANDLE_CHANGE_COOLDOWN_MS,
   isUserHandleUniqueViolation,
 } from '../../common/schemas/user-handle-assign.js';
+import { USER_HANDLE_ERROR } from '../../common/schemas/user-handle.errors.js';
 import { users } from '../../database/schema/index.js';
 import { media } from '../../database/schema/media/media.table.js';
 import type { UserEducationEntry } from '../../database/schema/profile/user-education-entries.table.js';
@@ -116,7 +117,7 @@ export class ProfileService {
               );
               throw profileError(
                 409,
-                'HANDLE_CHANGE_COOLDOWN',
+                USER_HANDLE_ERROR.CHANGE_COOLDOWN,
                 `You can change your handle again in ${daysLeft} day(s).`,
                 { handle: `You can change your handle again in ${daysLeft} day(s).` },
               );
@@ -151,9 +152,12 @@ export class ProfileService {
           .returning();
       } catch (error) {
         if (isUserHandleUniqueViolation(error)) {
-          throw profileError(409, 'HANDLE_IN_USE', 'This handle is already taken.', {
-            handle: 'This handle is already taken.',
-          });
+          throw profileError(
+            409,
+            USER_HANDLE_ERROR.IN_USE,
+            'This handle is already taken.',
+            { handle: 'This handle is already taken.' },
+          );
         }
         throw error;
       }

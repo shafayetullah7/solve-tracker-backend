@@ -51,6 +51,8 @@
     "verify:google-oauth:exit": "node scripts/verify-google-oauth-exit.mjs",
     "verify:google-risc": "pnpm build && node scripts/verify-google-risc.mjs",
     "verify:google-risc-exit": "node scripts/verify-google-risc-exit.mjs",
+    "verify:user-handle": "pnpm build && node scripts/verify-user-handle.mjs",
+    "verify:user-handle:exit": "node scripts/verify-user-handle-exit.mjs",
     "test:topics:integration": "pnpm build && node scripts/test-topics-integration.mjs",
     "test:profile:integration": "pnpm build && node scripts/test-profile-integration.mjs",
     "test:problems:integration": "pnpm build && node scripts/test-problems-integration.mjs",

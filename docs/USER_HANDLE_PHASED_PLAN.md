@@ -1,6 +1,6 @@
 # User handle (Codeforces-style username) — phased execution plan
 
-**Status:** H1 complete (2026-11-18). **H0:** [USER_HANDLE_A0_RESULTS.md](USER_HANDLE_A0_RESULTS.md). **H1:** [USER_HANDLE_H1_RESULTS.md](USER_HANDLE_H1_RESULTS.md).  
+**Status:** H4 complete (2026-11-18). **H0:** [USER_HANDLE_A0_RESULTS.md](USER_HANDLE_A0_RESULTS.md). **H1:** [USER_HANDLE_H1_RESULTS.md](USER_HANDLE_H1_RESULTS.md). **H2:** [USER_HANDLE_H2_RESULTS.md](USER_HANDLE_H2_RESULTS.md). **H3:** [USER_HANDLE_H3_RESULTS.md](USER_HANDLE_H3_RESULTS.md). **H4:** [USER_HANDLE_H4_RESULTS.md](USER_HANDLE_H4_RESULTS.md). **Rollup:** [USER_HANDLE_RESULTS.md](USER_HANDLE_RESULTS.md).  
 **Codename:** `USER-HANDLE` (phases **H0–H4** below).  
 **Problem:** Identity today is **display name** + **email** only ([`users` table](../src/database/schema/users/users.table.ts), [REQUIREMENTS.md](../REQUIREMENTS.md) FR-07). Email is private and unsuitable as a public label; display name is not unique and not stable. Users want a **unique handle** (e.g. `tourist`, `Benq`) like Codeforces — for profile identity, future sharing, and consistent `@mention`-style display.  
 **Outcome:** Optional-at-first, **globally unique**, **case-insensitive** handle on `users`, set at registration or profile, exposed in session + profile API, edited under clear rules. **Login stays email-based**; handles are not credentials in MVP.
@@ -177,40 +177,38 @@ No new module required — extend `users` schema, `AuthService`, `ProfileService
 
 ---
 
-### H2 — Backend API & auth integration
+### H2 — Backend API & auth integration ✅
 
 | Deliverable | Detail |
 | --- | --- |
-| **Register** | `registerSchema.handle` optional; `AuthService.register` sets handle when provided |
-| **Profile** | `patchProfileSchema.handle`; cooldown enforcement; `HANDLE_*` errors in `profile.errors.ts` |
-| **Responses** | `userSchema` / `profileResponseSchema` + `sessionResponseSchema` include `handle: z.string().optional()` or nullable |
-| **safeUser** | Include `handle` when non-null |
-| **Google paths** | New Google users: `handle` null; no silent auto-generation |
-| **Repository** | `findByHandle(lower)` for future use optional; uniqueness via DB |
-| **OpenAPI** | Regenerate `openapi.json`; `.env.openapi` unchanged |
-| **Tests** | Service specs (cooldown, reserved, duplicate); `test:auth:integration` + new `test:profile-handle:integration` (or extend profile integration script) |
+| **Register** | `registerSchema.handle` optional; chosen or **system assign** via `createUserAccount` |
+| **Profile** | `patchProfileSchema.handle`; cooldown; `HANDLE_*` via [`user-handle.errors.ts`](../src/common/schemas/user-handle.errors.ts) |
+| **Responses** | `userSchema.handle` string; profile + session include `handle` |
+| **Google paths** | New Google users: system assign at create |
+| **OpenAPI** | `openapi.json` + `api:check` / `api:types:check` |
+| **Tests** | Vitest + `test:auth:integration` + `test:profile:integration` handle slices |
 
-**Verify:** `pnpm test`; `TEST_DATABASE_URL=…/_test pnpm test:auth:integration`; profile handle integration green; `pnpm api:check`.
+**Results:** [USER_HANDLE_H2_RESULTS.md](USER_HANDLE_H2_RESULTS.md).
 
 **Exit:** API clients can set/read handle; session carries handle; conflicts return field-aware 409.
 
 ---
 
-### H3 — Frontend product UX
+### H3 — Frontend product UX ✅
 
 | Deliverable | Detail |
 | --- | --- |
-| **Types** | Generated / hand-maintained client types for `handle` on user + profile |
-| **Register** | Optional handle with inline rules + server error mapping (`HANDLE_IN_USE` → field) |
-| **Profile** | Handle field in account/about panel; change shows cooldown message from API |
-| **Session** | `AuthProvider` / bootstrap: store `user.handle`; `establishSession` sync |
-| **Chrome** | Profile header / shell: show `@handle` when set; omit when null |
-| **Nudge** | Dismissible banner when authenticated and `handle` missing (link to profile) |
-| **Google flow** | Post-link landing unchanged; nudge applies equally |
-| **Copy** | Explain difference: name vs handle vs email (one short paragraph in profile) |
-| **Tests** | Form validation unit tests; profile/register component tests as applicable |
+| **Types** | OpenAPI-generated `handle`; parsers in auth + profile API |
+| **Register** | Optional handle + client validation + API field errors |
+| **Profile** | About identity copy, handle editor dialog, session sync on PATCH |
+| **Session** | `AuthUser.handle` in bootstrap + `establishSession` |
+| **Chrome** | `@handle` on profile About + AppSidebar identity |
+| **Nudge** | Dismissible banner for **system-assigned** handles |
+| **Tests** | `user-handle.test.ts`, validator/auth API fixture updates |
 
-**Verify:** `pnpm test` (frontend); manual: register with/without handle; patch conflict; Google user claims handle.
+**Results:** [USER_HANDLE_H3_RESULTS.md](USER_HANDLE_H3_RESULTS.md).
+
+**Verify:** `cd solve-tracker-frontend && pnpm test`; `pnpm api:check`.
 
 **Exit:** End-to-end happy path without public profile routes.
 
@@ -223,16 +221,16 @@ No new module required — extend `users` schema, `AuthService`, `ProfileService
 | `docs/USER_HANDLE_RESULTS.md` | Rollup, limitations, manual checklist |
 | `docs/USER_HANDLE_H4_RESULTS.md` | Verification command table |
 | Script (optional) | `verify-user-handle.mjs` — schema wiring, reserved list grep, vitest slice; or document under `verify:phase-*` only |
-| `PRODUCTION.md` | Migration note: deploy migration before app; NULL handles OK |
+| `PRODUCTION.md` | Migration note: deploy both handle migrations before app |
 | Cross-links | `README.md` profile section one line |
 
 **Manual checklist**
 
 - [ ] Register with unique handle → session shows handle.
 - [ ] Register duplicate handle (case variant) → 409 field error.
-- [ ] Existing user `NULL` → login OK; set handle in profile.
+- [ ] Register without chosen handle → system handle; nudge + customize in profile.
 - [ ] Change handle within cooldown → rejected with clear message.
-- [ ] Google-only user → claim handle in profile.
+- [ ] Google-only user → system handle at create; customize in profile.
 - [ ] `pnpm api:check` green on both packages.
 
 **Exit:** `USER-HANDLE` closed for MVP; public-by-handle deferred explicitly.

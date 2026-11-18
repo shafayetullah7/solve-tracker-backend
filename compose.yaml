@@ -36,6 +36,7 @@ services:
       HOST: ${HOST:?HOST is required}
       SWAGGER_ENABLED: ${SWAGGER_ENABLED:?SWAGGER_ENABLED is required}
       DATABASE_URL: ${DOCKER_DATABASE_URL:?Set DOCKER_DATABASE_URL in .env}
+      GOOGLE_RISC_ENABLED: ${GOOGLE_RISC_ENABLED:-false}
     ports:
       - '${DOCKER_BIND_ADDRESS:?DOCKER_BIND_ADDRESS is required}:${PORT:?PORT is required}:${PORT:?PORT is required}'
     depends_on:

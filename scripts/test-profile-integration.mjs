@@ -104,7 +104,29 @@ try {
     .set('Cookie', user.cookie)
     .expect(200);
   check(initial.body.name === 'User main', 'GET profile returns registered name');
+  check(
+    typeof initial.body.handle === 'string' && initial.body.handle.length > 0,
+    'GET profile includes handle',
+  );
   check(Array.isArray(initial.body.work) && initial.body.work.length === 0, 'Empty work');
+
+  const customHandle = `profile_${randomUUID().replace(/-/g, '').slice(0, 12)}`;
+  const renamed = await request(server)
+    .patch('/users/me/profile')
+    .set(headers)
+    .set('Cookie', user.cookie)
+    .send({ handle: customHandle })
+    .expect(200);
+  check(renamed.body.handle === customHandle, 'PATCH profile handle');
+
+  const other = await registerAndLogin(server, 'conflict');
+  const taken = await request(server)
+    .patch('/users/me/profile')
+    .set(headers)
+    .set('Cookie', other.cookie)
+    .send({ handle: customHandle })
+    .expect(409);
+  check(taken.body.code === 'HANDLE_IN_USE', 'PATCH duplicate handle');
 
   const patched = await request(server)
     .patch('/users/me/profile')

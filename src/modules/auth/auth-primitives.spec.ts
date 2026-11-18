@@ -27,6 +27,29 @@ describe('auth primitives', () => {
         password: '🌱'.repeat(8),
       }),
     ).toMatchObject({ name: 'Jane', email: 'jane@example.com' });
+    expect(
+      registerSchema.parse({
+        name: 'Bob',
+        email: 'bob@example.com',
+        password: 'x'.repeat(8),
+        handle: 'valid_user',
+      }).handle,
+    ).toBe('valid_user');
+    expect(
+      registerSchema.parse({
+        name: 'Bob',
+        email: 'bob2@example.com',
+        password: 'x'.repeat(8),
+      }).handle,
+    ).toBeUndefined();
+    expect(
+      registerSchema.safeParse({
+        name: 'Bob',
+        email: 'bob3@example.com',
+        password: 'x'.repeat(8),
+        handle: 'admin',
+      }).success,
+    ).toBe(false);
     expect(passwordSchema.safeParse('🌱'.repeat(7)).success).toBe(false);
     expect(passwordSchema.safeParse('🌱'.repeat(8)).success).toBe(true);
     expect(passwordSchema.safeParse('🌱'.repeat(128)).success).toBe(true);
