@@ -54,4 +54,4 @@ Staging **Google** `stream:verify` and a real SET are not run in CI; complete th
 
 ## Next
 
-**R6** — [GOOGLE_RISC_RESULTS.md](GOOGLE_RISC_RESULTS.md) (rollup). **R7** — `verify:google-risc`. See phased plan § R7.
+**R6** — [GOOGLE_RISC_RESULTS.md](GOOGLE_RISC_RESULTS.md) (rollup). **R7** — [GOOGLE_RISC_R7_RESULTS.md](GOOGLE_RISC_R7_RESULTS.md) (`pnpm verify:google-risc`).

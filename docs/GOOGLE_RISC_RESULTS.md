@@ -25,7 +25,7 @@ Rollup for **GOOGLE-RISC** (R0–R7). Phase-by-phase detail lives in `GOOGLE_RIS
 | R4 HTTP receiver | Complete | [GOOGLE_RISC_R4_RESULTS.md](GOOGLE_RISC_R4_RESULTS.md) |
 | R5 Stream ops | Runbook complete; staging evidence | [GOOGLE_RISC_R5_RESULTS.md](GOOGLE_RISC_R5_RESULTS.md) |
 | R6 Docs / copy | Complete | This file |
-| R7 Verify gate | Planned | [GOOGLE_RISC_PHASED_PLAN.md](GOOGLE_RISC_PHASED_PLAN.md) § R7 |
+| R7 Verify gate | Complete | [GOOGLE_RISC_R7_RESULTS.md](GOOGLE_RISC_R7_RESULTS.md) |
 
 Staging Google `stream:verify` and real SET evidence remain **operator-owned** until the table in [GOOGLE_RISC_R5_RESULTS.md](GOOGLE_RISC_R5_RESULTS.md) is filled.
 
@@ -76,9 +76,12 @@ Use on staging/production after stream registration.
 | Command | When | What it covers |
 | --- | --- | --- |
 | `pnpm test` | CI | RISC unit tests (verify, handle, HTTP, limiter) |
-| `TEST_DATABASE_URL=…/_test pnpm test:google-risc-handle:integration` | Pre-release | Service revoke + idempotency |
-| `TEST_DATABASE_URL=…/_test pnpm test:google-risc-http:integration` | Pre-release | HTTP 202 path + 404 when off |
-| `pnpm verify:google-risc` | R7 | Env wiring + integration umbrella (not yet) |
+| `pnpm verify:google-risc` | CI / no DB | Env schema, wiring, RISC Vitest dir, HTTP smoke ([R7](GOOGLE_RISC_R7_RESULTS.md)) |
+| `TEST_DATABASE_URL=…/_test pnpm verify:google-risc-exit` | Pre-release | Fast verify + receipt/handle/http integration + `api:check` |
+| `TEST_DATABASE_URL=…/_test pnpm test:google-risc-handle:integration` | Pre-release (à la carte) | Service revoke + idempotency |
+| `TEST_DATABASE_URL=…/_test pnpm test:google-risc-http:integration` | Pre-release (à la carte) | HTTP 202 path + 404 when off |
+
+`verify:phase-8` / `verify:phase-9` are unchanged; run `verify:google-risc-exit` explicitly when cutting a RISC-bearing release.
 
 CI keeps `GOOGLE_RISC_ENABLED=false`; no Google egress required.
 
@@ -92,6 +95,7 @@ CI keeps `GOOGLE_RISC_ENABLED=false`; no Google egress required.
 | R3 | [GOOGLE_RISC_R3_RESULTS.md](GOOGLE_RISC_R3_RESULTS.md) |
 | R4 | [GOOGLE_RISC_R4_RESULTS.md](GOOGLE_RISC_R4_RESULTS.md) |
 | R5 | [GOOGLE_RISC_R5_RESULTS.md](GOOGLE_RISC_R5_RESULTS.md) |
+| R7 | [GOOGLE_RISC_R7_RESULTS.md](GOOGLE_RISC_R7_RESULTS.md) |
 
 ## Related
 

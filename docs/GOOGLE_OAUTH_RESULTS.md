@@ -56,6 +56,7 @@ Browser navigation and `302` redirects; excluded from generated client types (`@
 | `pnpm verify:google-oauth` | CI / no DB | Env schema (disabled default), wiring, client greps, 404/302 HTTP smoke |
 | `TEST_DATABASE_URL=…/_test pnpm verify:google-oauth:exit` | Pre-release | Above + identities + `test:google-oauth:*` + `api:check` + `verify:platform-api` |
 | `TEST_DATABASE_URL=…/_test pnpm verify:phase-8` | Phase 8 umbrella | Includes Google exit + full monorepo regression |
+| `pnpm verify:google-risc` / `verify:google-risc-exit` | Optional pre-release | Separate RISC gate; does not block OAuth CI ([GOOGLE_RISC_R7_RESULTS.md](GOOGLE_RISC_R7_RESULTS.md)) |
 
 CI should keep `GOOGLE_OAUTH_ENABLED=false`; gates pass without Google Cloud secrets.
 

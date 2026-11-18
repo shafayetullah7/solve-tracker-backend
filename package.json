@@ -48,6 +48,8 @@
     "test:google-oauth:integration": "pnpm build && node scripts/test-google-oauth-integration.mjs",
     "verify:google-oauth": "pnpm build && node scripts/verify-google-oauth.mjs",
     "verify:google-oauth:exit": "node scripts/verify-google-oauth-exit.mjs",
+    "verify:google-risc": "pnpm build && node scripts/verify-google-risc.mjs",
+    "verify:google-risc-exit": "node scripts/verify-google-risc-exit.mjs",
     "test:topics:integration": "pnpm build && node scripts/test-topics-integration.mjs",
     "test:profile:integration": "pnpm build && node scripts/test-profile-integration.mjs",
     "test:problems:integration": "pnpm build && node scripts/test-problems-integration.mjs",

@@ -1,6 +1,6 @@
 # Google Cross-Account Protection (RISC) — phased execution plan
 
-**Status:** R6 complete (2026-11-18). **Rollup:** [GOOGLE_RISC_RESULTS.md](GOOGLE_RISC_RESULTS.md). **Design lock:** [GOOGLE_RISC_A0_RESULTS.md](GOOGLE_RISC_A0_RESULTS.md). **R1:** [GOOGLE_RISC_R1_RESULTS.md](GOOGLE_RISC_R1_RESULTS.md). **R2:** [GOOGLE_RISC_R2_RESULTS.md](GOOGLE_RISC_R2_RESULTS.md). **R3:** [GOOGLE_RISC_R3_RESULTS.md](GOOGLE_RISC_R3_RESULTS.md). **R4:** [GOOGLE_RISC_R4_RESULTS.md](GOOGLE_RISC_R4_RESULTS.md). **R5:** [GOOGLE_RISC_R5_RESULTS.md](GOOGLE_RISC_R5_RESULTS.md). **R6:** [GOOGLE_RISC_RESULTS.md](GOOGLE_RISC_RESULTS.md). Staging smoke evidence pending in R5 results.  
+**Status:** R7 complete (2026-11-18). **Rollup:** [GOOGLE_RISC_RESULTS.md](GOOGLE_RISC_RESULTS.md). **Design lock:** [GOOGLE_RISC_A0_RESULTS.md](GOOGLE_RISC_A0_RESULTS.md). **R1:** [GOOGLE_RISC_R1_RESULTS.md](GOOGLE_RISC_R1_RESULTS.md). **R2:** [GOOGLE_RISC_R2_RESULTS.md](GOOGLE_RISC_R2_RESULTS.md). **R3:** [GOOGLE_RISC_R3_RESULTS.md](GOOGLE_RISC_R3_RESULTS.md). **R4:** [GOOGLE_RISC_R4_RESULTS.md](GOOGLE_RISC_R4_RESULTS.md). **R5:** [GOOGLE_RISC_R5_RESULTS.md](GOOGLE_RISC_R5_RESULTS.md). **R6:** [GOOGLE_RISC_RESULTS.md](GOOGLE_RISC_RESULTS.md). **R7:** [GOOGLE_RISC_R7_RESULTS.md](GOOGLE_RISC_R7_RESULTS.md). Staging smoke evidence pending in R5 results.  
 **Codename:** `GOOGLE-RISC` (phases **R0–R7** below).  
 **Problem:** Practice and Google sessions are **independent** ([GOOGLE_OAUTH_PHASED_PLAN.md](GOOGLE_OAUTH_PHASED_PLAN.md) §6). When a user revokes the app, signs out of **all** Google sessions, or Google disables the account, Practice `auth_sessions` and HttpOnly cookies can remain valid until TTL, logout, or password reset.  
 **Outcome:** Subscribe to [Google Cross-Account Protection (RISC)](https://developers.google.com/identity/protocols/risc) so **selected security events** trigger **server-side revocation of all Practice sessions** for the linked user. **No** Google tokens stored; **no** per-request Google calls; **authorization unchanged** (`AccessGuard` + existing session checks). Optional product copy update: partial vs total Google logout (see §6).
@@ -275,15 +275,15 @@ Staging and production require **separate** streams or delivery URLs.
 
 ---
 
-### R7 — Verify script and regression gate
+### R7 — Verify script and regression gate ✅
 
 | Deliverable | Detail |
 | --- | --- |
-| `scripts/verify-google-risc.mjs` | Env schema, route registered, module import, flag off in default CI |
-| `scripts/verify-google-risc-exit.mjs` | Runs unit/integration tests tagged `risc` |
-| `package.json` | `verify:google-risc`, optional hook in `verify:phase-9` or phase-8 umbrella (document only) |
+| `scripts/verify-google-risc.mjs` | Env schema, static wiring, Vitest `src/modules/auth/risc`, HTTP smoke |
+| `scripts/verify-google-risc-exit.mjs` | Fast verify + `test:*risc*:integration` + `api:check` |
+| `package.json` | `verify:google-risc`, `verify:google-risc-exit` (standalone — not in phase-8/9) |
 
-**Exit:** `pnpm verify:google-risc` green in CI without public URL; staging smoke optional manual gate.
+**Results:** [GOOGLE_RISC_R7_RESULTS.md](GOOGLE_RISC_R7_RESULTS.md). **Exit:** `pnpm verify:google-risc` green without `TEST_DATABASE_URL` or public URL.
 
 ---
 
