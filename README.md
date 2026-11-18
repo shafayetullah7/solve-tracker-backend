@@ -8,7 +8,7 @@ Use Node.js 24.15+ and pnpm 12.18.0 for host commands. Docker development requir
 
 ## Run everything in Docker
 
-From `backend/`, copy the example environment file once and start the stack:
+From `solve-tracker-backend/`, copy the example environment file once and start the stack:
 
 ```bash
 cp .env.example .env
@@ -111,7 +111,7 @@ pnpm db:migrate:docker
 
 Drizzle Kit generates timestamped folders under `drizzle/`, each containing `migration.sql` and `snapshot.json`; commit both. Generate on the host because this folder is mounted read-only in Docker. Use `pnpm db:migrate:create --name=data-backfill` for custom SQL. Rollbacks use new corrective migrations; there is no automatic down command. Do not edit applied migrations.
 
-After applying migrations that add `problems.platform_slug`, run `pnpm db:seed` (or `db:seed:docker`) to backfill slugs on existing problems, or `pnpm db:backfill:platform-slugs` when you only need to re-derive slugs after catalog changes. Full PLATFORM-CLS gate: `TEST_DATABASE_URL=…/_test pnpm verify:platform-cls` (chains P1–P4 + frontend catalog). See [docs/PLATFORM_CLASSIFICATION_PHASED_PLAN.md](docs/PLATFORM_CLASSIFICATION_PHASED_PLAN.md).
+After applying migrations that add `problems.platform_slug`, run `pnpm db:seed` (or `db:seed:docker`) to backfill slugs on existing problems, or `pnpm db:backfill:platform-slugs` when you only need to re-derive slugs after catalog changes. Full PLATFORM-CLS gate: `TEST_DATABASE_URL=…/_test pnpm verify:platform-cls` (chains P1–P4 + frontend catalog). See [docs/PLATFORM_CLASSIFICATION_PHASED_PLAN.md](docs/PLATFORM_CLASSIFICATION_PHASED_PLAN.md). **PLATFORM-API** (catalog from API): [docs/PLATFORM_CATALOG_API_PHASED_PLAN.md](docs/PLATFORM_CATALOG_API_PHASED_PLAN.md) — **A4 complete** (consumer migration); next **A5** (remove static catalog).
 
 The initial platform migration was regenerated from the current schema. It contains generated table creation SQL without legacy compatibility logic. Generating migrations does not apply them or change database history.
 

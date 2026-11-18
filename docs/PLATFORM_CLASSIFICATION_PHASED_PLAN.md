@@ -7,14 +7,14 @@
 
 **Outcome:** One canonical **`platform_slug`** per problem, set from the URL via the **same** catalog logic everywhere; indexed list filters and SQL-friendly progress; API returns `platformSlug` for UI; optional form **preview** (no manual picker required for MVP robustness).
 
-**References:** [REQUIREMENTS.md](../REQUIREMENTS.md) (FR-02, FR-04, §5 entities), [PHASE_7_PLAN.md](PHASE_7_PLAN.md) (current platform filter), [platform-catalog.ts](../src/shared/platform-catalog.ts), [solve-tracker-frontend platform catalog](../../solve-tracker-frontend/src/lib/platforms/platform-catalog.ts), [FRONTEND_CONVENTIONS.md](../../solve-tracker-frontend/FRONTEND_CONVENTIONS.md), [DRIZZLE_CONVENTIONS.md](../DRIZZLE_CONVENTIONS.md), [API_CLIENT.md](../../solve-tracker-frontend/API_CLIENT.md).
+**References:** [REQUIREMENTS.md](../REQUIREMENTS.md) (FR-02, FR-04, §5 entities), [PHASE_7_PLAN.md](PHASE_7_PLAN.md) (current platform filter), [platform-catalog.ts](../src/shared/platform-catalog.ts), [solve-tracker-frontend platform runtime](../../solve-tracker-frontend/src/lib/platforms/catalog-runtime.ts), [FRONTEND_CONVENTIONS.md](../../solve-tracker-frontend/FRONTEND_CONVENTIONS.md), [DRIZZLE_CONVENTIONS.md](../DRIZZLE_CONVENTIONS.md), [API_CLIENT.md](../../solve-tracker-frontend/API_CLIENT.md).
 
 ## 1. Scope, prerequisites, and boundaries
 
 ### Prerequisites
 
 - **Phase 7 complete** (library filters, progress, `pnpm verify:phase-7` on a `*_test` database).
-- **Catalog drift gate:** `pnpm verify:catalog` (frontend) keeps judge lists aligned.
+- **Catalog drift gate:** `pnpm verify:platform-api` (frontend) keeps catalog, OpenAPI, and `CATALOG_SLUGS` aligned ([PLATFORM-API](PLATFORM_CATALOG_API_PHASED_PLAN.md)).
 - **No open URL-normalization (FR-06) redesign** in this effort.
 
 ### In scope
@@ -179,12 +179,12 @@ solve-tracker-frontend/
 
 ## P5 — Form UX and verification gate
 
-**Status:** **complete**. Form uses `platformPreviewFromUrl` + read-only **Detected platform** row; judge ID copy; `verify-platform-cls.mjs` chains P1–P4 + `pnpm verify:catalog`. Gate: `TEST_DATABASE_URL=…/_test pnpm verify:platform-cls`.
+**Status:** **complete**. Form uses `platformPreviewFromUrl` + read-only **Detected platform** row; judge ID copy; `verify-platform-cls.mjs` chains P1–P4 + `pnpm verify:platform-api`. Gate: `TEST_DATABASE_URL=…/_test pnpm verify:platform-cls`.
 
 ### Work
 
 1. **Add/Edit form:** Under Problem URL, show read-only “Detected platform: …” using client `platformPreviewFromUrl` (preview only; server wins on save). Rename hint for “Platform problem ID” → **Judge problem ID (optional)** + one line that site comes from URL.
-2. **`scripts/verify-platform-cls.mjs`:** chain `verify:platform-p1` … `p4`, then frontend `pnpm verify:catalog`.
+2. **`scripts/verify-platform-cls.mjs`:** chain `verify:platform-p1` … `p4`, then frontend `pnpm verify:platform-api`.
 3. **§ Ops — catalog updates** (below).
 4. Optional Playwright add-problem e2e deferred (no existing coverage for `/app/problems/new`).
 
@@ -197,12 +197,13 @@ solve-tracker-frontend/
 
 ## Ops — catalog updates
 
-When adding or changing judge **`urlHosts`** in both platform catalogs:
+When adding or changing judge **`urlHosts`** (backend catalog only — see [PLATFORM_CATALOG_API_PHASED_PLAN.md](PLATFORM_CATALOG_API_PHASED_PLAN.md) §4):
 
-1. Edit `solve-tracker-backend/src/shared/platform-catalog.ts` and `solve-tracker-frontend/src/lib/platforms/platform-catalog.ts` together.
-2. Run **`pnpm verify:catalog`** in the frontend (and **`pnpm verify:platform-cls`** before merge when a test DB is available).
-3. Deploy backend (writes and reads use the updated resolver).
-4. On environments with existing problems, run **`pnpm db:backfill:platform-slugs`** (or full **`pnpm db:seed`** on dev) so stored `platform_slug` matches the new host rules.
+1. Edit **`solve-tracker-backend/src/shared/platform-catalog.ts`** only.
+2. Run backend tests + **`pnpm verify:platform-api`** in the frontend (and **`pnpm verify:platform-cls`** before merge when a test DB is available).
+3. `api:export` / `api:check`, frontend `api:generate`, sync **`CATALOG_SLUGS`** when the OpenAPI slug enum changes.
+4. Deploy backend (updates `GET /platforms`, write path, seed on next `pnpm db:seed`).
+5. On environments with existing problems, run **`pnpm db:backfill:platform-slugs`** (or full **`pnpm db:seed`** on dev) so stored `platform_slug` matches the new host rules.
 
 ## 3. Rollout order
 
@@ -220,7 +221,7 @@ Deploy note: ship **backend P1–P3** before or with **P4** frontend so response
 
 | Risk | Mitigation |
 | --- | --- |
-| Catalog / DB slug drift after host rule change | Version catalog; backfill script; `verify:catalog` + `verify:platform-cls` |
+| Catalog / DB slug drift after host rule change | Version catalog; backfill script; `verify:platform-api` + `verify:platform-cls` |
 | Large libraries backfill slow | Batch updates in migration; off-peak for production |
 | Filter `other` UX | Explicit chip “Other” in toolbar; document in FRONTEND_CONVENTIONS |
 | Phase 7 docs say hostname match | Update PHASE_7_PLAN cross-link when P3 completes (historical note only) |

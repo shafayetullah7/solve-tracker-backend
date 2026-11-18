@@ -10,6 +10,7 @@ import { ProgressModule } from './modules/progress/progress.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { ProfileModule } from './modules/profile/profile.module.js';
 import { MediaModule } from './modules/media/media.module.js';
+import { PlatformsModule } from './modules/platforms/platforms.module.js';
 import { DatabaseModule } from './database/database.module.js';
 
 @Module({
@@ -26,6 +27,7 @@ import { DatabaseModule } from './database/database.module.js';
     TopicsModule,
     ProblemsModule,
     ProgressModule,
+    PlatformsModule,
     HealthModule,
     MediaModule,
     ProfileModule,

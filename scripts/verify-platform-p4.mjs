@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const backendRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const frontendRoot = path.resolve(backendRoot, '..', 'solve-tracker-frontend');
+const frontendRoot = path.resolve(backendRoot, '..', 'cp-frontend');
 
 const target = process.env.TEST_DATABASE_URL;
 if (!target || !new URL(target).pathname.endsWith('_test')) {

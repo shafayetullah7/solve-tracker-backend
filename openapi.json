@@ -2378,6 +2378,112 @@
         ]
       }
     },
+    "/platforms": {
+      "get": {
+        "operationId": "PlatformsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "slug": {
+                            "type": "string",
+                            "enum": [
+                              "codeforces",
+                              "leetcode",
+                              "codechef",
+                              "atcoder",
+                              "hackerrank",
+                              "geeksforgeeks",
+                              "kattis",
+                              "spoj",
+                              "cses",
+                              "beecrowd",
+                              "codewars",
+                              "hackerearth",
+                              "topcoder",
+                              "projecteuler",
+                              "uva",
+                              "aizu"
+                            ]
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "baseUrl": {
+                            "type": "string",
+                            "format": "uri"
+                          },
+                          "urlHosts": {
+                            "minItems": 1,
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "required": [
+                          "slug",
+                          "name",
+                          "baseUrl",
+                          "urlHosts"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Canonical judge / practice site reference list (slug, label, base URL, URL host patterns)."
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "statusCode",
+                    "code",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Platforms"
+        ]
+      }
+    },
     "/health": {
       "get": {
         "operationId": "HealthController_live",

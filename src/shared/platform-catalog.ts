@@ -1,7 +1,7 @@
 /**
  * Canonical judges / practice sites for the API (seed + URL breakdown).
- * Duplicated in solve-tracker-frontend/src/lib/platforms/platform-catalog.ts.
- * Keep both in sync: `pnpm verify:catalog` from solve-tracker-frontend.
+ * Frontend loads judges via `GET /platforms` (see solve-tracker-frontend `platform-slugs.ts` for OpenAPI slug guards).
+ * Keep OpenAPI in sync: `pnpm verify:platform-api` from solve-tracker-frontend.
  */
 export type PlatformCatalogEntry = {
   readonly slug: string;

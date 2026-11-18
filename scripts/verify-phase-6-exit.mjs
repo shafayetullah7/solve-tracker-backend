@@ -9,7 +9,7 @@ import path from "node:path";
 import fs from "node:fs";
 
 const backendRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const frontendRoot = path.resolve(backendRoot, "..", "solve-tracker-frontend");
+const frontendRoot = path.resolve(backendRoot, "..", "cp-frontend");
 
 const criteria = [
   { id: 1, summary: "Two accounts; same URL allowed across accounts", gate: "problems-integration" },

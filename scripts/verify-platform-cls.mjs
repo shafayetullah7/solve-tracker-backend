@@ -49,7 +49,7 @@ for (const script of phases) {
   });
 }
 
-console.log('\nPLATFORM-CLS — frontend verify:catalog …');
-await run('pnpm', ['verify:catalog'], frontendRoot);
+console.log('\nPLATFORM-CLS — frontend verify:platform-api …');
+await run('pnpm', ['verify:platform-api'], frontendRoot);
 
 console.log('\nPLATFORM-CLS — PASS');

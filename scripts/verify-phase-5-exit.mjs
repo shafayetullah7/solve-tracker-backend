@@ -12,7 +12,7 @@ import path from "node:path";
 import fs from "node:fs";
 
 const backendRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const frontendRoot = path.resolve(backendRoot, "..", "solve-tracker-frontend");
+const frontendRoot = path.resolve(backendRoot, "..", "cp-frontend");
 
 const runPhase6Retest = (process.env.VERIFY_PHASE6_TOPIC_DELETE ?? "1") !== "0";
 
