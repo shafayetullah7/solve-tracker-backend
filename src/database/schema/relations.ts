@@ -14,6 +14,10 @@ import { problemTopics } from './problems/problem-topics.table.js';
 import { media } from './media/media.table.js';
 import { userWorkEntries } from './profile/user-work-entries.table.js';
 import { userEducationEntries } from './profile/user-education-entries.table.js';
+import { discoverDailyCounters } from './discover/discover-daily-counters.table.js';
+import { userFollows } from './follows/user-follows.table.js';
+import { discoverReports } from './discover-safety/discover-reports.table.js';
+import { userBlocks } from './discover-safety/user-blocks.table.js';
 
 const tables = {
   platforms,
@@ -28,6 +32,10 @@ const tables = {
   media,
   userWorkEntries,
   userEducationEntries,
+  discoverDailyCounters,
+  userFollows,
+  userBlocks,
+  discoverReports,
 };
 
 export const relations = defineRelations(tables);

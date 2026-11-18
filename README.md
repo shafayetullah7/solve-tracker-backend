@@ -16,7 +16,9 @@ pnpm docker:dev:build
 pnpm docker:dev
 ```
 
-The backend runs at `http://localhost:3000`. PostgreSQL is available on `localhost:5432`. Nest watches the mounted `src/` directory using polling, including on Docker Desktop. Dependencies and build output stay inside the image/container. This Dockerfile is for development.
+The backend runs at `http://localhost:3000`. PostgreSQL is available on `localhost:5432`. Nest watches the mounted `src/` directory using polling, including on Docker Desktop. Dependencies and build output stay inside the image/container. Compose uses the Dockerfile **`development`** target; **`production`** is built for registry deploy.
+
+**CI/CD (Docker Hub):** GitHub Actions builds and pushes the production image — see [docs/GITHUB_BACKEND_CI.md](docs/GITHUB_BACKEND_CI.md) for workflow, **GitHub secrets/variables**, and runtime env for deploy.
 
 In another terminal, also from `backend/`, apply migrations and seed:
 

@@ -30,7 +30,7 @@ The MVP requirements below add supporting behavior needed to make that core usab
 - A problem can have no topics and remain visible in the full library.
 - Users can add previously solved problems as well as problems they intend to solve.
 - The initial interface uses a compact table or list suitable for repeated tracking.
-- Support private user accounts with email/password registration and login, plus forgot-password and reset-password flows. Registration requires name, email, and password, with an optional unique handle (see FR-07). Use Resend for email delivery. Every problem and topic is private to its owner.
+- Support private user accounts with email/password registration and login, plus forgot-password and reset-password flows. Registration requires name, email, and password, with an optional unique handle (see FR-07). Use Resend for email delivery. Every problem and topic is **private by default**; owners may opt in to practice sharing (see FR-10).
 
 ## 4. MVP functional requirements
 
@@ -165,6 +165,21 @@ Design lock: [docs/USER_HANDLE_A0_RESULTS.md](docs/USER_HANDLE_A0_RESULTS.md). P
 - A delivery failure must not invalidate a user's current password or reveal account existence through a different public response.
 - Automated tests must mock the email provider or use an explicitly configured test setup; never send real user emails as part of routine tests.
 
+### FR-10: Practice discovery (DISCOVER)
+
+Design and execution: [docs/PRACTICE_DISCOVERY_PHASED_PLAN.md](docs/PRACTICE_DISCOVERY_PHASED_PLAN.md), [docs/DISCOVER_E0_DECISIONS.md](docs/DISCOVER_E0_DECISIONS.md).
+
+- Owners control **practice visibility** per account: `private` (default), `summary`, or `topics`. While `private`, other signed-in users cannot find or view the owner's practice profile; lookups behave like an unknown handle.
+- At `summary`, signed-in viewers may see name, handle, avatar, bio, optional practice goal, aggregate counts, streak, weekly activity buckets, and platform mix. At `topics`, they may also see topic names with progress and, for topics marked public, the problem list (title, platform, judge problem id, difficulty, rating, owner solve status, problem URL).
+- **Never expose** email, user id, notes, exact solve or create timestamps, private topic names on profile surfaces, session or OAuth status, or the identity of anyone who viewed or copied shared content.
+- Topics may be marked **public** with an optional short description (≤ 280 characters). Public problem lists apply only when practice visibility is `topics` and the topic is public.
+- Optional **practice goal** (`interview`, `contests`, `fundamentals`, `coaching`) powers goal-based discovery; it is visible from `summary` when set.
+- Aggregated discovery (commonly tracked problems, topic patterns, peer benchmarks) uses k-anonymity thresholds (k ≥ 3, 5, or 10 per surface). Below threshold, UI blocks are hidden rather than showing zero.
+- Discovery surfaces include handle search, personalized suggestion rails, topic hubs, read-only practice profiles, side-by-side compare with neutral insights, and borrowing (add problem, copy public topic) into the viewer's own library — without feeds, leaderboards, likes, or comments.
+- Viewing other users' practice requires a signed-in session until an explicit later phase allows anonymous share pages.
+- Product acceptance for discovery is defined by journeys **J1–J8** in the phased plan §2.4. Execution gates live in [docs/PRACTICE_DISCOVERY_EXECUTION_PLAN.md](docs/PRACTICE_DISCOVERY_EXECUTION_PLAN.md).
+- Cross-user **writes** remain owner-scoped; discovery is read-only projection plus the viewer's own create/duplicate flows when borrowing.
+
 ## 5. Logical data requirements
 
 These describe the domain independently of the PostgreSQL storage implementation.
@@ -172,15 +187,15 @@ These describe the domain independently of the PostgreSQL storage implementation
 | Entity | Required fields | Optional fields / notes |
 | --- | --- | --- |
 | Problem | ID, owner reference, title, URL, normalized URL, platform, status, created timestamp, updated timestamp | Platform problem identifier, difficulty label, numeric rating, notes, completion timestamp |
-| Topic | ID, owner reference, name, normalized name, created timestamp, updated timestamp | — |
+| Topic | ID, owner reference, name, normalized name, created timestamp, updated timestamp | Public flag and description when owner shares lists (FR-10) |
 | ProblemTopic | Problem reference, topic reference | Unique problem/topic pair |
-| User | ID, name, normalized unique email, password hash, created timestamp, updated timestamp | Email/password authentication |
+| User | ID, name, normalized unique email, password hash, handle, created timestamp, updated timestamp | Password hash optional for OAuth-only; practice visibility and practice goal (FR-10) |
 | AuthSession | ID, user reference, refresh-token digest, expiry timestamp, revocation state | Rotation/token-family metadata; access JWTs reference the session for revocation checks |
 | PasswordResetToken | ID, user reference, token hash, expiry timestamp | Consumption/revocation state; never persist the raw token |
 
 - Problems and topics have a many-to-many relationship through ProblemTopic.
-- All tracker data is **user-centric**: a user creates problems for their own practice only. There is no shared user-problem catalog, assignment to other users, or public problem library in the MVP.
-- Every problem and topic requires an owner reference. Platform reference records may be shared; user-created problems, notes, tags/topics, completion state, and progress remain private.
+- All tracker data is **user-centric**: a user creates problems for their own practice only. There is no shared user-problem catalog or assignment to other users. Opt-in practice sharing (FR-10) exposes **read-only** aggregates and explicitly public topic lists; it does not change ownership or cross-user write rules.
+- Every problem and topic requires an owner reference. Platform reference records may be shared. By default, user-created problems, notes, completion state, and progress are private to the owner; FR-10 defines what may be shown when the owner opts in.
 - The same external problem URL can exist independently in different users' libraries. Editing or solving one user's entry must never change another user's entry.
 - Scope every problem/topic lookup, mutation, association, list, search, and progress query to the authenticated owner. Do not fetch or update a resource by its ID alone without ownership enforcement.
 - Difficulty labels and numeric ratings are separate optional values. Ratings from different platforms are not assumed to be comparable.
@@ -235,6 +250,7 @@ These describe the domain independently of the PostgreSQL storage implementation
 19. Two users can independently add the same problem URL, assign different topics, and track different solve states without affecting each other.
 20. Stored password values are Argon2id hashes, and raw passwords, refresh tokens, and signing secrets never appear in logs or public API responses.
 21. A user can register with only name, email, and password (receiving a system-assigned handle), later customize handle in profile, or supply an optional chosen handle at registration; duplicate handles return a field-aware conflict error.
+22. With practice visibility not `private`, another signed-in user can view only the data allowed by that visibility level and public topic flags; a user with `private` visibility is indistinguishable from an unknown handle on discovery lookup.
 
 ## 9. Optional later features
 
@@ -252,13 +268,15 @@ These are candidates for later work and are not MVP commitments.
 | Automatic metadata lookup | Fill titles, identifiers, and difficulty from supported platform links |
 | Platform synchronization | Import submissions and update completion through supported integrations |
 | Goals and activity history | Track practice targets and progress over time |
-| Sharing | Publish selected sheets or topic lists with explicit visibility controls |
+| Follow other practicers | Study-group following without a feed (DISCOVER D7) |
+| Anonymous public practice pages | Share links viewable without login (DISCOVER D8) |
 
 ## 10. Outside the initial scope
 
 - An online judge, code execution, or submission evaluation.
 - A code editor or competitive programming contest platform.
 - Social feeds, leaderboards, or collaborative editing.
+- Practice discovery **profiles, topic list sharing, compare, and borrow** are **in scope** via FR-10; they are not a generic social network, feed, or ranking product.
 - Automatic scraping, account linking, or automatic solved detection.
 - AI recommendations or generated solutions.
 

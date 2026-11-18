@@ -6,7 +6,8 @@ import {
 } from './topic-name.js';
 import { TopicsRepository } from './topics.repository.js';
 import { topicError } from './topics.errors.js';
-import type { ListTopicsQuery } from './schemas/topics.schema.js';
+import { bumpDiscoverVersion } from '../discover/discover-cache.js';
+import type { ListTopicsQuery, PatchTopicInput } from './schemas/topics.schema.js';
 import { topicIdParamSchema } from './schemas/topics.schema.js';
 
 const DUPLICATE_CONSTRAINT = 'topics_user_normalized_name_uniq';
@@ -24,6 +25,8 @@ export function toTopicResponse(row: Topic) {
   return {
     id: row.id,
     name: row.name,
+    isPublic: row.isPublic,
+    description: row.description,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -83,18 +86,33 @@ export class TopicsService {
     }
   }
 
-  async rename(userId: string, rawTopicId: string, rawName: string) {
+  async patch(
+    userId: string,
+    rawTopicId: string,
+    input: PatchTopicInput,
+  ) {
     const topicId = this.parseId(rawTopicId);
-    const { name, normalizedName } = this.nameFromRaw(rawName);
+    const updates: {
+      name?: string;
+      normalizedName?: string;
+      isPublic?: boolean;
+      description?: string;
+    } = {};
+    if (input.name !== undefined) {
+      const { name, normalizedName } = this.nameFromRaw(input.name);
+      updates.name = name;
+      updates.normalizedName = normalizedName;
+    }
+    if (input.isPublic !== undefined) updates.isPublic = input.isPublic;
+    if (input.description !== undefined) updates.description = input.description;
+
     try {
-      const row = await this.repo.updateName(
-        userId,
-        topicId,
-        name,
-        normalizedName,
-      );
+      const row = await this.repo.updateFields(userId, topicId, updates);
       if (!row)
         throw topicError(404, 'NOT_FOUND', 'Topic was not found.');
+      if (input.isPublic !== undefined || input.description !== undefined) {
+        bumpDiscoverVersion();
+      }
       return toTopicResponse(row);
     } catch (error) {
       if (error instanceof Error && 'getStatus' in error) throw error;
@@ -102,6 +120,10 @@ export class TopicsService {
         throw topicError(409, 'TOPIC_NAME_IN_USE', 'Topic name already exists.');
       throw error;
     }
+  }
+
+  async rename(userId: string, rawTopicId: string, rawName: string) {
+    return this.patch(userId, rawTopicId, { name: rawName });
   }
 
   async remove(userId: string, rawTopicId: string): Promise<void> {

@@ -1,0 +1,440 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "e17f4f79-1424-4705-a752-ca5f1a09128c",
+  "prevIds": [
+    "fcc0deab-d67d-44ce-b46b-0628cf0b216d"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "user_blocks"
+      ],
+      "writes": [
+        "s|tbl|public.user_blocks",
+        "n|tbl|public.user_blocks",
+        "e|tbl|public.user_blocks",
+        "n|rel|public.user_blocks",
+        "n|type|public.user_blocks",
+        "n|rel|public.user_blocks_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "discover_reports"
+      ],
+      "writes": [
+        "s|tbl|public.discover_reports",
+        "n|tbl|public.discover_reports",
+        "e|tbl|public.discover_reports",
+        "n|rel|public.discover_reports",
+        "n|type|public.discover_reports",
+        "n|rel|public.discover_reports_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "users",
+        "public_web"
+      ],
+      "writes": [
+        "s|col|public.users.public_web",
+        "n|col|public.users.public_web",
+        "e|col|public.users.public_web"
+      ],
+      "reads": [
+        "n|tbl|public.users",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "user_blocks"
+      ],
+      "writes": [
+        "s|fk|public.user_blocks.user_blocks_blocker_id_users_id_fkey",
+        "n|fk|public.user_blocks.user_blocks_blocker_id_users_id_fkey",
+        "e|fk|public.user_blocks.user_blocks_blocker_id_users_id_fkey",
+        "n|con|public.user_blocks.user_blocks_blocker_id_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.user_blocks",
+        "n|sch|public",
+        "n|tbl|public.users",
+        "n|sch|public",
+        "n|col|public.user_blocks.blocker_id",
+        "n|col|public.users.id",
+        "e|uniqueness|public.users.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "user_blocks"
+      ],
+      "writes": [
+        "s|fk|public.user_blocks.user_blocks_blocked_id_users_id_fkey",
+        "n|fk|public.user_blocks.user_blocks_blocked_id_users_id_fkey",
+        "e|fk|public.user_blocks.user_blocks_blocked_id_users_id_fkey",
+        "n|con|public.user_blocks.user_blocks_blocked_id_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.user_blocks",
+        "n|sch|public",
+        "n|tbl|public.users",
+        "n|sch|public",
+        "n|col|public.user_blocks.blocked_id",
+        "n|col|public.users.id",
+        "e|uniqueness|public.users.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "discover_reports"
+      ],
+      "writes": [
+        "s|fk|public.discover_reports.discover_reports_reporter_id_users_id_fkey",
+        "n|fk|public.discover_reports.discover_reports_reporter_id_users_id_fkey",
+        "e|fk|public.discover_reports.discover_reports_reporter_id_users_id_fkey",
+        "n|con|public.discover_reports.discover_reports_reporter_id_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.discover_reports",
+        "n|sch|public",
+        "n|tbl|public.users",
+        "n|sch|public",
+        "n|col|public.discover_reports.reporter_id",
+        "n|col|public.users.id",
+        "e|uniqueness|public.users.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "discover_reports"
+      ],
+      "writes": [
+        "s|fk|public.discover_reports.discover_reports_reported_user_id_users_id_fkey",
+        "n|fk|public.discover_reports.discover_reports_reported_user_id_users_id_fkey",
+        "e|fk|public.discover_reports.discover_reports_reported_user_id_users_id_fkey",
+        "n|con|public.discover_reports.discover_reports_reported_user_id_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.discover_reports",
+        "n|sch|public",
+        "n|tbl|public.users",
+        "n|sch|public",
+        "n|col|public.discover_reports.reported_user_id",
+        "n|col|public.users.id",
+        "e|uniqueness|public.users.id"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "user_blocks",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "discover_reports",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "users",
+        "name": "public_web",
+        "type": "boolean",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "false",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "user_blocks",
+        "name": "blocker_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "user_blocks",
+        "name": "blocked_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "user_blocks",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_reports",
+        "name": "id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "gen_random_uuid()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_reports",
+        "name": "reporter_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_reports",
+        "name": "reported_user_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_reports",
+        "name": "reason",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_reports",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "user_blocks",
+        "name": "user_blocks_blocker_id_users_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "blocker_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "users",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "user_blocks",
+        "name": "user_blocks_blocked_id_users_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "blocked_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "users",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_reports",
+        "name": "discover_reports_reporter_id_users_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "reporter_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "users",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_reports",
+        "name": "discover_reports_reported_user_id_users_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "reported_user_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "users",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "user_blocks",
+        "name": "user_blocks_pkey",
+        "columns": [
+          "blocker_id",
+          "blocked_id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_reports",
+        "name": "discover_reports_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "user_blocks",
+        "name": "user_blocks_no_self",
+        "value": "blocker_id <> blocked_id",
+        "entityType": "checks"
+      }
+    }
+  ]
+}

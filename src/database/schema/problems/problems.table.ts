@@ -42,6 +42,7 @@ export const problems = pgTable(
     ),
     index('problems_user_idx').on(t.userId),
     index('problems_user_platform_slug_idx').on(t.userId, t.platformSlug),
+    index('discover_problem_normalized_url_idx').on(t.normalizedUrl),
   ],
 );
 

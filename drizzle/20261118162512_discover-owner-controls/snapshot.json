@@ -1,0 +1,236 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "7aef8f91-c0ca-4fb9-af5d-99dd34ff7470",
+  "prevIds": [
+    "8ea764f4-b267-4e63-b975-aa16cd745092"
+  ],
+  "footprints": [
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "users",
+        "practice_visibility"
+      ],
+      "writes": [
+        "s|col|public.users.practice_visibility",
+        "n|col|public.users.practice_visibility",
+        "e|col|public.users.practice_visibility"
+      ],
+      "reads": [
+        "n|tbl|public.users",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "users",
+        "practice_goal"
+      ],
+      "writes": [
+        "s|col|public.users.practice_goal",
+        "n|col|public.users.practice_goal",
+        "e|col|public.users.practice_goal"
+      ],
+      "reads": [
+        "n|tbl|public.users",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "topics",
+        "is_public"
+      ],
+      "writes": [
+        "s|col|public.topics.is_public",
+        "n|col|public.topics.is_public",
+        "e|col|public.topics.is_public"
+      ],
+      "reads": [
+        "n|tbl|public.topics",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "topics",
+        "description"
+      ],
+      "writes": [
+        "s|col|public.topics.description",
+        "n|col|public.topics.description",
+        "e|col|public.topics.description"
+      ],
+      "reads": [
+        "n|tbl|public.topics",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_check",
+      "statementTarget": [
+        "table",
+        "public",
+        "users"
+      ],
+      "writes": [
+        "s|ck|public.users.users_practice_visibility_check",
+        "n|ck|public.users.users_practice_visibility_check",
+        "e|ck|public.users.users_practice_visibility_check",
+        "n|con|public.users.users_practice_visibility_check"
+      ],
+      "reads": [
+        "n|tbl|public.users",
+        "n|sch|public",
+        "n|col|public.users.practice_visibility"
+      ]
+    },
+    {
+      "statementType": "add_check",
+      "statementTarget": [
+        "table",
+        "public",
+        "users"
+      ],
+      "writes": [
+        "s|ck|public.users.users_practice_goal_check",
+        "n|ck|public.users.users_practice_goal_check",
+        "e|ck|public.users.users_practice_goal_check",
+        "n|con|public.users.users_practice_goal_check"
+      ],
+      "reads": [
+        "n|tbl|public.users",
+        "n|sch|public",
+        "n|col|public.users.practice_goal"
+      ]
+    },
+    {
+      "statementType": "add_check",
+      "statementTarget": [
+        "table",
+        "public",
+        "topics"
+      ],
+      "writes": [
+        "s|ck|public.topics.topics_description_len",
+        "n|ck|public.topics.topics_description_len",
+        "e|ck|public.topics.topics_description_len",
+        "n|con|public.topics.topics_description_len"
+      ],
+      "reads": [
+        "n|tbl|public.topics",
+        "n|sch|public",
+        "n|col|public.topics.description"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "users",
+        "name": "practice_visibility",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'private'",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "users",
+        "name": "practice_goal",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "topics",
+        "name": "is_public",
+        "type": "boolean",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "false",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "topics",
+        "name": "description",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "''",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "users",
+        "name": "users_practice_visibility_check",
+        "value": "\"practice_visibility\" in ('private', 'summary', 'topics')",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "users",
+        "name": "users_practice_goal_check",
+        "value": "\"practice_goal\" is null or \"practice_goal\" in ('interview', 'contests', 'fundamentals', 'coaching')",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "topics",
+        "name": "topics_description_len",
+        "value": "char_length(\"description\") <= 280",
+        "entityType": "checks"
+      }
+    }
+  ]
+}

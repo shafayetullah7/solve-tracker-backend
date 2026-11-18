@@ -8,6 +8,8 @@ const topic = {
   userId: '22222222-2222-4222-8222-222222222222',
   name: 'Arrays',
   normalizedName: 'arrays',
+  isPublic: false,
+  description: '',
   createdAt: new Date('2026-01-01T00:00:00.000Z'),
   updatedAt: new Date('2026-01-01T00:00:00.000Z'),
 };
@@ -56,6 +58,8 @@ describe('TopicsService', () => {
     await expect(service.create('u', 'Arrays')).resolves.toEqual({
       id: topic.id,
       name: 'Arrays',
+      isPublic: false,
+      description: '',
       createdAt: '2026-01-01T00:00:00.000Z',
       updatedAt: '2026-01-01T00:00:00.000Z',
     });

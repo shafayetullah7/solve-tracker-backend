@@ -1,0 +1,221 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "67b036dd-3dfd-447a-94a0-7fe421f9e7ad",
+  "prevIds": [
+    "379c3615-a1de-4162-aaad-313935b35629"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "discover_events"
+      ],
+      "writes": [
+        "s|tbl|public.discover_events",
+        "n|tbl|public.discover_events",
+        "e|tbl|public.discover_events",
+        "n|rel|public.discover_events",
+        "n|type|public.discover_events",
+        "n|rel|public.discover_events_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "discover_events",
+        "discover_events_created_at_idx"
+      ],
+      "writes": [
+        "s|idx|public.discover_events_created_at_idx",
+        "n|idx|public.discover_events_created_at_idx",
+        "e|idx|public.discover_events_created_at_idx",
+        "n|rel|public.discover_events_created_at_idx"
+      ],
+      "reads": [
+        "n|tbl|public.discover_events",
+        "n|sch|public",
+        "n|col|public.discover_events.created_at"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "discover_events"
+      ],
+      "writes": [
+        "s|fk|public.discover_events.discover_events_viewer_id_users_id_fkey",
+        "n|fk|public.discover_events.discover_events_viewer_id_users_id_fkey",
+        "e|fk|public.discover_events.discover_events_viewer_id_users_id_fkey",
+        "n|con|public.discover_events.discover_events_viewer_id_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.discover_events",
+        "n|sch|public",
+        "n|tbl|public.users",
+        "n|sch|public",
+        "n|col|public.discover_events.viewer_id",
+        "n|col|public.users.id",
+        "e|uniqueness|public.users.id"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "discover_events",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_events",
+        "name": "id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "gen_random_uuid()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_events",
+        "name": "viewer_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_events",
+        "name": "event",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_events",
+        "name": "surface",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_events",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_events",
+        "name": "discover_events_created_at_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "created_at",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_events",
+        "name": "discover_events_viewer_id_users_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "viewer_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "users",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_events",
+        "name": "discover_events_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    }
+  ]
+}

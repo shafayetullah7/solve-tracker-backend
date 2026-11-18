@@ -109,6 +109,25 @@ try {
     'GET profile includes handle',
   );
   check(Array.isArray(initial.body.work) && initial.body.work.length === 0, 'Empty work');
+  check(initial.body.practiceVisibility === 'private', 'Default practice visibility');
+  check(initial.body.practiceGoal === null, 'Default practice goal null');
+
+  const visibilityPatch = await request(server)
+    .patch('/users/me/profile')
+    .set(headers)
+    .set('Cookie', user.cookie)
+    .send({ practiceVisibility: 'topics', practiceGoal: 'interview' })
+    .expect(200);
+  check(visibilityPatch.body.practiceVisibility === 'topics', 'PATCH practice visibility');
+  check(visibilityPatch.body.practiceGoal === 'interview', 'PATCH practice goal');
+
+  const badVisibility = await request(server)
+    .patch('/users/me/profile')
+    .set(headers)
+    .set('Cookie', user.cookie)
+    .send({ practiceVisibility: 'public' })
+    .expect(400);
+  check(badVisibility.body.code === 'VALIDATION_ERROR', 'Invalid visibility → 400');
 
   const customHandle = `profile_${randomUUID().replace(/-/g, '').slice(0, 12)}`;
   const renamed = await request(server)

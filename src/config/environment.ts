@@ -89,6 +89,16 @@ export const googleOAuthEnvironmentSchema = z.object({
   GOOGLE_OAUTH_PROMPT: z.string().trim().min(1).optional(),
   GOOGLE_OAUTH_STATE_TTL_SECONDS: positive.optional(),
 });
+const discoverModeSchema = z.preprocess(
+  (raw) => {
+    if (raw === undefined || raw === null || raw === '') return 'off';
+    return raw;
+  },
+  z.enum(['off', 'sharing', 'full']),
+);
+export const discoverEnvironmentSchema = z.object({
+  DISCOVER_MODE: discoverModeSchema,
+});
 export const googleRiscEnvironmentSchema = z.object({
   GOOGLE_RISC_ENABLED: envBooleanFlag('false'),
   GOOGLE_RISC_AUDIENCE: z.string().trim().min(1).optional(),
@@ -116,6 +126,7 @@ export const environmentSchema = z
   .extend(authEnvironmentSchema.shape)
   .extend(cloudinaryEnvironmentSchema.shape)
   .extend(googleOAuthEnvironmentSchema.shape)
+  .extend(discoverEnvironmentSchema.shape)
   .extend(googleRiscEnvironmentSchema.shape)
   .superRefine((v, ctx) => {
     const fail = (key: string, message: string) =>

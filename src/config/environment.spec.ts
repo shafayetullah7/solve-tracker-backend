@@ -184,4 +184,28 @@ describe('environment schema', () => {
     });
     expect(config.GOOGLE_RISC_ENABLED).toBe(true);
   });
+
+  it.each(['off', 'sharing', 'full'] as const)(
+    'parses DISCOVER_MODE %s',
+    (DISCOVER_MODE) => {
+      expect(environmentSchema.parse({ ...valid, DISCOVER_MODE }).DISCOVER_MODE).toBe(
+        DISCOVER_MODE,
+      );
+    },
+  );
+
+  it('defaults DISCOVER_MODE to off when unset or empty', () => {
+    const without = { ...valid };
+    delete (without as Record<string, unknown>).DISCOVER_MODE;
+    expect(environmentSchema.parse(without).DISCOVER_MODE).toBe('off');
+    expect(
+      environmentSchema.parse({ ...valid, DISCOVER_MODE: '' }).DISCOVER_MODE,
+    ).toBe('off');
+  });
+
+  it('rejects invalid DISCOVER_MODE', () => {
+    expect(
+      environmentSchema.safeParse({ ...valid, DISCOVER_MODE: 'enabled' }).success,
+    ).toBe(false);
+  });
 });

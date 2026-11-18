@@ -20,6 +20,8 @@ function baseUser(overrides: Partial<User> = {}): User {
     handleChangedAt: null,
     bio: '',
     avatarMediaId: null,
+    practiceVisibility: 'private',
+    practiceGoal: null,
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,

@@ -53,15 +53,19 @@ export class TopicsRepository {
     )[0]!;
   }
 
-  async updateName(
+  async updateFields(
     userId: string,
     topicId: string,
-    name: string,
-    normalizedName: string,
+    fields: {
+      name?: string;
+      normalizedName?: string;
+      isPublic?: boolean;
+      description?: string;
+    },
   ): Promise<Topic | undefined> {
     const rows = await this.db
       .update(topics)
-      .set({ name, normalizedName, updatedAt: new Date() })
+      .set({ ...fields, updatedAt: new Date() })
       .where(and(eq(topics.id, topicId), eq(topics.userId, userId)))
       .returning();
     return rows[0];

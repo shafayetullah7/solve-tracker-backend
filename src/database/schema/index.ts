@@ -7,3 +7,6 @@ export * from './topics/index.js';
 export * from './problems/index.js';
 export * from './media/index.js';
 export * from './profile/index.js';
+export * from './discover/index.js';
+export * from './follows/index.js';
+export * from './discover-safety/index.js';

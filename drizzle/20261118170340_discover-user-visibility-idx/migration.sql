@@ -1,0 +1,1 @@
+CREATE INDEX "discover_user_visibility_idx" ON "users" ("id") WHERE "practice_visibility" <> 'private';

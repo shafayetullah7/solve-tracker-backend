@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import {
+  practiceGoalSchema,
+  practiceVisibilitySchema,
+} from '../../common/schemas/practice-discovery.schema.js';
+import {
   USER_HANDLE_CHANGE_COOLDOWN_MS,
   isUserHandleUniqueViolation,
 } from '../../common/schemas/user-handle-assign.js';
@@ -8,6 +12,7 @@ import { USER_HANDLE_ERROR } from '../../common/schemas/user-handle.errors.js';
 import { users } from '../../database/schema/index.js';
 import { media } from '../../database/schema/media/media.table.js';
 import type { UserEducationEntry } from '../../database/schema/profile/user-education-entries.table.js';
+import type { User } from '../../database/schema/index.js';
 import type { UserWorkEntry } from '../../database/schema/profile/user-work-entries.table.js';
 import { UserLockRepository } from '../../database/user-lock.repository.js';
 import { MediaService } from '../media/media.service.js';
@@ -15,6 +20,7 @@ import {
   acquireProfileSlot,
   releaseProfileSlot,
 } from '../media/media-usage.js';
+import { bumpDiscoverVersion } from '../discover/discover-cache.js';
 import { MAX_EDUCATION_ENTRIES } from './profile.constants.js';
 import { profileError } from './profile.errors.js';
 import { ProfileRepository } from './profile.repository.js';
@@ -36,6 +42,17 @@ function toWorkEntry(row: UserWorkEntry): WorkEntryResponse {
     organization: row.organization,
     role: row.role,
     ...(row.period ? { period: row.period } : {}),
+  };
+}
+
+function toPracticeFields(user: User) {
+  return {
+    practiceVisibility: practiceVisibilitySchema.parse(user.practiceVisibility),
+    practiceGoal:
+      user.practiceGoal === null
+        ? null
+        : practiceGoalSchema.parse(user.practiceGoal),
+    publicWeb: user.publicWeb,
   };
 }
 
@@ -90,6 +107,7 @@ export class ProfileService {
       bio: user.bio,
       handle: user.handle,
       ...(avatarUrl ? { avatarUrl } : {}),
+      ...toPracticeFields(user),
       work: work.map(toWorkEntry),
       education: education.map(toEducationEntry),
     };
@@ -125,6 +143,39 @@ export class ProfileService {
           }
           updates.handle = next;
           updates.handleChangedAt = now;
+        }
+      }
+
+      let discoverBump = false;
+      if (input.practiceVisibility !== undefined) {
+        if (input.practiceVisibility !== user.practiceVisibility) {
+          updates.practiceVisibility = input.practiceVisibility;
+          discoverBump = true;
+          if (input.practiceVisibility === 'private') {
+            updates.publicWeb = false;
+          }
+        }
+      }
+      if (input.publicWeb !== undefined) {
+        const nextVisibility =
+          input.practiceVisibility ?? user.practiceVisibility;
+        if (nextVisibility === 'private') {
+          if (input.publicWeb) {
+            throw profileError(400, 'VALIDATION_ERROR', 'Invalid profile input.', {
+              publicWeb: 'Public page requires a sharing visibility level.',
+            });
+          }
+          updates.publicWeb = false;
+        } else {
+          updates.publicWeb = input.publicWeb;
+        }
+      }
+      if (input.practiceGoal !== undefined) {
+        const next = input.practiceGoal;
+        const prev = user.practiceGoal ?? null;
+        if (next !== prev) {
+          updates.practiceGoal = next;
+          discoverBump = true;
         }
       }
 
@@ -182,11 +233,14 @@ export class ProfileService {
         this.profiles.listEducation(userId, tx),
       ]);
 
+      if (discoverBump) bumpDiscoverVersion();
+
       return {
         name: updated.name,
         bio: updated.bio,
         handle: updated.handle,
         ...(avatarUrl ? { avatarUrl } : {}),
+        ...toPracticeFields(updated),
         work: work.map(toWorkEntry),
         education: education.map(toEducationEntry),
       };

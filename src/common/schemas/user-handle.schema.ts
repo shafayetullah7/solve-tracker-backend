@@ -12,6 +12,7 @@ export const USER_HANDLE_RESERVED_LIST = [
   'app',
   'auth',
   'dashboard',
+  'discover',
   'edit',
   'forgot',
   'google',
@@ -36,6 +37,7 @@ export const USER_HANDLE_RESERVED_LIST = [
   'settings',
   'support',
   'topics',
+  'u',
   'users',
   'www',
 ] as const;

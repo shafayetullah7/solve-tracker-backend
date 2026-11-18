@@ -9,5 +9,6 @@ import { ProgressService } from './progress.service.js';
   imports: [DatabaseModule, AuthModule],
   controllers: [ProgressController],
   providers: [ProgressService, ProgressRepository],
+  exports: [ProgressService],
 })
 export class ProgressModule {}

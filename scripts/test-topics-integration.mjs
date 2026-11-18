@@ -81,6 +81,7 @@ try {
     .send({ name: '  Monotonic Stack  ' })
     .expect(201);
   check(createdA.body.name === 'Monotonic Stack', 'Create trims display name');
+  check(createdA.body.isPublic === false && createdA.body.description === '', 'Create share defaults');
   const topicAId = createdA.body.id;
 
   const createdB = await request(server)
@@ -147,6 +148,23 @@ try {
     .send({ name: 'Stacks' })
     .expect(200);
   check(renamed.body.name === 'Stacks', 'Rename updates display name');
+
+  const shared = await request(server)
+    .patch(`/topics/${topicAId}`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ isPublic: true, description: 'Public list' })
+    .expect(200);
+  check(shared.body.isPublic === true && shared.body.description === 'Public list', 'PATCH share fields');
+
+  const longDesc = 'x'.repeat(281);
+  const tooLong = await request(server)
+    .patch(`/topics/${topicAId}`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ description: longDesc })
+    .expect(400);
+  check(tooLong.body.code === 'VALIDATION_ERROR', 'Description over max → 400');
 
   const secondA = await request(server)
     .post('/topics')

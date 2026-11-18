@@ -8,8 +8,8 @@ import {
 } from './user-handle.schema.js';
 
 describe('user-handle.schema', () => {
-  it('reserved list matches A0 contract (32 entries)', () => {
-    expect(USER_HANDLE_RESERVED_LIST).toHaveLength(32);
+  it('reserved list matches handle contract (34 entries)', () => {
+    expect(USER_HANDLE_RESERVED_LIST).toHaveLength(34);
     expect([...USER_HANDLE_RESERVED].sort()).toEqual([
       ...USER_HANDLE_RESERVED_LIST,
     ]);

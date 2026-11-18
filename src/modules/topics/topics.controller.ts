@@ -17,13 +17,13 @@ import { AuthSecurityGuard } from '../auth/auth-security.guard.js';
 import { TopicsService } from './topics.service.js';
 import {
   createTopicSchema,
-  renameTopicSchema,
+  patchTopicSchema,
   listTopicsQuerySchema,
   topicResponseSchema,
   topicListResponseSchema,
   errorSchema,
   type CreateTopicInput,
-  type RenameTopicInput,
+  type PatchTopicInput,
   type ListTopicsQuery,
 } from './schemas/topics.schema.js';
 
@@ -54,12 +54,12 @@ export class TopicsController {
 
   @Patch(':topicId')
   @ApiResponse({ status: 200, standardSchema: topicResponseSchema })
-  rename(
+  patch(
     @Req() req: AuthenticatedRequest,
     @Param('topicId') topicId: string,
-    @Body({ schema: renameTopicSchema }) body: RenameTopicInput,
+    @Body({ schema: patchTopicSchema }) body: PatchTopicInput,
   ) {
-    return this.topics.rename(req.auth.user.id, topicId, body.name);
+    return this.topics.patch(req.auth.user.id, topicId, body);
   }
 
   @Delete(':topicId')

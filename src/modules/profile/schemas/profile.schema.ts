@@ -1,4 +1,8 @@
 import { z } from 'zod';
+import {
+  practiceGoalPatchSchema,
+  practiceVisibilitySchema,
+} from '../../../common/schemas/practice-discovery.schema.js';
 import { profileHandleSchema } from '../../../common/schemas/user-handle.schema.js';
 import {
   educationEndYearSchema,
@@ -19,13 +23,19 @@ export const patchProfileSchema = z
     bio: profileBioSchema.optional(),
     avatarMediaId: z.uuid().nullable().optional(),
     handle: profileHandleSchema.optional(),
+    practiceVisibility: practiceVisibilitySchema.optional(),
+    practiceGoal: practiceGoalPatchSchema.optional(),
+    publicWeb: z.boolean().optional(),
   })
   .superRefine((value, ctx) => {
     if (
       value.name === undefined &&
       value.bio === undefined &&
       value.avatarMediaId === undefined &&
-      value.handle === undefined
+      value.handle === undefined &&
+      value.practiceVisibility === undefined &&
+      value.practiceGoal === undefined &&
+      value.publicWeb === undefined
     ) {
       ctx.addIssue({
         code: 'custom',
@@ -53,6 +63,9 @@ export const profileResponseSchema = z.strictObject({
   bio: z.string(),
   handle: z.string(),
   avatarUrl: z.url().optional(),
+  practiceVisibility: practiceVisibilitySchema,
+  practiceGoal: practiceGoalPatchSchema,
+  publicWeb: z.boolean(),
   work: z.array(workEntryResponseSchema),
   education: z.array(educationEntryResponseSchema),
 });

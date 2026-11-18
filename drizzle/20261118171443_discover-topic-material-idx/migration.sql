@@ -1,0 +1,2 @@
+CREATE INDEX "discover_public_topic_name_idx" ON "topics" ("normalized_name") WHERE "is_public" = true;--> statement-breakpoint
+CREATE INDEX "discover_problem_normalized_url_idx" ON "problems" ("normalized_url");

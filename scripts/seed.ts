@@ -4,6 +4,7 @@ import * as schema from '../src/database/schema/index.js';
 import { backfillProblemPlatformSlugs } from '../src/database/seed/backfill-problem-platform-slugs.js';
 import { databaseEnvironmentSchema } from '../src/config/environment.js';
 import { PLATFORM_SEED_ROWS } from '../src/shared/platform-catalog.js';
+import { seedStarterLists } from '../src/database/seed/starter-lists.js';
 
 const result = databaseEnvironmentSchema.safeParse(process.env);
 if (!result.success) {
@@ -42,6 +43,9 @@ try {
       `Problem platform_slug backfill complete. total=${slugStats.total} updated=${slugStats.updated} alreadyCorrect=${slugStats.unchanged}`,
     );
   }
+
+  await seedStarterLists(db);
+  console.log('Starter lists (@starter) seed complete.');
 } finally {
   await pool.end();
 }

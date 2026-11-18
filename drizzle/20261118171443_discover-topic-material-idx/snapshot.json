@@ -1,0 +1,101 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "5810d131-14be-48c7-be58-9fbcb066d851",
+  "prevIds": [
+    "67b036dd-3dfd-447a-94a0-7fe421f9e7ad"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "topics",
+        "discover_public_topic_name_idx"
+      ],
+      "writes": [
+        "s|idx|public.discover_public_topic_name_idx",
+        "n|idx|public.discover_public_topic_name_idx",
+        "e|idx|public.discover_public_topic_name_idx",
+        "n|rel|public.discover_public_topic_name_idx"
+      ],
+      "reads": [
+        "n|tbl|public.topics",
+        "n|sch|public",
+        "n|col|public.topics.normalized_name"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "problems",
+        "discover_problem_normalized_url_idx"
+      ],
+      "writes": [
+        "s|idx|public.discover_problem_normalized_url_idx",
+        "n|idx|public.discover_problem_normalized_url_idx",
+        "e|idx|public.discover_problem_normalized_url_idx",
+        "n|rel|public.discover_problem_normalized_url_idx"
+      ],
+      "reads": [
+        "n|tbl|public.problems",
+        "n|sch|public",
+        "n|col|public.problems.normalized_url"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "topics",
+        "name": "discover_public_topic_name_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "normalized_name",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": "\"is_public\" = true",
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "problems",
+        "name": "discover_problem_normalized_url_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "normalized_url",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    }
+  ]
+}

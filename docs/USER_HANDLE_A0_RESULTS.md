@@ -18,7 +18,7 @@
 | First-time set | No cooldown |
 | Change policy | After handle is set, **at most one change per 30 days**; enforce via **`users.handle_changed_at`** (H1) |
 | Availability API | **Deferred** — MVP uses register/profile PATCH only (no `GET …/handle-availability`) |
-| Public profile URL | **Deferred** (no `/u/:handle` or `GET /users/:handle` in MVP) |
+| Public practice profile | **Scheduled** — DISCOVER E3+ (`/app/u/:handle`, signed-in); see [PRACTICE_DISCOVERY_PHASED_PLAN.md](PRACTICE_DISCOVERY_PHASED_PLAN.md) |
 | Session / JWT | **Unchanged** — `AccessGuard` and purposes unchanged; handle is profile/session payload only |
 | UI display | Product may show **`@handle`**; API returns bare `handle` string |
 | Google / RISC | No OAuth or RISC changes; handle on same `users` row |
@@ -58,6 +58,7 @@ H1 **`USER_HANDLE_RESERVED`** (or equivalent in `user-handle.schema.ts`) **must 
 | `app` | Frontend `/app` workspace |
 | `auth` | Backend `auth/*`, frontend auth flows |
 | `dashboard` | App home UX name (`/app` dashboard) |
+| `discover` | FR-10 Discover workspace routes (`/app/discover`, future APIs) |
 | `edit` | Dynamic route segment `…/edit` |
 | `forgot` | Forgot-password flow (segment) |
 | `google` | `auth/google` OAuth |
@@ -82,11 +83,12 @@ H1 **`USER_HANDLE_RESERVED`** (or equivalent in `user-handle.schema.ts`) **must 
 | `settings` | Future settings |
 | `support` | Common reserved |
 | `topics` | Frontend `/app/topics`, API `topics` |
+| `u` | Public practice profile prefix `/app/u/:handle` (DISCOVER E3+) |
 | `users` | Profile API prefix `users/me` |
 | `www` | Common reserved |
 
 **Alphabetical canonical list for H1 tests:**  
-`account`, `admin`, `api`, `app`, `auth`, `dashboard`, `edit`, `forgot`, `google`, `health`, `help`, `login`, `logout`, `me`, `media`, `new`, `null`, `password`, `platforms`, `practice`, `problems`, `profile`, `progress`, `register`, `reset`, `risc`, `root`, `settings`, `support`, `topics`, `users`, `www`
+`account`, `admin`, `api`, `app`, `auth`, `dashboard`, `discover`, `edit`, `forgot`, `google`, `health`, `help`, `login`, `logout`, `me`, `media`, `new`, `null`, `password`, `platforms`, `practice`, `problems`, `profile`, `progress`, `register`, `reset`, `risc`, `root`, `settings`, `support`, `topics`, `u`, `users`, `www`
 
 ## API contract (forward reference — H2 implements)
 

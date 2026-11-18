@@ -1,0 +1,156 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "89bfb771-f300-4e78-88bb-776f998b226c",
+  "prevIds": [
+    "7aef8f91-c0ca-4fb9-af5d-99dd34ff7470"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "discover_daily_counters"
+      ],
+      "writes": [
+        "s|tbl|public.discover_daily_counters",
+        "n|tbl|public.discover_daily_counters",
+        "e|tbl|public.discover_daily_counters",
+        "n|rel|public.discover_daily_counters",
+        "n|type|public.discover_daily_counters",
+        "n|rel|public.discover_daily_counters_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "discover_daily_counters",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_daily_counters",
+        "name": "subject_type",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_daily_counters",
+        "name": "subject_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_daily_counters",
+        "name": "day",
+        "type": "date",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_daily_counters",
+        "name": "views",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "0",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_daily_counters",
+        "name": "copies",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "0",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_daily_counters",
+        "name": "discover_daily_counters_pkey",
+        "columns": [
+          "subject_type",
+          "subject_id",
+          "day"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_daily_counters",
+        "name": "discover_daily_counters_views_nonneg",
+        "value": "\"views\" >= 0",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "discover_daily_counters",
+        "name": "discover_daily_counters_copies_nonneg",
+        "value": "\"copies\" >= 0",
+        "entityType": "checks"
+      }
+    }
+  ]
+}

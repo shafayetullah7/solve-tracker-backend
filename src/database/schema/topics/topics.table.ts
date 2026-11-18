@@ -1,4 +1,14 @@
-import { index, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
+import {
+  boolean,
+  check,
+  index,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from 'drizzle-orm/pg-core';
 import { users } from '../users/users.table.js';
 
 // Display `name` keeps the owner's chosen casing after trim.
@@ -12,6 +22,8 @@ export const topics = pgTable(
       .references(() => users.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
     normalizedName: text('normalized_name').notNull(),
+    isPublic: boolean('is_public').notNull().default(false),
+    description: text('description').notNull().default(''),
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -25,6 +37,13 @@ export const topics = pgTable(
       t.normalizedName,
     ),
     index('topics_user_idx').on(t.userId),
+    index('discover_public_topic_name_idx')
+      .on(t.normalizedName)
+      .where(sql`${t.isPublic} = true`),
+    check(
+      'topics_description_len',
+      sql`char_length(${t.description}) <= 280`,
+    ),
   ],
 );
 

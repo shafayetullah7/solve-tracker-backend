@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -14,6 +15,12 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccessGuard, type AuthenticatedRequest } from '../auth/access.guard.js';
 import { AuthSecurityGuard } from '../auth/auth-security.guard.js';
 import { ProfileService } from './profile.service.js';
+import { DiscoverCountersService } from '../discover/discover-counters.service.js';
+import {
+  shareStatsQuerySchema,
+  shareStatsResponseSchema,
+  type ShareStatsQuery,
+} from './schemas/share-stats.schema.js';
 import {
   createEducationEntrySchema,
   createWorkEntrySchema,
@@ -30,13 +37,52 @@ import {
   type UpdateEducationEntryInput,
   type UpdateWorkEntryInput,
 } from './schemas/profile.schema.js';
+import { DiscoverModeGuard } from '../discover/discover-mode.guard.js';
+import { DiscoverFullModeGuard } from '../discover/discover-full-mode.guard.js';
+import { FollowsService } from '../follows/follows.service.js';
+import {
+  followersCountResponseSchema,
+  followingListQuerySchema,
+  followingListResponseSchema,
+  type FollowingListQuery,
+} from '../follows/schemas/follows.schema.js';
 
 @ApiTags('Profile')
 @ApiResponse({ status: '4XX', standardSchema: errorSchema })
 @UseGuards(AuthSecurityGuard, AccessGuard)
 @Controller('users/me')
 export class ProfileController {
-  constructor(private readonly profile: ProfileService) {}
+  constructor(
+    private readonly profile: ProfileService,
+    private readonly discoverCounters: DiscoverCountersService,
+    private readonly follows: FollowsService,
+  ) {}
+
+  @Get('following')
+  @UseGuards(DiscoverModeGuard, DiscoverFullModeGuard)
+  @ApiResponse({ status: 200, standardSchema: followingListResponseSchema })
+  listFollowing(
+    @Req() req: AuthenticatedRequest,
+    @Query({ schema: followingListQuerySchema }) query: FollowingListQuery,
+  ) {
+    return this.follows.listFollowing(req.auth.user.id, query);
+  }
+
+  @Get('followers/count')
+  @UseGuards(DiscoverModeGuard, DiscoverFullModeGuard)
+  @ApiResponse({ status: 200, standardSchema: followersCountResponseSchema })
+  followersCount(@Req() req: AuthenticatedRequest) {
+    return this.follows.followersCount(req.auth.user.id);
+  }
+
+  @Get('share-stats')
+  @ApiResponse({ status: 200, standardSchema: shareStatsResponseSchema })
+  shareStats(
+    @Req() req: AuthenticatedRequest,
+    @Query({ schema: shareStatsQuerySchema }) query: ShareStatsQuery,
+  ) {
+  return this.discoverCounters.aggregateShareStats(req.auth.user.id, query.days);
+  }
 
   @Get('profile')
   @ApiResponse({ status: 200, standardSchema: profileResponseSchema })
