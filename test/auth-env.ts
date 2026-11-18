@@ -18,4 +18,5 @@ export const authTestEnvironment = {
   CLOUDINARY_API_KEY: 'test_api_key',
   CLOUDINARY_API_SECRET: 'test_api_secret',
   GOOGLE_OAUTH_ENABLED: 'false',
+  GOOGLE_RISC_ENABLED: 'false',
 } as const;

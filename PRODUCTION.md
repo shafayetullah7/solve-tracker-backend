@@ -67,6 +67,41 @@ Rebuild the SPA with `VITE_GOOGLE_OAUTH_ENABLED=true` when the backend flag is o
 
 Set `GOOGLE_OAUTH_ENABLED=false` and rebuild frontend with `VITE_GOOGLE_OAUTH_ENABLED=false`. OAuth routes return 404; password auth and existing identity rows are unaffected.
 
+## Google RISC — Cross-Account Protection (optional)
+
+Receiver is implemented in R4; **stream registration** is an ops task (R5). Full steps: [docs/GOOGLE_RISC_STREAM_SETUP.md](docs/GOOGLE_RISC_STREAM_SETUP.md).
+
+### Delivery URL
+
+Google POSTs a Security Event Token (JWT string) to:
+
+`https://<public-origin>/api/auth/google/risc`
+
+The edge must proxy `/api` to Nest the same way as OAuth. No CSRF headers; raw JWT body (8KB cap).
+
+### Environment
+
+| Variable | Production notes |
+| --- | --- |
+| `GOOGLE_RISC_ENABLED` | `true` only after staging `stream:verify` and sign-off ([GOOGLE_RISC_R5_RESULTS.md](docs/GOOGLE_RISC_R5_RESULTS.md)) |
+| `GOOGLE_OAUTH_ENABLED` | Required `true` when RISC is on |
+| `GOOGLE_OAUTH_CLIENT_ID` | Primary SET `aud` |
+| `GOOGLE_RISC_AUDIENCE` | Optional override if Google assigns a distinct receiver id |
+| `GOOGLE_RISC_EVENT_TTL_SECONDS` | Optional receipt retention (default 30 days) |
+
+### Preflight (no Google API)
+
+```bash
+RISC_PUBLIC_URL="https://<public-origin>/api/auth/google/risc" pnpm preflight:google-risc
+```
+
+Empty POST → **400** when RISC enabled; **404** when disabled.
+
+### Rollback
+
+1. `stream:update` with `status: disabled` in Google Cloud (stop delivery).
+2. `GOOGLE_RISC_ENABLED=false` and redeploy (webhook **404**).
+
 ## Verification
 
 ```bash

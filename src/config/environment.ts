@@ -79,6 +79,14 @@ export const googleOAuthEnvironmentSchema = z.object({
   GOOGLE_OAUTH_PROMPT: z.string().trim().min(1).optional(),
   GOOGLE_OAUTH_STATE_TTL_SECONDS: positive.optional(),
 });
+export const googleRiscEnvironmentSchema = z.object({
+  GOOGLE_RISC_ENABLED: z
+    .enum(['true', 'false'])
+    .transform((v) => v === 'true'),
+  GOOGLE_RISC_AUDIENCE: z.string().trim().min(1).optional(),
+  GOOGLE_RISC_JWKS_URL: z.url().optional(),
+  GOOGLE_RISC_EVENT_TTL_SECONDS: positive.optional(),
+});
 export const environmentSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']),
@@ -100,6 +108,7 @@ export const environmentSchema = z
   .extend(authEnvironmentSchema.shape)
   .extend(cloudinaryEnvironmentSchema.shape)
   .extend(googleOAuthEnvironmentSchema.shape)
+  .extend(googleRiscEnvironmentSchema.shape)
   .superRefine((v, ctx) => {
     const fail = (key: string, message: string) =>
       ctx.addIssue({ code: 'custom', path: [key], message });
@@ -157,6 +166,18 @@ export const environmentSchema = z
       (!v.RESEND_API_KEY || !v.RESEND_FROM)
     )
       fail('RESEND_API_KEY', 'Resend mode requires key and sender');
+    if (v.GOOGLE_RISC_ENABLED) {
+      if (!v.GOOGLE_OAUTH_ENABLED)
+        fail(
+          'GOOGLE_RISC_ENABLED',
+          'Cross-Account Protection requires Google OAuth to be enabled',
+        );
+      if (!v.GOOGLE_OAUTH_CLIENT_ID)
+        fail(
+          'GOOGLE_OAUTH_CLIENT_ID',
+          'Required when Google RISC is enabled',
+        );
+    }
     if (v.GOOGLE_OAUTH_ENABLED) {
       if (!v.GOOGLE_OAUTH_CLIENT_ID)
         fail('GOOGLE_OAUTH_CLIENT_ID', 'Required when Google OAuth is enabled');

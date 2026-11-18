@@ -722,6 +722,37 @@
         ]
       }
     },
+    "/auth/google/risc": {
+      "post": {
+        "description": "Accepts a raw Security Event Token (JWT) in the request body. Returns 404 when GOOGLE_RISC_ENABLED is false. No CSRF headers required (server-to-server).",
+        "operationId": "GoogleRiscController_receiveSecurityEventToken",
+        "parameters": [],
+        "responses": {
+          "202": {
+            "description": "SET accepted and processed (or idempotent replay)."
+          },
+          "400": {
+            "description": "Malformed SET or unknown signing key."
+          },
+          "401": {
+            "description": "Invalid SET signature or claims."
+          },
+          "404": {
+            "description": "RISC feature disabled."
+          },
+          "429": {
+            "description": "Webhook rate limit exceeded."
+          },
+          "500": {
+            "description": "Transient processing failure."
+          }
+        },
+        "summary": "Google Cross-Account Protection (RISC) receiver",
+        "tags": [
+          "Internal webhooks"
+        ]
+      }
+    },
     "/topics": {
       "get": {
         "operationId": "TopicsController_list",

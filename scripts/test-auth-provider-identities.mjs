@@ -7,7 +7,7 @@ import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { Test } from '@nestjs/testing';
 import { randomUUID } from 'node:crypto';
 import { authTestEnvironment } from '../test/auth-env.ts';
-import { AUTH_PROVIDER_GOOGLE } from '../dist/modules/auth/auth-providers.js';
+import { AUTH_PROVIDER_GOOGLE } from '../dist/modules/auth/google/auth-providers.js';
 
 const target = process.env.TEST_DATABASE_URL;
 if (!target || !new URL(target).pathname.endsWith('_test'))
@@ -24,7 +24,7 @@ Object.assign(process.env, authTestEnvironment, {
 const pool = new pg.Pool({ connectionString: target });
 const { AppModule } = await import('../dist/app.module.js');
 const { AuthProviderIdentityRepository } = await import(
-  '../dist/modules/auth/auth-provider-identity.repository.js'
+  '../dist/modules/auth/google/auth-provider-identity.repository.js'
 );
 
 let count = 0;

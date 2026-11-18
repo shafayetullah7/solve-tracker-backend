@@ -1,20 +1,21 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { DatabaseModule } from '../../database/database.module.js';
 import { EmailModule } from '../email/email.module.js';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 import { AuthRepository } from './auth.repository.js';
-import { AuthProviderIdentityRepository } from './auth-provider-identity.repository.js';
-import { GoogleJwksCache } from './google-jwks.cache.js';
-import { GoogleOAuthService } from './google-oauth.service.js';
-import { OAuthStateService } from './oauth-state.service.js';
+import { AuthProviderIdentityRepository } from './google/auth-provider-identity.repository.js';
+import { GoogleJwksCache } from './google/google-jwks.cache.js';
+import { GoogleOAuthService } from './google/google-oauth.service.js';
+import { OAuthStateService } from './google/oauth-state.service.js';
 import { PasswordService } from './password.service.js';
 import { TokenService } from './token.service.js';
 import { AuthCookies } from './auth.cookies.js';
 import { AccessGuard } from './access.guard.js';
 import { AuthSecurityGuard, AuthLimiter } from './auth-security.guard.js';
+import { GoogleRiscModule } from './risc/google-risc.module.js';
 @Module({
-  imports: [DatabaseModule, EmailModule],
+  imports: [DatabaseModule, EmailModule, forwardRef(() => GoogleRiscModule)],
   controllers: [AuthController],
   providers: [
     AuthService,

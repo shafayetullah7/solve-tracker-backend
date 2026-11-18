@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { parseCookie, stringifySetCookie } from 'cookie';
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import type { Request, Response } from 'express';
-import type { Environment } from '../../config/environment.js';
+import type { Environment } from '../../../config/environment.js';
 import {
   GOOGLE_OAUTH_DEFAULT_STATE_TTL_SECONDS,
   GOOGLE_OAUTH_STATE_COOKIE,

@@ -8,7 +8,7 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { randomUUID } from 'node:crypto';
 import { authTestEnvironment } from '../test/auth-env.ts';
-import { GOOGLE_OAUTH_STATE_COOKIE } from '../dist/modules/auth/google-oauth.constants.js';
+import { GOOGLE_OAUTH_STATE_COOKIE } from '../dist/modules/auth/google/google-oauth.constants.js';
 
 const target = process.env.TEST_DATABASE_URL;
 if (!target || !new URL(target).pathname.endsWith('_test'))
@@ -28,7 +28,7 @@ Object.assign(process.env, authTestEnvironment, {
 });
 const pool = new pg.Pool({ connectionString: target });
 const { AppModule } = await import('../dist/app.module.js');
-const { GoogleOAuthService } = await import('../dist/modules/auth/google-oauth.service.js');
+const { GoogleOAuthService } = await import('../dist/modules/auth/google/google-oauth.service.js');
 const { configureApp, createApiDocument } =
   await import('../dist/configure-app.js');
 

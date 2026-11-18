@@ -122,7 +122,16 @@ Design lock: [docs/GOOGLE_OAUTH_A0_RESULTS.md](docs/GOOGLE_OAUTH_A0_RESULTS.md).
 - **Account linking:** when Google reports `email_verified` and the normalized email matches an existing user, link the Google identity and sign in in one step; when `sub` is already linked, sign in that user; when no user exists, create a Google-only account. Reject unverified Google emails.
 - The registration screen may offer Google alongside the three password fields; Google-first signup does not require a password on first sign-in.
 - OAuth start and callback endpoints use cryptographic `state`, PKCE, safe redirect (`next`) rules, and rate limiting consistent with other auth endpoints.
-- Signing out of the Google account in the browser does **not** end the Practice session; Practice **Sign out** and password reset session revocation behave as for password login.
+- Signing out of the Google account in the browser does **not** end the Practice session by itself; Practice **Sign out** and password reset session revocation behave as for password login. When **Cross-Account Protection (RISC)** is enabled on the server, Google may end Practice sessions after app access revocation or certain security events (see addendum below).
+
+#### FR-07 addendum: Optional Cross-Account Protection (RISC)
+
+Design lock: [docs/GOOGLE_RISC_A0_RESULTS.md](docs/GOOGLE_RISC_A0_RESULTS.md). Rollup: [docs/GOOGLE_RISC_RESULTS.md](docs/GOOGLE_RISC_RESULTS.md).
+
+- Optional; `GOOGLE_RISC_ENABLED=false` by default. When enabled, requires `GOOGLE_OAUTH_ENABLED=true` and configured OAuth client id.
+- Google delivers Security Event Tokens to `POST /auth/google/risc`; the backend verifies SETs and may revoke **all** server-side sessions for the mapped Practice user. No Google tokens are stored in the application.
+- Authorization (`AccessGuard`, HttpOnly cookies) is unchanged; clients detect revocation on the next session probe or refresh per [AUTH_CONVENTIONS.md](../solve-tracker-frontend/AUTH_CONVENTIONS.md).
+- Use SET data and receipt rows only for security and session management ([RISC Terms of Service](https://developers.google.com/identity/protocols/risc)).
 
 ### FR-08: Forgot and reset password
 

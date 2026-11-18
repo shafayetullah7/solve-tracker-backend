@@ -7,3 +7,8 @@ export type {
   AuthProviderIdentity,
   NewAuthProviderIdentity,
 } from './auth-provider-identities.table.js';
+export { riscEventReceipts } from './risc-event-receipts.table.js';
+export type {
+  RiscEventReceipt,
+  NewRiscEventReceipt,
+} from './risc-event-receipts.table.js';

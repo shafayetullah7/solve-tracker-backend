@@ -17,18 +17,18 @@ import type { Request, Response } from 'express';
 import type { Environment } from '../../config/environment.js';
 import { AuthService } from './auth.service.js';
 import { AuthCookies } from './auth.cookies.js';
-import { GoogleOAuthService } from './google-oauth.service.js';
-import { OAuthStateService } from './oauth-state.service.js';
+import { GoogleOAuthService } from './google/google-oauth.service.js';
+import { OAuthStateService } from './google/oauth-state.service.js';
 import {
   GoogleOAuthError,
   GoogleOAuthErrorCodes,
-} from './google-oauth.errors.js';
+} from './google/google-oauth.errors.js';
 import {
   frontendAppUrl,
   frontendLoginErrorUrl,
   frontendProfileUrl,
-} from './oauth-redirect.js';
-import { oauthReturnPath } from './oauth-return-path.js';
+} from './google/oauth-redirect.js';
+import { oauthReturnPath } from './google/oauth-return-path.js';
 import { AuthSecurityGuard, AuthLimiter } from './auth-security.guard.js';
 import { AccessGuard } from './access.guard.js';
 import type { AuthenticatedRequest } from './access.guard.js';

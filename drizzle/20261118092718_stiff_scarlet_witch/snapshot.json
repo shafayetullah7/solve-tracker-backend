@@ -1,0 +1,221 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "665a8a0b-ece2-4f26-98fc-5462d4d845b4",
+  "prevIds": [
+    "cf1a2d4f-503d-4f1d-ae78-1d5fd0d89673"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "risc_event_receipts"
+      ],
+      "writes": [
+        "s|tbl|public.risc_event_receipts",
+        "n|tbl|public.risc_event_receipts",
+        "e|tbl|public.risc_event_receipts",
+        "n|rel|public.risc_event_receipts",
+        "n|type|public.risc_event_receipts",
+        "n|rel|public.risc_event_receipts_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "risc_event_receipts",
+        "risc_event_receipts_received_at_idx"
+      ],
+      "writes": [
+        "s|idx|public.risc_event_receipts_received_at_idx",
+        "n|idx|public.risc_event_receipts_received_at_idx",
+        "e|idx|public.risc_event_receipts_received_at_idx",
+        "n|rel|public.risc_event_receipts_received_at_idx"
+      ],
+      "reads": [
+        "n|tbl|public.risc_event_receipts",
+        "n|sch|public",
+        "n|col|public.risc_event_receipts.received_at"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "risc_event_receipts"
+      ],
+      "writes": [
+        "s|fk|public.risc_event_receipts.risc_event_receipts_user_id_users_id_fkey",
+        "n|fk|public.risc_event_receipts.risc_event_receipts_user_id_users_id_fkey",
+        "e|fk|public.risc_event_receipts.risc_event_receipts_user_id_users_id_fkey",
+        "n|con|public.risc_event_receipts.risc_event_receipts_user_id_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.risc_event_receipts",
+        "n|sch|public",
+        "n|tbl|public.users",
+        "n|sch|public",
+        "n|col|public.risc_event_receipts.user_id",
+        "n|col|public.users.id",
+        "e|uniqueness|public.users.id"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "risc_event_receipts",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "risc_event_receipts",
+        "name": "jti",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "risc_event_receipts",
+        "name": "received_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "risc_event_receipts",
+        "name": "event_types",
+        "type": "jsonb",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "risc_event_receipts",
+        "name": "provider_subject",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "risc_event_receipts",
+        "name": "user_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "risc_event_receipts",
+        "name": "risc_event_receipts_received_at_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "received_at",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "risc_event_receipts",
+        "name": "risc_event_receipts_user_id_users_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "user_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "users",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "SET NULL",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "risc_event_receipts",
+        "name": "risc_event_receipts_pkey",
+        "columns": [
+          "jti"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    }
+  ]
+}

@@ -274,15 +274,21 @@ Two **independent** sessions exist:
 
 ### 6.3 User revokes Practice app in Google Account settings
 
-- Existing Practice cookies **still work** until TTL/revocation — we do not store Google refresh tokens to poll Google.
-- **Next** OAuth attempt may show re-consent; does not invalidate current JWT until logout/reset.
+- When **RISC is disabled** (default): existing Practice cookies **still work** until TTL, Practice logout, or password reset — we do not store Google refresh tokens to poll Google. **Next** OAuth attempt may show re-consent.
+- When **RISC is enabled** and the stream is registered: Google may send `sessions-revoked` / `tokens-revoked` and the backend revokes all Practice sessions for the linked user ([GOOGLE_RISC_RESULTS.md](GOOGLE_RISC_RESULTS.md)).
 
 ### 6.4 User deleted on Google / email change at Google
 
 - Old `provider_subject` (`sub`) is stable for the life of the Google account; email changes update `provider_email` on next login.
 - If Google disables the account, next OAuth fails at token exchange — show generic login error.
 
-**Product copy (G6):** “Signing out of Google in your browser does not sign you out of Practice.”
+**Product copy (G6 / RISC R6):** See frontend `GOOGLE_PRACTICE_LOGOUT_NOTE` in `oauth-error-copy.ts` (casual Google logout + optional Cross-Account Protection sentence).
+
+### 6.5 Optional RISC hardening (GOOGLE-RISC)
+
+- When `GOOGLE_RISC_ENABLED=true` and the Google stream is registered, selected **security events** revoke all Practice sessions for users linked via `auth_provider_identities` (`sub`).
+- Does **not** close the gap for casual Google sign-out in one tab when Google sends **no** event.
+- Rollout, limitations, and ops: [GOOGLE_RISC_RESULTS.md](GOOGLE_RISC_RESULTS.md), [GOOGLE_RISC_STREAM_SETUP.md](GOOGLE_RISC_STREAM_SETUP.md).
 
 ---
 

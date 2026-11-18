@@ -1,8 +1,8 @@
 import { ConfigService } from '@nestjs/config';
 import { describe, expect, it, vi } from 'vitest';
-import { environmentSchema } from '../../config/environment.js';
-import type { Environment } from '../../config/environment.js';
-import { authTestEnvironment } from '../../../test/auth-env.js';
+import { environmentSchema } from '../../../config/environment.js';
+import type { Environment } from '../../../config/environment.js';
+import { authTestEnvironment } from '../../../../test/auth-env.js';
 import { GOOGLE_OAUTH_STATE_COOKIE } from './google-oauth.constants.js';
 import { GoogleOAuthErrorCodes } from './google-oauth.errors.js';
 import { OAuthStateService } from './oauth-state.service.js';

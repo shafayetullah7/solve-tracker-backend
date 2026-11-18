@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { jwtVerify, type JWTVerifyGetKey } from 'jose';
 import { z } from 'zod';
-import type { Environment } from '../../config/environment.js';
+import type { Environment } from '../../../config/environment.js';
 import {
   GOOGLE_ID_TOKEN_ISSUERS,
   GOOGLE_OAUTH_AUTHORIZE_URL,

@@ -12,14 +12,14 @@ import {
 import type { User } from '../../database/schema/index.js';
 import { userNameSchema } from '../../common/schemas/user-name.schema.js';
 import { AuthLimiter } from './auth-security.guard.js';
-import { AuthRepository } from './auth.repository.js';
-import { AuthProviderIdentityRepository } from './auth-provider-identity.repository.js';
-import { AUTH_PROVIDER_GOOGLE } from './auth-providers.js';
+import { AuthRepository, type AuthTx } from './auth.repository.js';
+import { AuthProviderIdentityRepository } from './google/auth-provider-identity.repository.js';
+import { AUTH_PROVIDER_GOOGLE } from './google/auth-providers.js';
 import {
   GoogleOAuthError,
   GoogleOAuthErrorCodes,
-} from './google-oauth.errors.js';
-import type { VerifiedGoogleProfile } from './google-oauth.service.js';
+} from './google/google-oauth.errors.js';
+import type { VerifiedGoogleProfile } from './google/google-oauth.service.js';
 import { PasswordService } from './password.service.js';
 import { TokenService, digest, sameDigest } from './token.service.js';
 import type { Claims, Tokens } from './token.service.js';
@@ -449,10 +449,7 @@ export class AuthService {
           .update(passwordResetTokens)
           .set({ consumedAt: now })
           .where(eq(passwordResetTokens.userId, user.id));
-        await tx
-          .update(authSessions)
-          .set({ revokedAt: now, updatedAt: now })
-          .where(eq(authSessions.userId, user.id));
+        await this.revokeAllSessionsForUser(user.id, 'password-reset', tx);
         return true;
       },
     );
@@ -462,6 +459,26 @@ export class AuthService {
         'RESET_TOKEN_INVALID',
         'Reset link is invalid or expired.',
       );
+  }
+
+  async revokeAllSessionsForUser(
+    userId: string,
+    auditReason: string,
+    tx?: AuthTx,
+  ): Promise<number> {
+    const db = tx ?? this.repo.db;
+    const now = new Date();
+    const updated = await db
+      .update(authSessions)
+      .set({ revokedAt: now, updatedAt: now })
+      .where(eq(authSessions.userId, userId))
+      .returning({ id: authSessions.id });
+    if (updated.length > 0) {
+      this.logger.log(
+        `Revoked ${updated.length} session(s) for user ${userId} (${auditReason})`,
+      );
+    }
+    return updated.length;
   }
 
   async changePassword(userId: string, input: ChangePasswordInput) {
@@ -488,10 +505,7 @@ export class AuthService {
         .update(users)
         .set({ passwordHash: hash, updatedAt: now })
         .where(eq(users.id, user.id));
-      await tx
-        .update(authSessions)
-        .set({ revokedAt: now, updatedAt: now })
-        .where(eq(authSessions.userId, user.id));
+      await this.revokeAllSessionsForUser(user.id, 'change-password', tx);
       return hash;
     });
     if (!passwordHash)

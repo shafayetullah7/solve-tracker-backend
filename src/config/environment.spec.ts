@@ -143,4 +143,33 @@ describe('environment schema', () => {
       }).success,
     ).toBe(true);
   });
+
+  const googleOauthOn = {
+    GOOGLE_OAUTH_ENABLED: 'true',
+    GOOGLE_OAUTH_CLIENT_ID: 'test.apps.googleusercontent.com',
+    GOOGLE_OAUTH_CLIENT_SECRET: 'test-secret-min-length',
+    GOOGLE_OAUTH_REDIRECT_URI: 'http://localhost:3001/api/auth/google/callback',
+  };
+
+  it('parses with Google RISC disabled and no RISC overrides', () => {
+    expect(environmentSchema.safeParse({ ...valid }).success).toBe(true);
+  });
+
+  it('rejects RISC enabled without OAuth enabled', () => {
+    expect(
+      environmentSchema.safeParse({
+        ...valid,
+        GOOGLE_RISC_ENABLED: 'true',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('accepts RISC enabled when OAuth is fully configured', () => {
+    const config = environmentSchema.parse({
+      ...valid,
+      ...googleOauthOn,
+      GOOGLE_RISC_ENABLED: 'true',
+    });
+    expect(config.GOOGLE_RISC_ENABLED).toBe(true);
+  });
 });

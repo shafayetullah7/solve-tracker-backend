@@ -40,7 +40,7 @@ try {
   const auth = app.get(AuthService);
   const passwords = app.get(PasswordService);
   const { GoogleOAuthError } = await import(
-    '../dist/modules/auth/google-oauth.errors.js'
+    '../dist/modules/auth/google/google-oauth.errors.js'
   );
 
   const subject = `sub-${randomUUID()}`;

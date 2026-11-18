@@ -1,6 +1,11 @@
-import { json } from 'express';
+import { json, text } from 'express';
 import type { Request, Response, NextFunction } from 'express';
+import { httpResourcePath } from './common/http-resource-path.js';
 import { AuthErrorFilter } from './modules/auth/auth-error.filter.js';
+import {
+  GOOGLE_RISC_MAX_BODY_BYTES,
+  GOOGLE_RISC_RECEIVER_PATH,
+} from './modules/auth/risc/google-risc.constants.js';
 import {
   StandardSchemaValidationPipe,
   BadRequestException,
@@ -22,15 +27,18 @@ export function configureApp(
   swaggerEnabled: boolean,
 ): void {
   const parseAuthJson = json({ limit: '16kb' });
+  const parseRiscSet = text({ type: '*/*', limit: GOOGLE_RISC_MAX_BODY_BYTES });
   // Keep a distinct middleware name so Nest still installs its default parser
   // for non-auth routes (it detects existing parsers by middleware name).
   app.use(
     '/auth',
-    function authJsonBodyParser(
+    function authBodyParser(
       req: Request,
       res: Response,
       next: NextFunction,
     ) {
+      if (httpResourcePath(req) === GOOGLE_RISC_RECEIVER_PATH)
+        return parseRiscSet(req, res, next);
       return parseAuthJson(req, res, next);
     },
   );

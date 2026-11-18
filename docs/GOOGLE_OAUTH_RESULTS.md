@@ -12,9 +12,9 @@ Rollup for **GOOGLE-AUTH** (G0–G7). Phase-by-phase detail lives in `GOOGLE_OAU
 | Profile linking | `GET /auth/google?mode=link` attaches `sub` to signed-in user only ([GOOGLE_OAUTH_G5_RESULTS.md](GOOGLE_OAUTH_G5_RESULTS.md)) |
 | Google-only users | Allowed; `POST /auth/set-password` before password login or unlink |
 | Feature gate | `GOOGLE_OAUTH_ENABLED=false` → OAuth routes **404**, UI hidden |
-| Google vs Practice logout | Independent; see product note below |
+| Google vs Practice logout | Independent for casual Google sign-out; optional **RISC** when the server has Cross-Account Protection — [GOOGLE_RISC_RESULTS.md](GOOGLE_RISC_RESULTS.md) |
 
-**Product note:** Signing out of Google in your browser does not sign you out of Practice. Use Practice **Sign out** to end your session.
+**Product note:** Signing out of Google in your browser does not sign you out of Practice. Use Practice **Sign out** to end your session. When Cross-Account Protection is enabled on the server, Google may end your Practice session after you revoke app access or certain account security events.
 
 ## Documented JSON API (`openapi.json`)
 
@@ -44,6 +44,7 @@ Browser navigation and `302` redirects; excluded from generated client types (`@
 
 - **Local:** See [`.env.example`](../.env.example) and `VITE_GOOGLE_OAUTH_ENABLED` in frontend `.env.example`.
 - **Production:** [PRODUCTION.md](../PRODUCTION.md) § Google OAuth.
+- **Optional RISC:** [GOOGLE_RISC_RESULTS.md](GOOGLE_RISC_RESULTS.md), stream setup [GOOGLE_RISC_STREAM_SETUP.md](GOOGLE_RISC_STREAM_SETUP.md).
 - **Rollback:** `GOOGLE_OAUTH_ENABLED=false` (+ rebuild frontend flag); identity rows remain.
 
 **Enable in an environment only when** `GOOGLE_OAUTH_*` credentials, redirect URI, and matching frontend build flag are complete.
@@ -81,6 +82,7 @@ Use on staging with real Google credentials only.
 - [ ] Forged or expired OAuth `state` rejected.
 - [ ] Rate limit on repeated OAuth starts.
 - [ ] Production redirect URI and `FRONTEND_ORIGIN` match Google Cloud Console.
+- [ ] With `GOOGLE_RISC_ENABLED=true` and stream registered: revoking app access (or verify handshake) ends Practice session on next API/refresh for linked users.
 
 ## Phase results index
 

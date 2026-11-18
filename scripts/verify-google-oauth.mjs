@@ -177,7 +177,7 @@ async function checkHttpSmoke() {
         'http://localhost:3001/api/auth/google/callback',
     });
     const { GoogleOAuthService } = await import(
-      '../dist/modules/auth/google-oauth.service.js'
+      '../dist/modules/auth/google/google-oauth.service.js'
     );
     const googleMock = {
       isEnabled: () => true,

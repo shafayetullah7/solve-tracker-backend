@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
-import { DatabaseService } from '../../database/database.service.js';
+import { DatabaseService } from '../../../database/database.service.js';
 import {
   authProviderIdentities,
   type NewAuthProviderIdentity,
-} from '../../database/schema/index.js';
+} from '../../../database/schema/index.js';
 import type { AuthProvider } from './auth-providers.js';
 
 @Injectable()

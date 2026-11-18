@@ -7,6 +7,7 @@ import { users } from './users/users.table.js';
 import { authSessions } from './auth/auth-sessions.table.js';
 import { passwordResetTokens } from './auth/password-reset-tokens.table.js';
 import { authProviderIdentities } from './auth/auth-provider-identities.table.js';
+import { riscEventReceipts } from './auth/risc-event-receipts.table.js';
 import { topics } from './topics/topics.table.js';
 import { problems } from './problems/problems.table.js';
 import { problemTopics } from './problems/problem-topics.table.js';
@@ -20,6 +21,7 @@ const tables = {
   authSessions,
   passwordResetTokens,
   authProviderIdentities,
+  riscEventReceipts,
   topics,
   problems,
   problemTopics,

@@ -6,9 +6,9 @@ import {
   generateKeyPair,
 } from 'jose';
 import { describe, expect, it, vi } from 'vitest';
-import { environmentSchema } from '../../config/environment.js';
-import type { Environment } from '../../config/environment.js';
-import { authTestEnvironment } from '../../../test/auth-env.js';
+import { environmentSchema } from '../../../config/environment.js';
+import type { Environment } from '../../../config/environment.js';
+import { authTestEnvironment } from '../../../../test/auth-env.js';
 import { GoogleJwksCache } from './google-jwks.cache.js';
 import { GoogleOAuthErrorCodes } from './google-oauth.errors.js';
 import { GoogleOAuthService } from './google-oauth.service.js';
