@@ -19,7 +19,7 @@
 
 ## Nudge behavior
 
-- Shown when `isSystemAssignedHandle(user.handle)` and not dismissed per user id in `localStorage`.
+- Shown when `isSystemAssignedHandle(user.handle)` (session `user.handle` from API). Dismiss hides until reload; customizing the handle clears the nudge permanently (no browser storage).
 - CTA → `/app/profile?focus=handle` opens handle editor.
 
 ## Verification
