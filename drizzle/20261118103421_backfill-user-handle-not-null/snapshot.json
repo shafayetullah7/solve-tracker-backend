@@ -1,0 +1,66 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "8ea764f4-b267-4e63-b975-aa16cd745092",
+  "prevIds": [
+    "5400cfeb-a34e-4805-8e92-76851436f582"
+  ],
+  "footprints": [
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "users",
+        "handle"
+      ],
+      "writes": [
+        "s|colprop|public.users.handle.notNull"
+      ],
+      "reads": [
+        "n|tbl|public.users",
+        "n|sch|public",
+        "n|col|public.users.handle"
+      ],
+      "sqlHash": "3e0a81f07be6c360"
+    },
+    {
+      "statementType": "recreate_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "users",
+        "users_handle_lower_uniq"
+      ],
+      "writes": [
+        "s|idx|public.users_handle_lower_uniq",
+        "n|idx|public.users_handle_lower_uniq",
+        "e|idx|public.users_handle_lower_uniq",
+        "n|rel|public.users_handle_lower_uniq"
+      ],
+      "reads": [
+        "n|tbl|public.users",
+        "n|sch|public"
+      ],
+      "sharedWrites": [],
+      "sqlHash": "793f167a0b3ddd0b"
+    }
+  ],
+  "deltas": [
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"users\",\"handle\"]",
+      "set": {
+        "notNull": true
+      }
+    },
+    {
+      "op": "alter",
+      "key": "indexes\u0000[\"public\",\"users_handle_lower_uniq\"]",
+      "set": {
+        "where": null
+      }
+    }
+  ]
+}

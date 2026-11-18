@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { profileHandleSchema } from '../../../common/schemas/user-handle.schema.js';
 import {
   educationEndYearSchema,
   educationInstitutionSchema,
@@ -17,12 +18,14 @@ export const patchProfileSchema = z
     name: profileNameSchema.optional(),
     bio: profileBioSchema.optional(),
     avatarMediaId: z.uuid().nullable().optional(),
+    handle: profileHandleSchema.optional(),
   })
   .superRefine((value, ctx) => {
     if (
       value.name === undefined &&
       value.bio === undefined &&
-      value.avatarMediaId === undefined
+      value.avatarMediaId === undefined &&
+      value.handle === undefined
     ) {
       ctx.addIssue({
         code: 'custom',
@@ -48,6 +51,7 @@ export const educationEntryResponseSchema = z.strictObject({
 export const profileResponseSchema = z.strictObject({
   name: z.string(),
   bio: z.string(),
+  handle: z.string(),
   avatarUrl: z.url().optional(),
   work: z.array(workEntryResponseSchema),
   education: z.array(educationEntryResponseSchema),

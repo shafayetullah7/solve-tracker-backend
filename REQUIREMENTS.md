@@ -30,7 +30,7 @@ The MVP requirements below add supporting behavior needed to make that core usab
 - A problem can have no topics and remain visible in the full library.
 - Users can add previously solved problems as well as problems they intend to solve.
 - The initial interface uses a compact table or list suitable for repeated tracking.
-- Support private user accounts with email/password registration and login, plus forgot-password and reset-password flows. Registration requires only name, email, and password. Use Resend for email delivery. Every problem and topic is private to its owner.
+- Support private user accounts with email/password registration and login, plus forgot-password and reset-password flows. Registration requires name, email, and password, with an optional unique handle (see FR-07). Use Resend for email delivery. Every problem and topic is private to its owner.
 
 ## 4. MVP functional requirements
 
@@ -96,7 +96,7 @@ The MVP requirements below add supporting behavior needed to make that core usab
 
 ### FR-07: Registration and login
 
-- Provide a registration screen and endpoint with exactly three required user-entered fields: **name, email, and password**. Do not require a username, phone number, or other profile fields.
+- Provide a registration screen and endpoint with exactly three required user-entered fields: **name, email, and password**. An optional **unique handle** (Codeforces-style username) may be offered per [docs/USER_HANDLE_A0_RESULTS.md](docs/USER_HANDLE_A0_RESULTS.md); do not require a phone number or other profile fields beyond name, email, password, and that optional handle.
 - Trim and validate a nonempty name and a valid email address. Normalize email consistently for uniqueness, login, and password recovery; do not alter passwords silently.
 - Enforce email uniqueness in PostgreSQL, including concurrent registration attempts. Reject duplicate registration with a useful validation/conflict response.
 - Validate the agreed password policy on the server and communicate it in the UI. Use **Argon2id (Argon2)** for password hashing and verification, with a unique salt per password and parameters selected for the deployment environment. Store only the encoded password hash; never store plaintext or reversible encrypted passwords, or log submitted passwords.
@@ -132,6 +132,17 @@ Design lock: [docs/GOOGLE_RISC_A0_RESULTS.md](docs/GOOGLE_RISC_A0_RESULTS.md). R
 - Google delivers Security Event Tokens to `POST /auth/google/risc`; the backend verifies SETs and may revoke **all** server-side sessions for the mapped Practice user. No Google tokens are stored in the application.
 - Authorization (`AccessGuard`, HttpOnly cookies) is unchanged; clients detect revocation on the next session probe or refresh per [AUTH_CONVENTIONS.md](../solve-tracker-frontend/AUTH_CONVENTIONS.md).
 - Use SET data and receipt rows only for security and session management ([RISC Terms of Service](https://developers.google.com/identity/protocols/risc)).
+
+#### FR-07 addendum: User handle (USER-HANDLE)
+
+Design lock: [docs/USER_HANDLE_A0_RESULTS.md](docs/USER_HANDLE_A0_RESULTS.md). Phased implementation: [docs/USER_HANDLE_PHASED_PLAN.md](docs/USER_HANDLE_PHASED_PLAN.md).
+
+- Users may claim an optional **handle** at registration or in profile. Handles are **globally unique** (case-insensitive), stored in **canonical lowercase**, and validated for length, charset, and reserved names in the design lock.
+- **Display name** (`name`) and **handle** are independent: display name is not unique; handle is the stable public identifier within the authenticated product.
+- **Login** remains email (+ optional Google); handles are **not** login identifiers in MVP.
+- After a handle is first set, users may change it **at most once per 30 days** (`handle_changed_at` semantics in the design lock).
+- Existing accounts without a handle remain fully functional; claiming a handle is optional and does not block library use.
+- Handle appears in session and profile API responses when set; it is not exposed through forgot-password or other unauthenticated flows.
 
 ### FR-08: Forgot and reset password
 
@@ -223,6 +234,7 @@ These describe the domain independently of the PostgreSQL storage implementation
 18. Refresh rotates the credential atomically; replay is rejected. Logout revokes the session, and password reset revokes all sessions, including access to protected endpoints.
 19. Two users can independently add the same problem URL, assign different topics, and track different solve states without affecting each other.
 20. Stored password values are Argon2id hashes, and raw passwords, refresh tokens, and signing secrets never appear in logs or public API responses.
+21. A user can register with only name, email, and password and later claim an optional unique handle in profile, or supply an optional handle at registration when USER-HANDLE is enabled, without invalidating existing email-only accounts.
 
 ## 9. Optional later features
 

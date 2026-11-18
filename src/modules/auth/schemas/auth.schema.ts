@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { optionalUserHandleSchema } from '../../../common/schemas/user-handle.schema.js';
 import { userNameSchema } from '../../../common/schemas/user-name.schema.js';
 
 export const PASSWORD_MIN_CODE_POINTS = 8;
@@ -27,6 +28,7 @@ export const registerSchema = z.strictObject({
   name: userNameSchema,
   email: inputEmail,
   password: passwordSchema,
+  handle: optionalUserHandleSchema,
 });
 export const loginSchema = z.strictObject({
   email: inputEmail,
@@ -58,6 +60,7 @@ export const userSchema = z.strictObject({
   id: z.uuid(),
   name: z.string(),
   email: z.email(),
+  handle: z.string(),
 });
 export const userResponseSchema = z.strictObject({ user: userSchema });
 export const sessionResponseSchema = z.strictObject({

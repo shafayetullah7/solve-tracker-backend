@@ -347,7 +347,7 @@ try {
   );
   const doc = createApiDocument(app);
   const authPaths = Object.keys(doc.paths).filter((p) => p.startsWith('/auth/'));
-  check(authPaths.length === 9, 'Nine documented auth routes');
+  check(authPaths.length === 10, 'Ten documented auth routes');
   const sessionSchema =
     doc.paths['/auth/session']?.get?.responses?.['200']?.content?.[
       'application/json'

@@ -6,6 +6,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { Test } from '@nestjs/testing';
 import { randomUUID } from 'node:crypto';
+import { systemHandleFromUserId } from './lib/user-handle-sql.mjs';
 import { authTestEnvironment } from '../test/auth-env.ts';
 import { AUTH_PROVIDER_GOOGLE } from '../dist/modules/auth/google/auth-providers.js';
 
@@ -45,12 +46,18 @@ try {
   const email = `oauth-${randomUUID()}@example.test`;
 
   await pool.query(
-    `INSERT INTO users (id, name, email, password_hash) VALUES ($1, $2, $3, $4)`,
-    [passwordUserId, 'Password User', `pw-${randomUUID()}@example.test`, '$argon2id$v=19$m=19456,t=2,p=1$dummy'],
+    `INSERT INTO users (id, name, email, password_hash, handle) VALUES ($1, $2, $3, $4, $5)`,
+    [
+      passwordUserId,
+      'Password User',
+      `pw-${randomUUID()}@example.test`,
+      '$argon2id$v=19$m=19456,t=2,p=1$dummy',
+      systemHandleFromUserId(passwordUserId),
+    ],
   );
   await pool.query(
-    `INSERT INTO users (id, name, email, password_hash) VALUES ($1, $2, $3, NULL)`,
-    [userId, 'Google Only', `go-${randomUUID()}@example.test`],
+    `INSERT INTO users (id, name, email, password_hash, handle) VALUES ($1, $2, $3, NULL, $4)`,
+    [userId, 'Google Only', `go-${randomUUID()}@example.test`, systemHandleFromUserId(userId)],
   );
 
   const row = await identities.create({

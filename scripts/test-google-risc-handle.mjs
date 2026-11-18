@@ -13,6 +13,7 @@ import {
   generateKeyPair,
 } from 'jose';
 import { authTestEnvironment } from '../test/auth-env.ts';
+import { systemHandleFromUserId } from './lib/user-handle-sql.mjs';
 
 const SESSIONS_REVOKED =
   'https://schemas.openid.net/secevent/risc/event-type/sessions-revoked';
@@ -100,8 +101,13 @@ try {
   const jti = randomUUID();
 
   await pool.query(
-    `INSERT INTO users (id, name, email, password_hash) VALUES ($1, $2, $3, NULL)`,
-    [userId, 'RISC User', `risc-${randomUUID()}@example.test`],
+    `INSERT INTO users (id, name, email, password_hash, handle) VALUES ($1, $2, $3, NULL, $4)`,
+    [
+      userId,
+      'RISC User',
+      `risc-${randomUUID()}@example.test`,
+      systemHandleFromUserId(userId),
+    ],
   );
   await pool.query(
     `INSERT INTO auth_provider_identities (id, user_id, provider, provider_subject, provider_email)

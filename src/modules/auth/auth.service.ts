@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { and, eq, desc } from 'drizzle-orm';
 import { errors as joseErrors } from 'jose';
@@ -10,6 +10,11 @@ import {
   users,
 } from '../../database/schema/index.js';
 import type { User } from '../../database/schema/index.js';
+import {
+  generateRandomSystemHandle,
+  isUserHandleUniqueViolation,
+  systemHandleFromUserId,
+} from '../../common/schemas/user-handle-assign.js';
 import { userNameSchema } from '../../common/schemas/user-name.schema.js';
 import { AuthLimiter } from './auth-security.guard.js';
 import { AuthRepository, type AuthTx } from './auth.repository.js';
@@ -32,7 +37,12 @@ import type {
   ChangePasswordInput,
   SetPasswordInput,
 } from './schemas/auth.schema.js';
-const safeUser = (u: User) => ({ id: u.id, name: u.name, email: u.email });
+const safeUser = (u: User) => ({
+  id: u.id,
+  name: u.name,
+  email: u.email,
+  handle: u.handle,
+});
 const usable = (s: { revokedAt: Date | null; expiresAt: Date } | undefined) =>
   s && !s.revokedAt && s.expiresAt.getTime() > Date.now();
 export const forgotMessage =
@@ -66,6 +76,54 @@ export class AuthService {
       (error as { cause?: { code?: string } })?.cause ??
       (error as { code?: string });
     return cause?.code === '23505';
+  }
+
+  private isEmailUniqueViolation(error: unknown): boolean {
+    const cause =
+      (error as { cause?: { code?: string; constraint?: string } })?.cause ??
+      (error as { code?: string; constraint?: string });
+    return (
+      cause?.code === '23505' &&
+      ['users_email_key', 'users_email_unique'].includes(
+        cause.constraint ?? '',
+      )
+    );
+  }
+
+  private async createUserAccount(values: {
+    name: string;
+    email: string;
+    passwordHash: string | null;
+    handle?: string;
+  }): Promise<User> {
+    const maxAttempts = 8;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const id = randomUUID();
+      const handle =
+        values.handle ??
+        (attempt === 0
+          ? systemHandleFromUserId(id)
+          : generateRandomSystemHandle());
+      try {
+        return await this.repo.createUser({
+          id,
+          name: values.name,
+          email: values.email,
+          passwordHash: values.passwordHash,
+          handle,
+        });
+      } catch (error) {
+        if (this.isEmailUniqueViolation(error)) throw error;
+        if (values.handle && isUserHandleUniqueViolation(error)) {
+          throw authError(409, 'HANDLE_IN_USE', 'This handle is already taken.', {
+            handle: 'This handle is already taken.',
+          });
+        }
+        if (!values.handle && isUserHandleUniqueViolation(error)) continue;
+        throw error;
+      }
+    }
+    throw new Error('Unable to assign a unique handle.');
   }
 
   async establishOAuthSession(
@@ -144,7 +202,7 @@ export class AuthService {
         );
         return session;
       }
-      const user = await this.repo.createUser({
+      const user = await this.createUserAccount({
         name: this.googleDisplayName(profile),
         email: profile.email,
         passwordHash: null,
@@ -252,23 +310,17 @@ export class AuthService {
     try {
       return {
         user: safeUser(
-          await this.repo.createUser({
+          await this.createUserAccount({
             name: input.name,
             email: input.email,
             passwordHash: await this.passwords.hash(input.password),
+            handle: input.handle,
           }),
         ),
       };
     } catch (error) {
-      const cause =
-        (error as { cause?: { code?: string; constraint?: string } })?.cause ??
-        (error as { code?: string; constraint?: string });
-      if (
-        cause.code === '23505' &&
-        ['users_email_key', 'users_email_unique'].includes(
-          cause.constraint ?? '',
-        )
-      )
+      if (error instanceof HttpException) throw error;
+      if (this.isEmailUniqueViolation(error))
         throw authError(409, 'EMAIL_IN_USE', 'Email is already registered.');
       throw error;
     }

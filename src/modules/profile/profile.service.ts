@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
+import {
+  USER_HANDLE_CHANGE_COOLDOWN_MS,
+  isUserHandleUniqueViolation,
+} from '../../common/schemas/user-handle-assign.js';
 import { users } from '../../database/schema/index.js';
 import { media } from '../../database/schema/media/media.table.js';
 import type { UserEducationEntry } from '../../database/schema/profile/user-education-entries.table.js';
@@ -83,6 +87,7 @@ export class ProfileService {
     return {
       name: user.name,
       bio: user.bio,
+      handle: user.handle,
       ...(avatarUrl ? { avatarUrl } : {}),
       work: work.map(toWorkEntry),
       education: education.map(toEducationEntry),
@@ -99,6 +104,29 @@ export class ProfileService {
       if (input.name !== undefined) updates.name = input.name;
       if (input.bio !== undefined) updates.bio = input.bio;
 
+      if (input.handle !== undefined) {
+        const next = input.handle;
+        if (next !== user.handle) {
+          if (user.handleChangedAt) {
+            const elapsed = Date.now() - user.handleChangedAt.getTime();
+            if (elapsed < USER_HANDLE_CHANGE_COOLDOWN_MS) {
+              const daysLeft = Math.ceil(
+                (USER_HANDLE_CHANGE_COOLDOWN_MS - elapsed) /
+                  (24 * 60 * 60 * 1000),
+              );
+              throw profileError(
+                409,
+                'HANDLE_CHANGE_COOLDOWN',
+                `You can change your handle again in ${daysLeft} day(s).`,
+                { handle: `You can change your handle again in ${daysLeft} day(s).` },
+              );
+            }
+          }
+          updates.handle = next;
+          updates.handleChangedAt = now;
+        }
+      }
+
       if (input.avatarMediaId !== undefined) {
         const target = input.avatarMediaId;
         const current = user.avatarMediaId;
@@ -114,11 +142,21 @@ export class ProfileService {
         }
       }
 
-      const [updated] = await tx
-        .update(users)
-        .set(updates)
-        .where(eq(users.id, userId))
-        .returning();
+      let updated;
+      try {
+        [updated] = await tx
+          .update(users)
+          .set(updates)
+          .where(eq(users.id, userId))
+          .returning();
+      } catch (error) {
+        if (isUserHandleUniqueViolation(error)) {
+          throw profileError(409, 'HANDLE_IN_USE', 'This handle is already taken.', {
+            handle: 'This handle is already taken.',
+          });
+        }
+        throw error;
+      }
       if (!updated)
         throw profileError(404, 'NOT_FOUND', 'Profile was not found.');
 
@@ -143,6 +181,7 @@ export class ProfileService {
       return {
         name: updated.name,
         bio: updated.bio,
+        handle: updated.handle,
         ...(avatarUrl ? { avatarUrl } : {}),
         work: work.map(toWorkEntry),
         education: education.map(toEducationEntry),

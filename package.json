@@ -42,6 +42,7 @@
     "test:risc-receipts:integration": "pnpm build && node scripts/test-risc-receipts.mjs",
     "test:google-risc-handle:integration": "pnpm build && node scripts/test-google-risc-handle.mjs",
     "test:google-risc-http:integration": "pnpm build && node scripts/test-google-risc-http.mjs",
+    "test:user-handle:integration": "node scripts/test-user-handle-schema.mjs",
     "preflight:google-risc": "node scripts/preflight-google-risc-endpoint.mjs",
     "sign:test-risc-set": "node scripts/sign-test-risc-set.mjs",
     "test:google-oauth:auth": "pnpm build && node scripts/test-google-oauth-auth.mjs",

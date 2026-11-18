@@ -67,10 +67,17 @@ try {
   assert.equal(column.rowCount, 1, 'platform_slug column missing');
   assert.equal(column.rows[0].is_nullable, 'NO');
 
+  const { systemHandleFromUserId } = await import('./lib/user-handle-sql.mjs');
   await pool.query(
-    `INSERT INTO users (id, name, email, password_hash)
-     VALUES ($1, $2, $3, $4)`,
-    [fixtureUserId, 'P1 Verify', `p1-verify-${tag}@example.test`, 'unused-hash'],
+    `INSERT INTO users (id, name, email, password_hash, handle)
+     VALUES ($1, $2, $3, $4, $5)`,
+    [
+      fixtureUserId,
+      'P1 Verify',
+      `p1-verify-${tag}@example.test`,
+      'unused-hash',
+      systemHandleFromUserId(fixtureUserId),
+    ],
   );
 
   const fixtures = [
