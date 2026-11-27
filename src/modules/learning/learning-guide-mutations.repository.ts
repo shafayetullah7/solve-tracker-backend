@@ -7,7 +7,7 @@ import { learningError } from './learning.errors.js';
 import type { CreateGuideInput, PatchGuideInput } from './schemas/learning-guides.schema.js';
 
 import { buildHierarchy, planPlacement, HierarchyError, MAX_NODES } from './learning-hierarchy.js';
-import type { CreateNodeInput, MoveNodeInput, PatchNodeInput } from './schemas/learning-nodes.schema.js';
+import type { CreateNodeInput, MoveNodeInput, PatchNodeInput, ResumeInput } from './schemas/learning-nodes.schema.js';
 
 const DAY = 86400000;
 const MAX_GUIDES = 100;
@@ -125,6 +125,30 @@ export class LearningGuideMutationsRepository {
       await tx.update(learningGuides).set({ structureRevision: guide.structureRevision + 1n, updatedAt: now })
         .where(and(eq(learningGuides.id, guideId), eq(learningGuides.ownerId, ownerId)));
       return node.id;
+    }, guideId);
+  }
+
+  async resume(ownerId: string, guideId: string, input: ResumeInput): Promise<Receipt> {
+    return this.execute(ownerId, input.operationId, [
+      'enrollment.resume', guideId, input.nodeId, input.expectedStructureRevision,
+    ], async (tx, now) => {
+      const guide = await this.lockGuide(tx, ownerId, guideId);
+      if (guide.deletedAt) throw learningError(404, 'NOT_FOUND', 'Guide was not found.');
+      if (guide.archivedAt) throw learningError(409, 'LEARNING_LIFECYCLE_CONFLICT', 'Guide is archived.');
+      if (guide.structureRevision.toString() !== input.expectedStructureRevision)
+        throw learningError(409, 'LEARNING_REVISION_CONFLICT', 'Guide structure changed.');
+      if (input.nodeId !== null) {
+        const [node] = await tx.select({ id: learningNodes.id }).from(learningNodes).where(and(
+          eq(learningNodes.guideId, guideId), eq(learningNodes.id, input.nodeId), isNull(learningNodes.deletedAt),
+        ));
+        if (!node) throw learningError(404, 'NOT_FOUND', 'Node was not found.');
+      }
+      const [enrollment] = await tx.update(learningEnrollments).set({
+        resumeNodeId: input.nodeId, lastActivityAt: now, updatedAt: now,
+      }).where(and(eq(learningEnrollments.guideId, guideId), eq(learningEnrollments.learnerId, ownerId)))
+        .returning({ id: learningEnrollments.id });
+      if (!enrollment) throw learningError(404, 'NOT_FOUND', 'Enrollment was not found.');
+      return enrollment.id;
     }, guideId);
   }
 
