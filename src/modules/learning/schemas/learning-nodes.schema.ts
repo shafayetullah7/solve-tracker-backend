@@ -44,3 +44,17 @@ export const patchNodeSchema = z.strictObject({
   message: 'At least one metadata field is required.',
 });
 export type PatchNodeInput = z.infer<typeof patchNodeSchema>;
+
+export const recoveryQuerySchema = z.strictObject({
+  page: z.coerce.number().int().min(1).max(10000).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(25),
+});
+export const recoveryResponseSchema = z.strictObject({
+  items: z.array(z.strictObject({
+    id: z.uuid(), title: z.string(), parentId: z.uuid().nullable(),
+    deletedAt: z.iso.datetime(), expiresAt: z.iso.datetime(),
+  })),
+  page: z.number().int(), pageSize: z.number().int(), hasMore: z.boolean(),
+});
+export type RecoveryQuery = z.infer<typeof recoveryQuerySchema>;
+export type RecoveryResponse = z.infer<typeof recoveryResponseSchema>;
