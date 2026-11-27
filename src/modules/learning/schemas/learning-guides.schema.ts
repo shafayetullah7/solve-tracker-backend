@@ -3,7 +3,7 @@ import { paginatedListSchema } from '../../../common/pagination.schema.js';
 
 export const guideIdSchema = z.uuid();
 export const revisionSchema = z.string().regex(/^[1-9][0-9]{0,18}$/).refine(
-  (value) => BigInt(value) <= 9223372036854775807n,
+  (value) => /^[1-9][0-9]{0,18}$/.test(value) && BigInt(value) <= 9223372036854775807n,
   'Revision exceeds the supported range.',
 );
 export const guideTitleSchema = z.string().trim().min(1).max(200);
@@ -27,7 +27,7 @@ export const patchGuideSchema = z.strictObject({
 export const listGuidesQuerySchema = z.strictObject({
   page: z.coerce.number().int().min(1).max(10000).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(25),
-  status: z.enum(['active', 'archived']).default('active'),
+  status: z.enum(['active', 'archived', 'deleted']).default('active'),
   search: z.string().trim().max(200).optional(),
 });
 
@@ -38,6 +38,7 @@ export const guideResponseSchema = z.strictObject({
   structureRevision: revisionSchema,
   metadataRevision: revisionSchema,
   archivedAt: z.iso.datetime().nullable(),
+  deletedAt: z.iso.datetime().nullable(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });
@@ -53,3 +54,14 @@ export type CreateGuideInput = z.infer<typeof createGuideSchema>;
 export type PatchGuideInput = z.infer<typeof patchGuideSchema>;
 export type ListGuidesQuery = z.infer<typeof listGuidesQuerySchema>;
 export type GuideResponse = z.infer<typeof guideResponseSchema>;
+
+export const guideLifecycleSchema = z.strictObject({
+  action: z.enum(['archive', 'unarchive', 'restore']),
+  expectedMetadataRevision: revisionSchema,
+  operationId: z.uuid(),
+});
+export const guideMutationReceiptSchema = z.strictObject({
+  resourceId: z.uuid(),
+  replayed: z.boolean(),
+});
+export type GuideLifecycleInput = z.infer<typeof guideLifecycleSchema>;
