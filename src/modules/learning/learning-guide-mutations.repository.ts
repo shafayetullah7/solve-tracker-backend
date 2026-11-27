@@ -128,6 +128,64 @@ export class LearningGuideMutationsRepository {
     }, guideId);
   }
 
+  async restoreNode(ownerId: string, guideId: string, nodeId: string, input: MoveNodeInput): Promise<Receipt> {
+    return this.execute(ownerId, input.operationId, [
+      'node.restore', guideId, nodeId, input.expectedStructureRevision, input.parentId, input.beforeNodeId,
+    ], async (tx, now) => {
+      const guide = await this.lockGuide(tx, ownerId, guideId);
+      if (guide.deletedAt) throw learningError(404, 'NOT_FOUND', 'Guide was not found.');
+      if (guide.archivedAt) throw learningError(409, 'LEARNING_LIFECYCLE_CONFLICT', 'Guide is archived.');
+      if (guide.structureRevision.toString() !== input.expectedStructureRevision)
+        throw learningError(409, 'LEARNING_REVISION_CONFLICT', 'Guide structure changed.');
+      const [root] = await tx.select().from(learningNodes).where(and(
+        eq(learningNodes.guideId, guideId), eq(learningNodes.id, nodeId),
+      ));
+      if (!root) throw learningError(404, 'NOT_FOUND', 'Node was not found.');
+      if (!root.deletedAt || !root.deletionBatchId || now.getTime() - root.deletedAt.getTime() >= 30 * DAY)
+        throw learningError(409, 'LEARNING_LIFECYCLE_CONFLICT', 'Subtree is not recoverable.');
+      const batch = await tx.select().from(learningNodes).where(and(
+        eq(learningNodes.guideId, guideId), eq(learningNodes.deletionBatchId, root.deletionBatchId),
+      )).limit(MAX_NODES + 1);
+      const batchIds = new Set(batch.map(node => node.id));
+      const roots = batch.filter(node => node.parentId === null || !batchIds.has(node.parentId));
+      if (roots.length !== 1 || roots[0]?.id !== nodeId)
+        throw learningError(409, 'LEARNING_INVALID_PLACEMENT', 'Restore the entire deletion batch from its root.');
+      const active = await tx.select().from(learningNodes).where(and(
+        eq(learningNodes.guideId, guideId), isNull(learningNodes.deletedAt),
+      )).limit(MAX_NODES + 1);
+      buildHierarchy(active);
+      buildHierarchy(batch.map(node => node.id === nodeId ? { ...node, parentId: null, position: 0 } : node));
+      const plan = (() => {
+        try {
+          const placement = planPlacement(active, null, input.parentId, input.beforeNodeId);
+          const shifted = new Set(placement.destination.slice(placement.index).map(node => node.id));
+          buildHierarchy([
+            ...active.map(node => shifted.has(node.id) ? { ...node, position: node.position + 1 } : node),
+            ...batch.map(node => node.id === nodeId ? { ...node, parentId: input.parentId, position: placement.index } : node),
+          ]);
+          return placement;
+        } catch (error) {
+          if (error instanceof HierarchyError)
+            throw learningError(409, 'LEARNING_INVALID_PLACEMENT', error.message);
+          throw error;
+        }
+      })();
+      const shifted = plan.destination.slice(plan.index).map(node => node.id);
+      if (shifted.length) {
+        const scope = and(eq(learningNodes.guideId, guideId), isNull(learningNodes.deletedAt), inArray(learningNodes.id, shifted));
+        await tx.update(learningNodes).set({ position: sql`${learningNodes.position} + 1000` }).where(scope);
+        await tx.update(learningNodes).set({ position: sql`${learningNodes.position} - 999`, updatedAt: now }).where(scope);
+      }
+      await tx.update(learningNodes).set({ parentId: input.parentId, position: plan.index })
+        .where(and(eq(learningNodes.guideId, guideId), eq(learningNodes.id, nodeId)));
+      await tx.update(learningNodes).set({ deletedAt: null, deletionBatchId: null, updatedAt: now })
+        .where(and(eq(learningNodes.guideId, guideId), eq(learningNodes.deletionBatchId, root.deletionBatchId)));
+      await tx.update(learningGuides).set({ structureRevision: guide.structureRevision + 1n, updatedAt: now })
+        .where(and(eq(learningGuides.id, guideId), eq(learningGuides.ownerId, ownerId)));
+      return nodeId;
+    }, guideId);
+  }
+
   async deleteNode(ownerId: string, guideId: string, nodeId: string, expected: string, operationId: string): Promise<Receipt> {
     return this.execute(ownerId, operationId, ['node.delete', guideId, nodeId, expected], async (tx, now) => {
       const guide = await this.lockGuide(tx, ownerId, guideId);
