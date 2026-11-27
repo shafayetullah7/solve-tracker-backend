@@ -128,6 +128,67 @@ export class LearningGuideMutationsRepository {
     }, guideId);
   }
 
+  async copyNode(ownerId: string, guideId: string, nodeId: string, input: MoveNodeInput): Promise<Receipt> {
+    return this.execute(ownerId, input.operationId, [
+      'node.copy', guideId, nodeId, input.expectedStructureRevision, input.parentId, input.beforeNodeId,
+    ], async (tx, now) => {
+      const guide = await this.lockGuide(tx, ownerId, guideId);
+      if (guide.deletedAt) throw learningError(404, 'NOT_FOUND', 'Guide was not found.');
+      if (guide.archivedAt) throw learningError(409, 'LEARNING_LIFECYCLE_CONFLICT', 'Guide is archived.');
+      if (guide.structureRevision.toString() !== input.expectedStructureRevision)
+        throw learningError(409, 'LEARNING_REVISION_CONFLICT', 'Guide structure changed.');
+      const nodes = await tx.select().from(learningNodes).where(and(
+        eq(learningNodes.guideId, guideId), isNull(learningNodes.deletedAt),
+      )).limit(MAX_NODES + 1);
+      const tree = buildHierarchy(nodes);
+      const root = tree.byId.get(nodeId);
+      if (!root) throw learningError(404, 'NOT_FOUND', 'Node was not found.');
+      const source = tree.preorder.filter(node => {
+        let current: string | null = node.id;
+        while (current !== null) {
+          if (current === nodeId) return true;
+          current = tree.byId.get(current)?.parentId ?? null;
+        }
+        return false;
+      });
+      const ids = new Map(source.map(node => [node.id, randomUUID()]));
+      const copiedId = ids.get(nodeId);
+      if (!copiedId) throw new Error('Missing copied root identity.');
+      const { plan, copies } = (() => {
+        try {
+          const plan = planPlacement(nodes, null, input.parentId, input.beforeNodeId);
+          const copies = source.map(node => {
+            const id = ids.get(node.id);
+            const parentId = node.id === nodeId ? input.parentId : ids.get(node.parentId ?? '');
+            if (!id || parentId === undefined) throw new Error('Missing copied node identity.');
+            return { id, guideId, parentId, position: node.id === nodeId ? plan.index : node.position,
+              title: node.title, required: node.required, completionMode: node.completionMode };
+          });
+          const shifted = new Set(plan.destination.slice(plan.index).map(node => node.id));
+          buildHierarchy([
+            ...nodes.map(node => shifted.has(node.id) ? { ...node, position: node.position + 1 } : node),
+            ...copies,
+          ].map(({ id, parentId, position }) => ({ id, parentId, position })));
+          return { plan, copies };
+        } catch (error) {
+          if (error instanceof HierarchyError)
+            throw learningError(409, 'LEARNING_INVALID_PLACEMENT', error.message);
+          throw error;
+        }
+      })();
+      const shifted = plan.destination.slice(plan.index).map(node => node.id);
+      if (shifted.length) {
+        const scope = and(eq(learningNodes.guideId, guideId), isNull(learningNodes.deletedAt), inArray(learningNodes.id, shifted));
+        await tx.update(learningNodes).set({ position: sql`${learningNodes.position} + 1000` }).where(scope);
+        await tx.update(learningNodes).set({ position: sql`${learningNodes.position} - 999`, updatedAt: now }).where(scope);
+      }
+      await tx.insert(learningNodes).values(copies);
+      await tx.update(learningGuides).set({ structureRevision: guide.structureRevision + 1n, updatedAt: now })
+        .where(and(eq(learningGuides.id, guideId), eq(learningGuides.ownerId, ownerId)));
+      return copiedId;
+    }, guideId);
+  }
+
   async restoreNode(ownerId: string, guideId: string, nodeId: string, input: MoveNodeInput): Promise<Receipt> {
     return this.execute(ownerId, input.operationId, [
       'node.restore', guideId, nodeId, input.expectedStructureRevision, input.parentId, input.beforeNodeId,
