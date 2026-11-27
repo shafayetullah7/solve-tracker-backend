@@ -15,6 +15,10 @@ Migration folder: `drizzle/20261127135401_pg_enums_learning_users_auth/`.
 
 Redundant `CHECK ... IN (...)` constraints on these columns were dropped in the same migration. The partial index `discover_user_visibility_idx` is dropped and recreated with an enum-typed predicate (`<> 'private'::practice_visibility`) because PostgreSQL cannot alter the column while the old text comparison remains on the index.
 
+## Phase 5A (2026-11-27)
+
+- **`learning_block_type`:** value `problem` added in migration `drizzle/20261127144101_chunky_lady_mastermind/`. See [LEARNING_5A_RESULTS.md](./LEARNING_5A_RESULTS.md).
+
 ## API contract (unchanged)
 
 - **completion_mode:** database and read responses include `gated`; create, patch, and portable import/export remain `structural` \| `manual`.

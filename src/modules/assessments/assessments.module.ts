@@ -21,6 +21,6 @@ import { AttemptsService } from './attempts.service.js';
     AttemptMutationsRepository,
     AttemptsService,
   ],
-  exports: [AssessmentsService, AssessmentsRepository, AttemptsService],
+  exports: [AssessmentsService, AssessmentsRepository, AttemptsService, AttemptsRepository],
 })
 export class AssessmentsModule {}

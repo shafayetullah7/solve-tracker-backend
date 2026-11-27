@@ -1,7 +1,7 @@
 # Practice — Learning requirements
 
 Date: 2026-11-27  
-Status: Phase 0 closed 2026-11-27; six product decisions approved.  
+Status: Phase 0 closed 2026-11-27; six product decisions approved. **Phase 6 R1 integration complete** on `feature/learning-guides` ([LEARNING_6_PHASE_SIGNOFF.md](./LEARNING_6_PHASE_SIGNOFF.md)). **Dark mode** for learning-integrated UX is **waived through Phase 6** ([LEARNING_6_DECISIONS.md](./LEARNING_6_DECISIONS.md)); full public release still tracks approved decision A0-06.  
 Companion documents: `LEARNING_A0_RESULTS.md`, `practice-learning-roadmap.md`.
 
 ## 1. Purpose and scope
@@ -123,7 +123,25 @@ Release requires all MUST requirements, approved responsive designs, both themes
 
 Phase 0 closed: see [PHASE_0_1_CLOSURE.md](./PHASE_0_1_CLOSURE.md) and [BASELINE_RUN.md](./BASELINE_RUN.md).
 
-## 9. Source references
+## 9. Phase 6 R1 integration evidence
+
+Evidence for **integration journeys** delivered on `feature/learning-guides` through Phase 6. This section does **not** claim full §8 release signoff (E2E browser suite, both themes, full WCAG audit).
+
+| Req ID | Acceptance theme | Evidence |
+|--------|------------------|----------|
+| LG-01 | Create guide without problem; search/archive library | `test-learning-integration.mjs`; [LEARNING_6D_RESULTS.md](./LEARNING_6D_RESULTS.md) |
+| LG-02 | Recursive structure, limits | `learning-hierarchy.ts`; structure UI + integration mutations |
+| LG-04 | Import/export R1 | Phase 3 import + export integration asserts |
+| LG-05 | Resume, study, outline | Phases 3A–3C; [LEARNING_6F_RESULTS.md](./LEARNING_6F_RESULTS.md); `GuideOutline.test.tsx` |
+| LG-06 | Required-step progress | Tree `progress` in API + study completion flows |
+| LG-07 | Assessments R1 | [LEARNING_4_PHASE_SIGNOFF.md](./LEARNING_4_PHASE_SIGNOFF.md) |
+| LG-09 | Problem links, no duplicate library records | [LEARNING_5A_RESULTS.md](./LEARNING_5A_RESULTS.md)–[LEARNING_5E_RESULTS.md](./LEARNING_5E_RESULTS.md); integration + `BlockViews` tests |
+| LG-10 | Dual-product nav, separate metrics, onboarding | [LEARNING_6A_RESULTS.md](./LEARNING_6A_RESULTS.md)–[LEARNING_6E_RESULTS.md](./LEARNING_6E_RESULTS.md); [LEARNING_6_ACTIVITY_CONTRACT.md](./LEARNING_6_ACTIVITY_CONTRACT.md); `AppSidebar.learning.test.tsx` |
+| NFR-08 | Existing coding APIs intact | `test-problems-integration.mjs`, `test-topics-integration.mjs` |
+
+**Not met for full release (Phase 7+):** dark/system theme on all surfaces (LG-10, NFR-05 partial); public publishing (A0-02); formal screenshot archive; Playwright E2E per §8.
+
+## 10. Source references
 
 - https://github.com/shafayetullah7/solve-tracker-backend/blob/main/REQUIREMENTS.md
 - https://github.com/shafayetullah7/solve-tracker-backend/blob/main/BACKEND_CONVENTIONS.md

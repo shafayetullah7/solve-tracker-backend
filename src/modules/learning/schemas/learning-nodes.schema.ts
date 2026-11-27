@@ -6,6 +6,7 @@ import {
 } from '../../../database/schema/learning/learning-node-completion-mode.enum.js';
 import { revisionSchema, guideTitleSchema } from './learning-guides.schema.js';
 import { progressSummarySchema } from './learning-blocks.schema.js';
+import { problemBlockSummarySchema } from '../learning-problem-resolution.js';
 
 const placement = {
   parentId: z.uuid().nullable(),
@@ -33,6 +34,7 @@ export const nodeResponseSchema = z.strictObject({
   contentRevision: revisionSchema,
   requirementRevision: revisionSchema,
   completed: z.boolean(),
+  problemBlocks: z.array(problemBlockSummarySchema).optional(),
 });
 export const treeResponseSchema = z.strictObject({
   structureRevision: revisionSchema,

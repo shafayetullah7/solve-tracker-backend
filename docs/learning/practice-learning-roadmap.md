@@ -126,32 +126,36 @@ Proposed routes: `/learning/guides`, `/learning/guides/:guideId/nodes`, node/blo
 
 ## Phase 5 — Existing problem tracker integration
 
-**Objective:** Connect knowledge acquisition with deliberate coding practice.
+**Objective:** Connect knowledge acquisition with deliberate coding practice. **Execution slices:** [LEARNING_5_SLICE_PLAN.md](./LEARNING_5_SLICE_PLAN.md).
 
-- [ ] Add a problem-assignment block that searches existing library or accepts a supported problem URL.
-- [ ] Reuse existing URL normalization/platform behavior; preserve portable assignment identity for future shared guides.
-- [ ] Resolve assignments to the current learner's own problem record, with an explicit add-to-library flow when missing.
-- [ ] Derive linked completion from existing solved status; define behavior when a problem is unsolved again or deleted.
-- [ ] Add backlinks from problem detail to related learning steps where useful.
-- [ ] Support practical assignment checklists and evidence attachments separately from coding problems.
-- [ ] Keep manually marked solved status clearly labeled; do not claim automatic judge verification.
-- [ ] Test synchronization, duplicate links, deleted records and cross-account access.
+- [x] **5.0** — Baseline, Problems read contract spec, enum/link blueprint ([LEARNING_5_0_RESULTS.md](./LEARNING_5_0_RESULTS.md)).
+- [x] **5A** — `problem` block + `learning_problem_links`; URL normalization on content replace; portable URL-only payloads ([LEARNING_5A_RESULTS.md](./LEARNING_5A_RESULTS.md)).
+- [x] **5B** — Learner resolution (`unresolved` / `linked_unsolved` / `solved`) on content and tree reads; cross-account safe ([LEARNING_5B_RESULTS.md](./LEARNING_5B_RESULTS.md)).
+- [x] **5C** — Study UI problem block; add-to-library via existing problem APIs; manual solved labeling ([LEARNING_5C_RESULTS.md](./LEARNING_5C_RESULTS.md)).
+- [x] **5D** — Gated completion AND required problem links (batch reads); unsolved/delete/reopen behavior ([LEARNING_5D_RESULTS.md](./LEARNING_5D_RESULTS.md), [LEARNING_5D_CONVENTIONS.md](./LEARNING_5D_CONVENTIONS.md)).
+- [x] **5E** — Backlinks from problem detail to guide steps (owner-scoped) ([LEARNING_5E_RESULTS.md](./LEARNING_5E_RESULTS.md), [LEARNING_5E_CONVENTIONS.md](./LEARNING_5E_CONVENTIONS.md)).
+- [ ] _Deferred (post-5 or R2):_ library search picker in editor; `learning_block_progress` checklist gates; practical evidence attachments.
 
-**Exit criteria:** A DSA guide can require reading, passing a test and solving linked problems without duplicating progress entry.
+**Exit criteria:** A DSA guide can require reading, passing a test and solving linked problems without duplicating progress entry. **R1 slices 5.0–5E complete (2026-11-27).**
+
+**Depends on:** [LEARNING_4_PHASE_SIGNOFF.md](./LEARNING_4_PHASE_SIGNOFF.md). **5.0 signoff:** [LEARNING_5_0_RESULTS.md](./LEARNING_5_0_RESULTS.md).
 
 ## Phase 6 — Product-wide integration and polish
 
-**Objective:** Make the new feature feel native to Practice.
+**Objective:** Make the new feature feel native to Practice. **Execution slices:** [LEARNING_6_SLICE_PLAN.md](./LEARNING_6_SLICE_PLAN.md).
 
-- [ ] Implement approved navigation and responsive shell; preserve existing accessibility and route behavior.
-- [ ] Redesign Overview with resume learning, practice queue and relevant activity; retain detailed practice analytics.
-- [ ] Keep learning and problem metrics distinct; define combined activity/streak semantics explicitly and avoid double counting.
-- [ ] Update landing page, SEO metadata, social preview, onboarding, empty states and help copy to reflect Learn / Practice / Track.
-- [ ] Add guide search, filters, archive and resume shortcuts; ensure keyboard navigation and focus restoration.
-- [ ] Test real long-form content, code overflow, narrow screens, large trees and reduced motion. Add dark mode only if fully tested and prioritized.
-- [ ] Update both repositories' requirements, API documentation and deployment instructions.
+- [x] **6.0** — Baseline, metrics contract, IA decisions ([LEARNING_6_0_RESULTS.md](./LEARNING_6_0_RESULTS.md), [LEARNING_6_0_BASELINE.md](./LEARNING_6_0_BASELINE.md), [LEARNING_6_DECISIONS.md](./LEARNING_6_DECISIONS.md)).
+- [x] **6A** — Shell, sidebar, Create menu, learning nav ([LEARNING_6A_RESULTS.md](./LEARNING_6A_RESULTS.md)).
+- [x] **6B** — Overview: resume learning + practice queue ([LEARNING_6B_RESULTS.md](./LEARNING_6B_RESULTS.md)).
+- [x] **6C** — Dual metrics semantics, no double counting ([LEARNING_6C_RESULTS.md](./LEARNING_6C_RESULTS.md)).
+- [x] **6D** — Guide library search, archive, resume shortcuts ([LEARNING_6D_RESULTS.md](./LEARNING_6D_RESULTS.md)).
+- [x] **6E** — Landing, SEO, onboarding, empty-state copy ([LEARNING_6E_RESULTS.md](./LEARNING_6E_RESULTS.md)).
+- [x] **6F** — Responsive/a11y/content stress (light theme; dark waived) ([LEARNING_6F_RESULTS.md](./LEARNING_6F_RESULTS.md)).
+- [x] **6G** — Docs, deployment, phase signoff ([LEARNING_6_PHASE_SIGNOFF.md](./LEARNING_6_PHASE_SIGNOFF.md)).
 
 **Exit criteria:** Existing users can continue their workflow unchanged in substance; new learning-only users can onboard without creating coding problems.
+
+**Phase 6 R1 signoff (2026-11-27):** [LEARNING_6_PHASE_SIGNOFF.md](./LEARNING_6_PHASE_SIGNOFF.md)
 
 ## Phase 7 — Public release hardening
 

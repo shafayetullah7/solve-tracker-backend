@@ -3,6 +3,7 @@ import {
   learningBlockType,
   type LearningBlockType,
 } from '../../database/schema/learning/learning-block-type.enum.js';
+import { prepareLinkableProblemUrl } from './learning-problem-link.validation.js';
 
 const bodyLimit = 64_000;
 
@@ -34,6 +35,17 @@ export const assessmentPayloadSchema = z.strictObject({
   label: z.string().max(200).optional(),
 });
 
+export const problemPayloadSchema = z.strictObject({
+  url: z.string().max(2048),
+  label: z.string().max(200).optional(),
+});
+
+const storedProblemPayloadSchema = z.strictObject({
+  normalizedUrl: z.string().max(2048),
+  url: z.string().max(2048),
+  label: z.string().max(200).optional(),
+});
+
 export function stripMarkup(value: string): string {
   return value.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '').replace(/<[^>]+>/g, '');
 }
@@ -58,6 +70,23 @@ export function normalizeBlockPayload(type: LearningBlockType, payload: unknown)
   if (type === learningBlockType.Assessment) {
     const parsed = assessmentPayloadSchema.parse(payload);
     return { assessmentId: parsed.assessmentId, label: parsed.label?.trim() };
+  }
+  if (type === learningBlockType.Problem) {
+    const stored = storedProblemPayloadSchema.safeParse(payload);
+    if (stored.success) {
+      return {
+        normalizedUrl: stored.data.normalizedUrl,
+        url: stored.data.url,
+        ...(stored.data.label?.trim() ? { label: stored.data.label.trim() } : {}),
+      };
+    }
+    const parsed = problemPayloadSchema.parse(payload);
+    const prepared = prepareLinkableProblemUrl(parsed.url);
+    return {
+      normalizedUrl: prepared.normalizedUrl,
+      url: prepared.url,
+      ...(parsed.label?.trim() ? { label: parsed.label.trim() } : {}),
+    };
   }
   const parsed = checklistPayloadSchema.parse(payload);
   return {

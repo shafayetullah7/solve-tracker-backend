@@ -9,6 +9,7 @@ import {
   learningNodes,
   learningBlocks,
   learningAssessmentLinks,
+  learningProblemLinks,
   learningNodeProgress,
   type LearningGuide,
 } from '../../database/schema/index.js';
@@ -23,6 +24,39 @@ import { assertLinkableGateAssessment } from './learning-gate-assessment.validat
 import { learningBlockType } from '../../database/schema/learning/learning-block-type.enum.js';
 import { learningNodeCompletionMode } from '../../database/schema/learning/learning-node-completion-mode.enum.js';
 import type { PortableGuide } from './schemas/learning-portable.schema.js';
+
+async function insertBlockLinkRows(
+  tx: DbTx,
+  guideId: string,
+  rows: { id: string; type: string; payload: unknown }[],
+): Promise<void> {
+  for (const row of rows) {
+    if (row.type === learningBlockType.Assessment) {
+      const payload = row.payload as { assessmentId?: string };
+      if (!payload.assessmentId) {
+        throw learningError(400, 'VALIDATION_ERROR', 'Assessment block requires assessmentId.');
+      }
+      await assertLinkableGateAssessment(tx, guideId, payload.assessmentId);
+      await tx.insert(learningAssessmentLinks).values({
+        blockId: row.id,
+        guideId,
+        assessmentId: payload.assessmentId,
+      });
+    }
+    if (row.type === learningBlockType.Problem) {
+      const payload = row.payload as { normalizedUrl?: string; url?: string };
+      if (!payload.normalizedUrl || !payload.url) {
+        throw learningError(400, 'VALIDATION_ERROR', 'Problem block requires a valid URL.');
+      }
+      await tx.insert(learningProblemLinks).values({
+        blockId: row.id,
+        guideId,
+        normalizedUrl: payload.normalizedUrl,
+        displayUrl: payload.url,
+      });
+    }
+  }
+}
 
 const DAY = 86400000;
 const MAX_GUIDES = 100;
@@ -494,21 +528,8 @@ export class LearningGuideMutationsRepository {
               schemaVersion: 1,
             })),
           )
-          .returning({ id: learningBlocks.id, position: learningBlocks.position, type: learningBlocks.type, payload: learningBlocks.payload });
-        for (const row of inserted) {
-          if (row.type === learningBlockType.Assessment) {
-            const payload = row.payload as { assessmentId?: string };
-            if (!payload.assessmentId) {
-              throw learningError(400, 'VALIDATION_ERROR', 'Assessment block requires assessmentId.');
-            }
-            await assertLinkableGateAssessment(tx, guideId, payload.assessmentId);
-            await tx.insert(learningAssessmentLinks).values({
-              blockId: row.id,
-              guideId,
-              assessmentId: payload.assessmentId,
-            });
-          }
-        }
+          .returning({ id: learningBlocks.id, type: learningBlocks.type, payload: learningBlocks.payload });
+        await insertBlockLinkRows(tx, guideId, inserted);
       }
       await tx.update(learningNodes).set({
         contentRevision: node.contentRevision + 1n,
@@ -536,7 +557,11 @@ export class LearningGuideMutationsRepository {
       ));
       if (!node) throw learningError(404, 'NOT_FOUND', 'Node was not found.');
       if (node.completionMode === learningNodeCompletionMode.Gated) {
-        throw learningError(409, 'GATED_COMPLETION', 'This step completes when required assessments pass.');
+        throw learningError(
+          409,
+          'GATED_COMPLETION',
+          'This step completes when required assessments pass and linked problems are solved.',
+        );
       }
       const [enrollment] = await tx.select().from(learningEnrollments).where(and(
         eq(learningEnrollments.guideId, guideId),
@@ -612,16 +637,20 @@ export class LearningGuideMutationsRepository {
           completionMode: row.node.completionMode,
         });
         if (row.node.blocks.length) {
-          await tx.insert(learningBlocks).values(
-            row.node.blocks.map((block, position) => ({
-              guideId,
-              nodeId: id,
-              position,
-              type: block.type,
-              payload: normalizeBlockPayload(block.type, block.payload),
-              schemaVersion: 1,
-            })),
-          );
+          const inserted = await tx
+            .insert(learningBlocks)
+            .values(
+              row.node.blocks.map((block, position) => ({
+                guideId,
+                nodeId: id,
+                position,
+                type: block.type,
+                payload: normalizeBlockPayload(block.type, block.payload),
+                schemaVersion: 1,
+              })),
+            )
+            .returning({ id: learningBlocks.id, type: learningBlocks.type, payload: learningBlocks.payload });
+          await insertBlockLinkRows(tx, guideId, inserted);
         }
       }
       await tx.update(learningGuides).set({

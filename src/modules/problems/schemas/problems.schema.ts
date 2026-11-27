@@ -138,6 +138,17 @@ export const problemResponseSchema = z.strictObject({
 
 export const problemListResponseSchema = paginatedListSchema(problemResponseSchema);
 
+export const problemLearningReferenceSchema = z.strictObject({
+  guideId: z.uuid(),
+  guideTitle: z.string(),
+  nodeId: z.uuid(),
+  nodeTitle: z.string(),
+});
+
+export const problemLearningReferencesResponseSchema = z.strictObject({
+  items: z.array(problemLearningReferenceSchema),
+});
+
 export type ListProblemsQuery = z.infer<typeof listProblemsQuerySchema>;
 export type CreateProblemInput = z.infer<typeof createProblemSchema>;
 export type UpdateProblemInput = z.infer<typeof updateProblemSchema>;

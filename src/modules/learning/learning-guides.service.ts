@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { LearningGuide } from '../../database/schema/index.js';
+import type { LearningBlockType } from '../../database/schema/learning/learning-block-type.enum.js';
 import { LearningGuideMutationsRepository } from './learning-guide-mutations.repository.js';
 import { LearningGuidesRepository } from './learning-guides.repository.js';
 import { learningError } from './learning.errors.js';
@@ -24,14 +25,20 @@ import type { CreateNodeInput, MoveNodeInput, PatchNodeInput, TreeResponse, Reco
 import type { NodeCompletionInput, NodeContentResponse, ReplaceNodeContentInput } from './schemas/learning-blocks.schema.js';
 import { toBlockResponse } from './schemas/learning-blocks.schema.js';
 import { summarizeProgress } from './learning-progress.js';
-import { AttemptsService } from '../assessments/attempts.service.js';
+import { ProblemsLearningReadService } from '../problems/problems-learning-read.service.js';
+import { LearningGatedCompletionService } from './learning-gated-completion.service.js';
+import {
+  enrichBlocksWithProblemResolution,
+  groupProblemSummariesByNodeId,
+} from './learning-problem-resolution.js';
 
 @Injectable()
 export class LearningGuidesService {
   constructor(
     private readonly repository: LearningGuidesRepository,
     private readonly mutations: LearningGuideMutationsRepository,
-    private readonly attempts: AttemptsService,
+    private readonly gatedCompletion: LearningGatedCompletionService,
+    private readonly problemsLearningRead: ProblemsLearningReadService,
   ) {}
 
   async get(ownerId: string, rawGuideId: string): Promise<GuideResponse> {
@@ -80,19 +87,35 @@ export class LearningGuidesService {
     const enrollment = await this.repository.findEnrollment(ownerId, this.parseId(id));
     const gatedCompleted =
       enrollment
-        ? await this.attempts.resolveGatedCompleteNodeIds(enrollment.id, this.parseId(id))
+        ? await this.gatedCompletion.resolveCompleteGatedNodeIds(
+            enrollment.id,
+            this.parseId(id),
+            ownerId,
+          )
         : new Set<string>();
     const completedIds = new Set<string>();
     for (const nodeId of manualCompleted) {
       if (!gatedNodeIds.has(nodeId)) completedIds.add(nodeId);
     }
     for (const nodeId of gatedCompleted) completedIds.add(nodeId);
-    const preorder = buildHierarchy(nodes).preorder.map(node => ({
-      ...node,
-      contentRevision: node.contentRevision.toString(),
-      requirementRevision: node.requirementRevision.toString(),
-      completed: completedIds.has(node.id),
-    }));
+    const guideId = this.parseId(id);
+    const problemLinks = await this.repository.findProblemLinksForGuide(ownerId, guideId);
+    const problemUrls = [...new Set(problemLinks.map((link) => link.normalizedUrl))];
+    const problemStatusMap = await this.problemsLearningRead.findStatusesByNormalizedUrls(
+      ownerId,
+      problemUrls,
+    );
+    const summariesByNode = groupProblemSummariesByNodeId(problemLinks, problemStatusMap);
+    const preorder = buildHierarchy(nodes).preorder.map((node) => {
+      const summaries = summariesByNode.get(node.id);
+      return {
+        ...node,
+        contentRevision: node.contentRevision.toString(),
+        requirementRevision: node.requirementRevision.toString(),
+        completed: completedIds.has(node.id),
+        ...(summaries?.length ? { problemBlocks: summaries } : {}),
+      };
+    });
   return {
       structureRevision: first.structureRevision.toString(),
       nodes: preorder,
@@ -101,14 +124,25 @@ export class LearningGuidesService {
   }
 
   async nodeContent(ownerId: string, guideId: string, nodeId: string): Promise<NodeContentResponse> {
-    const row = await this.repository.findNodeBlocks(ownerId, this.parseId(guideId), this.parseId(nodeId));
+    const parsedGuideId = this.parseId(guideId);
+    const parsedNodeId = this.parseId(nodeId);
+    const row = await this.repository.findNodeBlocks(ownerId, parsedGuideId, parsedNodeId);
     if (!row) throw learningError(404, 'NOT_FOUND', 'Node was not found.');
+    const problemLinks = (await this.repository.findProblemLinksForGuide(ownerId, parsedGuideId))
+      .filter((link) => link.nodeId === parsedNodeId);
+    const problemUrls = [...new Set(problemLinks.map((link) => link.normalizedUrl))];
+    const problemStatusMap = await this.problemsLearningRead.findStatusesByNormalizedUrls(
+      ownerId,
+      problemUrls,
+    );
+    const linkByBlockId = new Map(problemLinks.map((link) => [link.blockId, link.normalizedUrl]));
+    const blocks = row.blocks.map((block) => toBlockResponse({
+      ...block,
+      type: block.type as LearningBlockType,
+    }));
     return {
       contentRevision: row.contentRevision.toString(),
-      blocks: row.blocks.map((block) => toBlockResponse({
-        ...block,
-        type: block.type as 'text' | 'code' | 'checklist' | 'link' | 'assessment',
-      })),
+      blocks: enrichBlocksWithProblemResolution(blocks, linkByBlockId, problemStatusMap),
     };
   }
 

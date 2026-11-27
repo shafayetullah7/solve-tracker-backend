@@ -7,7 +7,9 @@ import {
   learningEnrollments,
   learningBlocks,
   learningNodeProgress,
+  learningProblemLinks,
 } from '../../database/schema/index.js';
+import { learningNodeCompletionMode } from '../../database/schema/learning/learning-node-completion-mode.enum.js';
 import type { LearningGuide } from '../../database/schema/index.js';
 import type { RecoveryQuery } from './schemas/learning-nodes.schema.js';
 import { MAX_NODES } from './learning-hierarchy.js';
@@ -107,6 +109,57 @@ export class LearningGuidesRepository {
       eq(learningBlocks.nodeId, nodeId),
     )).orderBy(learningBlocks.position);
     return { contentRevision: node.contentRevision, blocks };
+  }
+
+  async findGatedProblemLinksForGuide(guideId: string) {
+    return this.database.db
+      .select({
+        nodeId: learningBlocks.nodeId,
+        blockId: learningProblemLinks.blockId,
+        normalizedUrl: learningProblemLinks.normalizedUrl,
+      })
+      .from(learningNodes)
+      .innerJoin(
+        learningBlocks,
+        and(
+          eq(learningBlocks.guideId, learningNodes.guideId),
+          eq(learningBlocks.nodeId, learningNodes.id),
+        ),
+      )
+      .innerJoin(
+        learningProblemLinks,
+        and(
+          eq(learningProblemLinks.guideId, learningBlocks.guideId),
+          eq(learningProblemLinks.blockId, learningBlocks.id),
+        ),
+      )
+      .where(
+        and(
+          eq(learningNodes.guideId, guideId),
+          eq(learningNodes.completionMode, learningNodeCompletionMode.Gated),
+          isNull(learningNodes.deletedAt),
+        ),
+      );
+  }
+
+  async findProblemLinksForGuide(ownerId: string, guideId: string) {
+    return this.database.db
+      .select({
+        blockId: learningProblemLinks.blockId,
+        nodeId: learningBlocks.nodeId,
+        normalizedUrl: learningProblemLinks.normalizedUrl,
+      })
+      .from(learningProblemLinks)
+      .innerJoin(learningBlocks, and(
+        eq(learningBlocks.guideId, learningProblemLinks.guideId),
+        eq(learningBlocks.id, learningProblemLinks.blockId),
+      ))
+      .innerJoin(learningGuides, eq(learningGuides.id, learningProblemLinks.guideId))
+      .where(and(
+        eq(learningGuides.ownerId, ownerId),
+        eq(learningGuides.id, guideId),
+        isNull(learningGuides.deletedAt),
+      ));
   }
 
   async findCompletedNodeIds(ownerId: string, guideId: string): Promise<Set<string>> {

@@ -22,9 +22,9 @@ Composite FKs on `learning_assessment_links` remain the database backstop.
 
 ## Gated completion (tree read)
 
-Implemented in [`AttemptsRepository.resolveGatedCompleteNodeIds`](../src/modules/assessments/attempts.repository.ts):
+Implemented in [`learning-gated-completion.ts`](../src/modules/learning/learning-gated-completion.ts) (orchestrated by [`LearningGatedCompletionService`](../src/modules/learning/learning-gated-completion.service.ts) on tree GET; assessment-only path still available on [`AttemptsRepository.resolveGatedCompleteNodeIds`](../src/modules/assessments/attempts.repository.ts)):
 
-- Collect all assessment IDs from gated nodes via `learning_assessment_links`.
+- Collect all assessment IDs from gated nodes via `learning_assessment_links` (problem links AND rule: [LEARNING_5D_CONVENTIONS.md](./LEARNING_5D_CONVENTIONS.md)).
 - **One query** for active-revision `passingBasisPoints` per assessment (`loadPublishedGateThresholds`).
 - **One query** for best finalized `scoreBasisPoints` per assessment for the enrollment.
 - Node complete iff **every** linked assessment has `best >= active passingBasisPoints`; missing/unpublished/archived assessments cannot satisfy the gate.

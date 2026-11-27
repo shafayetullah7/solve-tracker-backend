@@ -21,6 +21,7 @@ import {
   listProblemsQuerySchema,
   problemResponseSchema,
   problemListResponseSchema,
+  problemLearningReferencesResponseSchema,
   errorSchema,
   type CreateProblemInput,
   type UpdateProblemInput,
@@ -50,6 +51,15 @@ export class ProblemsController {
     @Body({ schema: createProblemSchema }) body: CreateProblemInput,
   ) {
     return this.problems.create(req.auth.user.id, body);
+  }
+
+  @Get(':problemId/learning-references')
+  @ApiResponse({ status: 200, standardSchema: problemLearningReferencesResponseSchema })
+  listLearningReferences(
+    @Req() req: AuthenticatedRequest,
+    @Param('problemId') problemId: string,
+  ) {
+    return this.problems.listLearningReferences(req.auth.user.id, problemId);
   }
 
   @Get(':problemId')

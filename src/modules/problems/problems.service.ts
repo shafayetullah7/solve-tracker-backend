@@ -160,6 +160,18 @@ export class ProblemsService {
     return toProblemResponse(detail);
   }
 
+  async listLearningReferences(userId: string, rawProblemId: string) {
+    const problemId = this.parseId(rawProblemId);
+    const detail = await this.repo.findDetailed(userId, problemId);
+    if (!detail)
+      throw problemError(404, 'NOT_FOUND', 'Problem was not found.');
+    const items = await this.repo.listLearningReferencesForNormalizedUrl(
+      userId,
+      detail.problem.normalizedUrl,
+    );
+    return { items };
+  }
+
   async create(userId: string, input: CreateProblemInput) {
     const title = this.titleFromRaw(input.title);
     const { url, normalizedUrl } = this.urlFromRaw(input.url);

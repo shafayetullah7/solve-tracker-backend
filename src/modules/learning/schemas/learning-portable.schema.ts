@@ -27,6 +27,13 @@ const portableBlockSchema = z.discriminatedUnion('type', [
     type: z.literal(learningBlockType.Link),
     payload: z.strictObject({ url: z.string().max(2048), label: z.string().max(500) }),
   }),
+  z.strictObject({
+    type: z.literal(learningBlockType.Problem),
+    payload: z.strictObject({
+      url: z.string().max(2048),
+      label: z.string().max(200).optional(),
+    }),
+  }),
 ]);
 
 const portableNodeSchema = z.strictObject({

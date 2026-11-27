@@ -9,10 +9,12 @@ import {
   checklistPayloadSchema,
   codePayloadSchema,
   assessmentPayloadSchema,
+  problemPayloadSchema,
   linkPayloadSchema,
   normalizeBlockPayload,
   textPayloadSchema,
 } from '../learning-block-payload.js';
+import { problemResolutionSchema } from '../learning-problem-resolution.js';
 
 const blockTypeSchema = z.enum(LEARNING_BLOCK_TYPES);
 
@@ -27,6 +29,10 @@ const blockInputSchema = z.discriminatedUnion('type', [
   z.strictObject({
     type: z.literal(learningBlockType.Assessment),
     payload: assessmentPayloadSchema,
+  }),
+  z.strictObject({
+    type: z.literal(learningBlockType.Problem),
+    payload: problemPayloadSchema,
   }),
 ]);
 
@@ -43,6 +49,8 @@ export const blockResponseSchema = z.strictObject({
   type: blockTypeSchema,
   payload: z.record(z.string(), z.unknown()),
   schemaVersion: z.number().int().positive(),
+  problemResolution: problemResolutionSchema.optional(),
+  problemId: z.uuid().optional(),
 });
 export type BlockResponse = z.infer<typeof blockResponseSchema>;
 

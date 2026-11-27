@@ -32,6 +32,7 @@ import { learningQuestions } from './learning/learning-questions.table.js';
 import { learningAttempts } from './learning/learning-attempts.table.js';
 import { learningAnswers } from './learning/learning-answers.table.js';
 import { learningAssessmentLinks } from './learning/learning-assessment-links.table.js';
+import { learningProblemLinks } from './learning/learning-problem-links.table.js';
 
 const tables = {
   learningOperations,
@@ -46,6 +47,7 @@ const tables = {
   learningAttempts,
   learningAnswers,
   learningAssessmentLinks,
+  learningProblemLinks,
   platforms,
   users,
   authSessions,

@@ -279,6 +279,304 @@ try {
   check(content.body.blocks.length === 2, 'Content blocks returned');
   check(content.body.blocks[0].payload.body === 'Hello', 'Text payload sanitized on read');
 
+  const treeProblemBlock = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  const problemContentRevision = treeProblemBlock.body.nodes.find(
+    (n) => n.id === childId,
+  ).contentRevision;
+
+  const invalidProblemUrl = await request(server)
+    .put(`/learning/guides/${guideId}/nodes/${childId}/content`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      expectedContentRevision: problemContentRevision,
+      operationId: randomUUID(),
+      blocks: [{ type: 'problem', payload: { url: 'not-a-url', label: 'Bad' } }],
+    });
+  check(
+    invalidProblemUrl.status === 400 && invalidProblemUrl.body.code === 'PROBLEM_URL_INVALID',
+    'Problem block rejects invalid URL',
+  );
+
+  const unsupportedProblem = await request(server)
+    .put(`/learning/guides/${guideId}/nodes/${childId}/content`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      expectedContentRevision: problemContentRevision,
+      operationId: randomUUID(),
+      blocks: [{ type: 'problem', payload: { url: 'https://example.com/p', label: 'Other' } }],
+    });
+  check(
+    unsupportedProblem.status === 400 &&
+      unsupportedProblem.body.code === 'PROBLEM_PLATFORM_UNSUPPORTED',
+    'Problem block rejects unsupported platform host',
+  );
+
+  await request(server)
+    .put(`/learning/guides/${guideId}/nodes/${childId}/content`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      expectedContentRevision: problemContentRevision,
+      operationId: randomUUID(),
+      blocks: [
+        {
+          type: 'problem',
+          payload: {
+            url: 'https://leetcode.com/problems/two-sum/',
+            label: 'Two Sum',
+          },
+        },
+      ],
+    })
+    .expect(200);
+
+  const problemContent = await request(server)
+    .get(`/learning/guides/${guideId}/nodes/${childId}/content`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(problemContent.body.blocks.length === 1, 'Problem block saved');
+  check(problemContent.body.blocks[0].type === 'problem', 'Problem block type on read');
+  check(
+    problemContent.body.blocks[0].payload.normalizedUrl ===
+      'https://leetcode.com/problems/two-sum/',
+    'Problem block stores normalized URL',
+  );
+  check(
+    problemContent.body.blocks[0].problemResolution === 'unresolved',
+    'Problem block unresolved without library row',
+  );
+  check(
+    problemContent.body.blocks[0].problemId === undefined,
+    'No problemId when unresolved',
+  );
+
+  const treeWithProblem = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  const childWithProblem = treeWithProblem.body.nodes.find((n) => n.id === childId);
+  check(
+    childWithProblem?.problemBlocks?.length === 1 &&
+      childWithProblem.problemBlocks[0].problemResolution === 'unresolved',
+    'Tree exposes unresolved problemBlocks summary',
+  );
+
+  const createdProblem = await request(server)
+    .post('/problems')
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      title: 'Two Sum',
+      url: 'https://leetcode.com/problems/two-sum/',
+      topicIds: [],
+    })
+    .expect(201);
+  const libraryProblemId = createdProblem.body.id;
+
+  const linkedContent = await request(server)
+    .get(`/learning/guides/${guideId}/nodes/${childId}/content`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(
+    linkedContent.body.blocks[0].problemResolution === 'linked_unsolved',
+    'Problem block linked_unsolved after library create',
+  );
+  check(
+    linkedContent.body.blocks[0].problemId === libraryProblemId,
+    'Problem block returns owned problemId',
+  );
+
+  await request(server)
+    .patch(`/problems/${libraryProblemId}`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ status: 'solved' })
+    .expect(200);
+
+  const solvedContent = await request(server)
+    .get(`/learning/guides/${guideId}/nodes/${childId}/content`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(
+    solvedContent.body.blocks[0].problemResolution === 'solved',
+    'Problem block solved after library update',
+  );
+
+  const treeDupSource = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  const treeDupRevision = treeDupSource.body.nodes.find((n) => n.id === childId).contentRevision;
+  await request(server)
+    .put(`/learning/guides/${guideId}/nodes/${childId}/content`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      expectedContentRevision: treeDupRevision,
+      operationId: randomUUID(),
+      blocks: [
+        {
+          type: 'problem',
+          payload: {
+            url: 'https://leetcode.com/problems/two-sum/',
+            label: 'Two Sum A',
+          },
+        },
+        {
+          type: 'problem',
+          payload: {
+            url: 'https://leetcode.com/problems/two-sum/',
+            label: 'Two Sum B',
+          },
+        },
+      ],
+    })
+    .expect(200);
+
+  const duplicateBlocksContent = await request(server)
+    .get(`/learning/guides/${guideId}/nodes/${childId}/content`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(duplicateBlocksContent.body.blocks.length === 2, 'Two problem blocks saved');
+  check(
+    duplicateBlocksContent.body.blocks.every((block) => block.problemResolution === 'solved'),
+    'Duplicate URL blocks share solved resolution',
+  );
+  check(
+    duplicateBlocksContent.body.blocks[0].problemId === libraryProblemId &&
+      duplicateBlocksContent.body.blocks[1].problemId === libraryProblemId,
+    'Duplicate URL blocks share problemId',
+  );
+
+  const guideB = await createGuide(server, userB.cookie, 'B Problem Guide');
+  let treeB = await request(server)
+    .get(`/learning/guides/${guideB.guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userB.cookie)
+    .expect(200);
+  const rootBRes = await createNode(
+    server,
+    userB.cookie,
+    guideB.guideId,
+    treeB.body.structureRevision,
+    'Root B',
+  );
+  check(rootBRes.status === 201, 'Create root for user B guide');
+  treeB = await request(server)
+    .get(`/learning/guides/${guideB.guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userB.cookie)
+    .expect(200);
+  const rootB = treeB.body.nodes[0]?.id;
+  if (!rootB) throw new Error('Guide B missing root node.');
+  const nodeBRes = await createNode(
+    server,
+    userB.cookie,
+    guideB.guideId,
+    treeB.body.structureRevision,
+    'Practice step',
+    rootB,
+  );
+  check(nodeBRes.status === 201, 'Create node for user B guide');
+  const nodeB = nodeBRes.body.resourceId;
+  const treeB2 = await request(server)
+    .get(`/learning/guides/${guideB.guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userB.cookie)
+    .expect(200);
+  const nodeBRow = treeB2.body.nodes.find((n) => n.id === nodeB);
+  await request(server)
+    .put(`/learning/guides/${guideB.guideId}/nodes/${nodeB}/content`)
+    .set(headers)
+    .set('Cookie', userB.cookie)
+    .send({
+      expectedContentRevision: nodeBRow.contentRevision,
+      operationId: randomUUID(),
+      blocks: [
+        {
+          type: 'problem',
+          payload: {
+            url: 'https://leetcode.com/problems/two-sum/',
+            label: 'Two Sum',
+          },
+        },
+      ],
+    })
+    .expect(200);
+  const problemB = await request(server)
+    .post('/problems')
+    .set(headers)
+    .set('Cookie', userB.cookie)
+    .send({
+      title: 'Two Sum B',
+      url: 'https://leetcode.com/problems/two-sum/',
+      topicIds: [],
+      status: 'unsolved',
+    })
+    .expect(201);
+  const contentB = await request(server)
+    .get(`/learning/guides/${guideB.guideId}/nodes/${nodeB}/content`)
+    .set(headers)
+    .set('Cookie', userB.cookie)
+    .expect(200);
+  check(
+    contentB.body.blocks[0].problemResolution === 'linked_unsolved',
+    'Learner B resolution is scoped to B library',
+  );
+  check(
+    contentB.body.blocks[0].problemId === problemB.body.id,
+    'Learner B problemId is not user A problem',
+  );
+  check(
+    contentB.body.blocks[0].problemId !== libraryProblemId,
+    'Cross-account problem ids differ',
+  );
+
+  const linkRows = await pool.query(
+    'select block_id from learning_problem_links where guide_id = $1',
+    [guideId],
+  );
+  check(linkRows.rowCount === 2, 'learning_problem_links rows for duplicate blocks');
+
+  const treeClearProblem = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  const clearRevision = treeClearProblem.body.nodes.find((n) => n.id === childId).contentRevision;
+
+  await request(server)
+    .put(`/learning/guides/${guideId}/nodes/${childId}/content`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      expectedContentRevision: clearRevision,
+      operationId: randomUUID(),
+      blocks: [
+        { type: 'text', payload: { body: 'Hello' } },
+        { type: 'code', payload: { language: 'ts', body: 'const x = 1;' } },
+      ],
+    })
+    .expect(200);
+
+  const linksAfterClear = await pool.query(
+    'select block_id from learning_problem_links where guide_id = $1',
+    [guideId],
+  );
+  check(linksAfterClear.rowCount === 0, 'Problem link removed when block replaced');
+
   await request(server)
     .get(`/learning/guides/${guideId}/nodes/${childId}/content`)
     .set(headers)
@@ -614,6 +912,199 @@ try {
     'Manual completion blocked on gated node',
   );
 
+  const treeForComboGate = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  const comboGateCreate = await createNode(
+    server,
+    userA.cookie,
+    guideId,
+    treeForComboGate.body.structureRevision,
+    'Gate and problem',
+    rootId,
+  );
+  check(comboGateCreate.status === 201, 'Create gated assessment+problem node');
+  const treeComboGate = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  const comboGateNodeId = treeComboGate.body.nodes.find(
+    (n) => n.title === 'Gate and problem',
+  )?.id;
+  check(Boolean(comboGateNodeId), 'Combo gate node listed in tree');
+  await request(server)
+    .patch(`/learning/guides/${guideId}/nodes/${comboGateNodeId}`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      completionMode: 'gated',
+      expectedStructureRevision: treeComboGate.body.structureRevision,
+      operationId: randomUUID(),
+    })
+    .expect(200);
+  const comboAssessmentCreate = await request(server)
+    .post(`/learning/guides/${guideId}/assessments`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ title: 'Combo gate quiz', operationId: randomUUID() })
+    .expect(201);
+  const comboAssessmentId = comboAssessmentCreate.body.id;
+  const comboCorrectId = randomUUID();
+  const comboWrongId = randomUUID();
+  await request(server)
+    .post(`/learning/guides/${guideId}/assessments/${comboAssessmentId}/questions`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      kind: 'single_choice',
+      prompt: {
+        stem: 'Pick one',
+        options: [
+          { id: comboCorrectId, label: 'Right' },
+          { id: comboWrongId, label: 'Wrong' },
+        ],
+      },
+      gradingConfig: { correctOptionId: comboCorrectId },
+      points: 1,
+      operationId: randomUUID(),
+    })
+    .expect(201);
+  await request(server)
+    .post(`/learning/guides/${guideId}/assessments/${comboAssessmentId}/revisions`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ passingBasisPoints: 4000, operationId: randomUUID() })
+    .expect(201);
+  await request(server)
+    .post(`/learning/guides/${guideId}/assessments/${comboAssessmentId}/publish`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ passingBasisPoints: 4000, operationId: randomUUID() })
+    .expect(201);
+  const treeComboContent = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  const comboGateRow = treeComboContent.body.nodes.find((n) => n.id === comboGateNodeId);
+  await request(server)
+    .put(`/learning/guides/${guideId}/nodes/${comboGateNodeId}/content`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      expectedContentRevision: comboGateRow.contentRevision,
+      operationId: randomUUID(),
+      blocks: [
+        {
+          type: 'assessment',
+          payload: { assessmentId: comboAssessmentId, label: 'Combo quiz' },
+        },
+        {
+          type: 'problem',
+          payload: {
+            url: 'https://leetcode.com/problems/add-two-numbers/',
+            label: 'Add Two Numbers',
+          },
+        },
+      ],
+    })
+    .expect(200);
+  const comboAttemptStart = await request(server)
+    .post(`/learning/guides/${guideId}/assessments/${comboAssessmentId}/attempts`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(201);
+  const comboAttemptId = comboAttemptStart.body.id;
+  const comboQuestion = comboAttemptStart.body.questions[0];
+  await request(server)
+    .patch(
+      `/learning/guides/${guideId}/assessments/${comboAssessmentId}/attempts/${comboAttemptId}/answers`,
+    )
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      questionId: comboQuestion.id,
+      response: { selectedOptionId: comboCorrectId },
+      operationId: randomUUID(),
+    })
+    .expect(200);
+  const comboSubmit = await request(server)
+    .post(
+      `/learning/guides/${guideId}/assessments/${comboAssessmentId}/attempts/${comboAttemptId}/submissions`,
+    )
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ operationId: randomUUID() })
+    .expect(201);
+  check(comboSubmit.body.passed === true, 'Combo gate assessment passes');
+  const treeAssessmentOnly = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(
+    treeAssessmentOnly.body.nodes.find((n) => n.id === comboGateNodeId)?.completed === false,
+    'Gated node incomplete when assessment passes but problem unsolved',
+  );
+  const comboProblemCreate = await request(server)
+    .post('/problems')
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      url: 'https://leetcode.com/problems/add-two-numbers/',
+      title: 'Add Two Numbers',
+    })
+    .expect(201);
+  const comboProblemId = comboProblemCreate.body.id;
+  await request(server)
+    .patch(`/problems/${comboProblemId}`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ status: 'solved' })
+    .expect(200);
+  const treeBothSatisfied = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(
+    treeBothSatisfied.body.nodes.find((n) => n.id === comboGateNodeId)?.completed === true,
+    'Gated node complete when assessment passes and problem solved',
+  );
+  await request(server)
+    .patch(`/problems/${comboProblemId}`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ status: 'unsolved' })
+    .expect(200);
+  const treeReopenedProblem = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(
+    treeReopenedProblem.body.nodes.find((n) => n.id === comboGateNodeId)?.completed === false,
+    'Gated node reopens when linked problem marked unsolved',
+  );
+  await request(server)
+    .patch(`/problems/${comboProblemId}`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ status: 'solved' })
+    .expect(200);
+  const treeResolvedAgain = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(
+    treeResolvedAgain.body.nodes.find((n) => n.id === comboGateNodeId)?.completed === true,
+    'Gated node completes again after problem re-solved',
+  );
+
   const mcA = randomUUID();
   const mcB = randomUUID();
   const typesAssessmentCreate = await request(server)
@@ -726,6 +1217,34 @@ try {
     })
     .expect(200);
 
+  const listArchived = await request(server)
+    .get('/learning/guides?status=archived')
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(
+    listArchived.body.items.some((g) => g.id === guideId),
+    'Archived guide appears in archived library list',
+  );
+  const listSearchArchived = await request(server)
+    .get('/learning/guides?search=algo&status=archived')
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(
+    listSearchArchived.body.items.some((g) => g.id === guideId),
+    'Guide list search matches archived guide title',
+  );
+  const listSearchActive = await request(server)
+    .get('/learning/guides?search=algo&status=active')
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(
+    !listSearchActive.body.items.some((g) => g.id === guideId),
+    'Archived guide excluded from active search',
+  );
+
   const archivedCreate = await createNode(
     server,
     userA.cookie,
@@ -770,6 +1289,140 @@ try {
     .expect(200);
   check(recovery.body.items.some((item) => item.id === childId), 'Deleted subtree appears in recovery');
 
+  const backlinkGuide = await createGuide(server, userA.cookie, 'Backlink guide');
+  const backlinkGuideId = backlinkGuide.guideId;
+  const treeBacklink0 = await request(server)
+    .get(`/learning/guides/${backlinkGuideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(
+    (await createNode(
+      server,
+      userA.cookie,
+      backlinkGuideId,
+      treeBacklink0.body.structureRevision,
+      'Backlink root',
+    )).status === 201,
+    'Create backlink guide root',
+  );
+  const treeBacklinkRoot = await request(server)
+    .get(`/learning/guides/${backlinkGuideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  const backlinkRootId = treeBacklinkRoot.body.nodes[0]?.id;
+  check(Boolean(backlinkRootId), 'Backlink guide has root node');
+  const backlinkStepATitle = 'Backlink step A';
+  const backlinkStepBTitle = 'Backlink step B';
+  check(
+    (await createNode(
+      server,
+      userA.cookie,
+      backlinkGuideId,
+      treeBacklinkRoot.body.structureRevision,
+      backlinkStepATitle,
+      backlinkRootId,
+    )).status === 201,
+    'Create backlink test node A',
+  );
+  const treeBacklink1 = await request(server)
+    .get(`/learning/guides/${backlinkGuideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(
+    (await createNode(
+      server,
+      userA.cookie,
+      backlinkGuideId,
+      treeBacklink1.body.structureRevision,
+      backlinkStepBTitle,
+      backlinkRootId,
+    )).status === 201,
+    'Create backlink test node B',
+  );
+  const treeBacklink2 = await request(server)
+    .get(`/learning/guides/${backlinkGuideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  const backlinkNodeA = treeBacklink2.body.nodes.find((n) => n.title === backlinkStepATitle);
+  const backlinkNodeB = treeBacklink2.body.nodes.find((n) => n.title === backlinkStepBTitle);
+  check(Boolean(backlinkNodeA?.id && backlinkNodeB?.id), 'Backlink test nodes listed');
+  const backlinkUrl = 'https://leetcode.com/problems/reverse-linked-list/';
+  await request(server)
+    .put(`/learning/guides/${backlinkGuideId}/nodes/${backlinkNodeA.id}/content`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      expectedContentRevision: backlinkNodeA.contentRevision,
+      operationId: randomUUID(),
+      blocks: [
+        {
+          type: 'problem',
+          payload: { url: backlinkUrl, label: 'Reverse list' },
+        },
+      ],
+    })
+    .expect(200);
+  await request(server)
+    .put(`/learning/guides/${backlinkGuideId}/nodes/${backlinkNodeB.id}/content`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      expectedContentRevision: backlinkNodeB.contentRevision,
+      operationId: randomUUID(),
+      blocks: [
+        {
+          type: 'problem',
+          payload: { url: backlinkUrl, label: 'Reverse list B' },
+        },
+      ],
+    })
+    .expect(200);
+  const backlinkProblem = await request(server)
+    .post('/problems')
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      url: backlinkUrl,
+      title: 'Reverse Linked List',
+    })
+    .expect(201);
+  const backlinkProblemId = backlinkProblem.body.id;
+  const refsA = await request(server)
+    .get(`/problems/${backlinkProblemId}/learning-references`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(
+    refsA.body.items.length === 2 &&
+      refsA.body.items.some((row) => row.nodeTitle === backlinkStepATitle) &&
+      refsA.body.items.some((row) => row.nodeTitle === backlinkStepBTitle),
+    'Problem learning references list two owning guide steps',
+  );
+  const refsCross = await request(server)
+    .get(`/problems/${backlinkProblemId}/learning-references`)
+    .set(headers)
+    .set('Cookie', userB.cookie);
+  check(refsCross.status === 404, 'Other user cannot read learning references for foreign problem');
+  const backlinkProblemB = await request(server)
+    .post('/problems')
+    .set(headers)
+    .set('Cookie', userB.cookie)
+    .send({
+      url: backlinkUrl,
+      title: 'Reverse Linked List B copy',
+    })
+    .expect(201);
+  const refsB = await request(server)
+    .get(`/problems/${backlinkProblemB.body.id}/learning-references`)
+    .set(headers)
+    .set('Cookie', userB.cookie)
+    .expect(200);
+  check(refsB.body.items.length === 0, 'Owner with no guide links sees empty learning references');
+
   await request(server)
     .get('/learning/guides')
     .set(headers)
@@ -778,8 +1431,12 @@ try {
 
   const doc = createApiDocument(app);
   check(
-    ['/learning/guides', '/learning/guides/{guideId}/tree'].every((path) => path in doc.paths),
-    'Swagger documents learning guide and tree routes',
+    [
+      '/learning/guides',
+      '/learning/guides/{guideId}/tree',
+      '/problems/{problemId}/learning-references',
+    ].every((path) => path in doc.paths),
+    'Swagger documents learning and problem backlink routes',
   );
 
   console.log(

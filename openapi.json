@@ -1762,6 +1762,101 @@
         ]
       }
     },
+    "/problems/{problemId}/learning-references": {
+      "get": {
+        "operationId": "ProblemsController_listLearningReferences",
+        "parameters": [
+          {
+            "name": "problemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "guideId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "guideTitle": {
+                            "type": "string"
+                          },
+                          "nodeId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "nodeTitle": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "guideId",
+                          "guideTitle",
+                          "nodeId",
+                          "nodeTitle"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "statusCode",
+                    "code",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Problems"
+        ]
+      }
+    },
     "/problems/{problemId}": {
       "get": {
         "operationId": "ProblemsController_getOne",
@@ -10198,6 +10293,37 @@
                           },
                           "completed": {
                             "type": "boolean"
+                          },
+                          "problemBlocks": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "blockId": {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                                },
+                                "problemResolution": {
+                                  "type": "string",
+                                  "enum": [
+                                    "unresolved",
+                                    "linked_unsolved",
+                                    "solved"
+                                  ]
+                                },
+                                "problemId": {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                                }
+                              },
+                              "required": [
+                                "blockId",
+                                "problemResolution"
+                              ],
+                              "additionalProperties": false
+                            }
                           }
                         },
                         "required": [
@@ -11191,7 +11317,8 @@
                               "code",
                               "checklist",
                               "link",
-                              "assessment"
+                              "assessment",
+                              "problem"
                             ]
                           },
                           "payload": {
@@ -11203,6 +11330,19 @@
                             "minimum": 0,
                             "exclusiveMinimum": true,
                             "maximum": 9007199254740991
+                          },
+                          "problemResolution": {
+                            "type": "string",
+                            "enum": [
+                              "unresolved",
+                              "linked_unsolved",
+                              "solved"
+                            ]
+                          },
+                          "problemId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                           }
                         },
                         "required": [
@@ -11469,6 +11609,39 @@
                               },
                               "required": [
                                 "assessmentId"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "payload"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "problem"
+                              ]
+                            },
+                            "payload": {
+                              "type": "object",
+                              "properties": {
+                                "url": {
+                                  "type": "string",
+                                  "maxLength": 2048
+                                },
+                                "label": {
+                                  "type": "string",
+                                  "maxLength": 200
+                                }
+                              },
+                              "required": [
+                                "url"
                               ],
                               "additionalProperties": false
                             }

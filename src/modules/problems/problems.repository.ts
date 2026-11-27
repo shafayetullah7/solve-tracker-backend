@@ -8,6 +8,7 @@ import {
   exists,
   ilike,
   inArray,
+  isNull,
   notExists,
   or,
   sql,
@@ -16,6 +17,10 @@ import {
 import { escapeIlikePattern } from '../../common/ilike-escape.js';
 import { DatabaseService } from '../../database/database.service.js';
 import {
+  learningBlocks,
+  learningGuides,
+  learningNodes,
+  learningProblemLinks,
   problemTopics,
   problems,
   topics,
@@ -27,6 +32,13 @@ export type ProblemTopicSummary = { id: string; name: string };
 export type ProblemDetail = {
   problem: Problem;
   topics: ProblemTopicSummary[];
+};
+
+export type ProblemLearningReferenceRow = {
+  guideId: string;
+  guideTitle: string;
+  nodeId: string;
+  nodeTitle: string;
 };
 
 export type ListProblemsFilters = {
@@ -249,6 +261,74 @@ export class ProblemsRepository {
       )
       .limit(1);
     return rows[0]?.id;
+  }
+
+  async listLearningReferencesForNormalizedUrl(
+    ownerId: string,
+    normalizedUrl: string,
+  ): Promise<ProblemLearningReferenceRow[]> {
+    const rows = await this.db
+      .select({
+        guideId: learningGuides.id,
+        guideTitle: learningGuides.title,
+        nodeId: learningNodes.id,
+        nodeTitle: learningNodes.title,
+      })
+      .from(learningProblemLinks)
+      .innerJoin(
+        learningBlocks,
+        and(
+          eq(learningBlocks.guideId, learningProblemLinks.guideId),
+          eq(learningBlocks.id, learningProblemLinks.blockId),
+        ),
+      )
+      .innerJoin(
+        learningNodes,
+        and(
+          eq(learningNodes.guideId, learningBlocks.guideId),
+          eq(learningNodes.id, learningBlocks.nodeId),
+        ),
+      )
+      .innerJoin(learningGuides, eq(learningGuides.id, learningProblemLinks.guideId))
+      .where(
+        and(
+          eq(learningProblemLinks.normalizedUrl, normalizedUrl),
+          eq(learningGuides.ownerId, ownerId),
+          isNull(learningGuides.deletedAt),
+          isNull(learningNodes.deletedAt),
+        ),
+      )
+      .orderBy(asc(learningGuides.title), asc(learningNodes.title), asc(learningNodes.id));
+    const deduped = new Map<string, ProblemLearningReferenceRow>();
+    for (const row of rows) {
+      const key = `${row.guideId}:${row.nodeId}`;
+      if (!deduped.has(key)) deduped.set(key, row);
+    }
+    return [...deduped.values()];
+  }
+
+  async findStatusesByNormalizedUrls(
+    userId: string,
+    normalizedUrls: readonly string[],
+  ): Promise<Map<string, { problemId: string; status: 'solved' | 'unsolved' }>> {
+    const unique = [...new Set(normalizedUrls.filter((url) => url.length > 0))];
+    if (unique.length === 0) return new Map();
+    const rows = await this.db
+      .select({
+        id: problems.id,
+        normalizedUrl: problems.normalizedUrl,
+        status: problems.status,
+      })
+      .from(problems)
+      .where(and(eq(problems.userId, userId), inArray(problems.normalizedUrl, unique)));
+    const result = new Map<string, { problemId: string; status: 'solved' | 'unsolved' }>();
+    for (const row of rows) {
+      result.set(row.normalizedUrl, {
+        problemId: row.id,
+        status: row.status,
+      });
+    }
+    return result;
   }
 
   async createWithTopics(

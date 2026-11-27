@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { loadPublishedGateThresholds } from '../learning/learning-gate-assessment.validation.js';
+import {
+  collectAssessmentIds,
+  groupAssessmentLinksByNode,
+  resolveGatedCompleteNodeIdsFromData,
+} from '../learning/learning-gated-completion.js';
 import { DatabaseService } from '../../database/database.service.js';
 import {
   learningAnswers,
@@ -153,38 +158,20 @@ export class AttemptsRepository {
     guideId: string,
   ): Promise<Set<string>> {
     const rows = await this.listGatedNodeAssessments(guideId);
-    const byNode = new Map<string, string[]>();
-    const allAssessmentIds: string[] = [];
-    for (const row of rows) {
-      const list = byNode.get(row.nodeId) ?? [];
-      list.push(row.assessmentId);
-      byNode.set(row.nodeId, list);
-      allAssessmentIds.push(row.assessmentId);
-    }
+    const byNode = groupAssessmentLinksByNode(rows);
+    const allAssessmentIds = collectAssessmentIds(rows);
     const thresholds = await loadPublishedGateThresholds(this.db, guideId, allAssessmentIds);
     const bestScores = await this.mapBestFinalizedScores(enrollmentId, allAssessmentIds);
-    const complete = new Set<string>();
-    for (const [nodeId, assessmentIds] of byNode) {
-      if (assessmentIds.length === 0) continue;
-      let allPass = true;
-      for (const assessmentId of assessmentIds) {
-        const passing = thresholds.get(assessmentId);
-        if (passing === undefined) {
-          allPass = false;
-          break;
-        }
-        const best = bestScores.get(assessmentId) ?? null;
-        if (best === null || best < passing) {
-          allPass = false;
-          break;
-        }
-      }
-      if (allPass) complete.add(nodeId);
-    }
-    return complete;
+    return resolveGatedCompleteNodeIdsFromData(
+      byNode,
+      new Map(),
+      thresholds,
+      bestScores,
+      new Map(),
+    );
   }
 
-  private async mapBestFinalizedScores(enrollmentId: string, assessmentIds: readonly string[]) {
+  async mapBestFinalizedScores(enrollmentId: string, assessmentIds: readonly string[]) {
     const unique = [...new Set(assessmentIds)];
     if (unique.length === 0) return new Map<string, number>();
     const rows = await this.db

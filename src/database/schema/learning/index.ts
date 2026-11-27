@@ -10,6 +10,7 @@ export * from './learning-attempt-status.enum.js';
 export * from './learning-attempts.table.js';
 export * from './learning-answers.table.js';
 export * from './learning-assessment-links.table.js';
+export * from './learning-problem-links.table.js';
 export * from './learning-guides.table.js';
 export * from './learning-nodes.table.js';
 export * from './learning-enrollments.table.js';

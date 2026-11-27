@@ -3,7 +3,10 @@ import { Injectable } from '@nestjs/common';
 import { and, eq, gt, isNull } from 'drizzle-orm';
 import { DatabaseService } from '../../database/database.service.js';
 import { learningGuides, learningImportPreviews, learningNodes } from '../../database/schema/index.js';
-import type { LearningBlockType } from '../../database/schema/learning/learning-block-type.enum.js';
+import {
+  learningBlockType,
+  type LearningBlockType,
+} from '../../database/schema/learning/learning-block-type.enum.js';
 import { WRITABLE_LEARNING_NODE_COMPLETION_MODES } from '../../database/schema/learning/learning-node-completion-mode.enum.js';
 import { WRITABLE_LEARNING_IMPORT_SOURCE_KINDS } from '../../database/schema/learning/learning-import-source-kind.enum.js';
 import { LearningGuideMutationsRepository } from './learning-guide-mutations.repository.js';
@@ -54,6 +57,18 @@ export class LearningPortabilityService {
           payload: row.payload,
           schemaVersion: row.schemaVersion,
         });
+        if (response.type === learningBlockType.Problem) {
+          const payload = response.payload as { url?: string; label?: string };
+          return {
+            type: learningBlockType.Problem,
+            payload: {
+              url: typeof payload.url === 'string' ? payload.url : '',
+              ...(typeof payload.label === 'string' && payload.label.trim().length > 0
+                ? { label: payload.label.trim() }
+                : {}),
+            },
+          };
+        }
         return { type: response.type, payload: response.payload } as PortableGuide['nodes'][number]['blocks'][number];
       });
       portableNodes.push({
