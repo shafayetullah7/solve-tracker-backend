@@ -11,6 +11,7 @@ import type { CreateNodeInput, MoveNodeInput, PatchNodeInput, ResumeInput } from
 
 const DAY = 86400000;
 const MAX_GUIDES = 100;
+const MAX_RETAINED_NODES = 4000;
 const MAX_RECEIPTS = 10000;
 
 type Lifecycle = 'archive' | 'unarchive' | 'delete' | 'restore';
@@ -86,6 +87,13 @@ export class LearningGuideMutationsRepository {
     });
   }
 
+  private async checkRetainedCapacity(tx: DbTx, guideId: string, additional: number): Promise<void> {
+    const [usage] = await tx.select({ total: count() }).from(learningNodes)
+      .where(eq(learningNodes.guideId, guideId));
+    if ((usage?.total ?? 0) + additional > MAX_RETAINED_NODES)
+      throw learningError(409, 'LEARNING_NODE_LIMIT', 'Retained node limit reached.');
+  }
+
   async createNode(ownerId: string, guideId: string, input: CreateNodeInput): Promise<Receipt> {
     return this.execute(ownerId, input.operationId, [
       'node.create', guideId, input.expectedStructureRevision, input.parentId,
@@ -110,6 +118,7 @@ export class LearningGuideMutationsRepository {
           throw error;
         }
       })();
+      await this.checkRetainedCapacity(tx, guideId, 1);
       const shifted = plan.destination.slice(plan.index).map(node => node.id);
       if (shifted.length) {
         const scope = and(eq(learningNodes.guideId, guideId), isNull(learningNodes.deletedAt), inArray(learningNodes.id, shifted));
@@ -175,6 +184,7 @@ export class LearningGuideMutationsRepository {
         }
         return false;
       });
+      await this.checkRetainedCapacity(tx, guideId, source.length);
       const ids = new Map(source.map(node => [node.id, randomUUID()]));
       const copiedId = ids.get(nodeId);
       if (!copiedId) throw new Error('Missing copied root identity.');
