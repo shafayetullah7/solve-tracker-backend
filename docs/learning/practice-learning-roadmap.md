@@ -99,14 +99,14 @@ Proposed routes: `/learning/guides`, `/learning/guides/:guideId/nodes`, node/blo
 
 **Objective:** A user can create a guide, study a step and resume later.
 
-- [ ] Implement additive migrations, ownership constraints, guide CRUD, enrollment and recursive node CRUD/move/reorder.
-- [ ] Add frontend API modules and generated types following existing client conventions.
-- [ ] Implement `/app/learning`, guide overview, node deep links and study workspace.
-- [ ] Add editor with inline node creation, keyboard indentation, drag/drop plus accessible alternatives, autosave with conflict handling, undo and delete confirmation.
-- [ ] Implement initial blocks: rich text, code snippets, links/resources, images, video embeds and checklists. Reuse media infrastructure where appropriate.
-- [ ] Add private notes, manual completion, derived progress and resume position.
+- [x] Implement additive migrations, ownership constraints, guide CRUD, enrollment and recursive node CRUD/move/reorder (3A; blocks/progress tables in 3B).
+- [x] Add frontend API modules and generated types following existing client conventions.
+- [x] Implement `/app/learning`, guide overview, node deep links and study workspace.
+- [ ] Add editor with inline node creation, keyboard indentation, drag/drop plus accessible alternatives, autosave with conflict handling, undo and delete confirmation. _(Minimal block editor route in 3B; full A1 deferred.)_
+- [x] Implement initial blocks: text, code snippets and checklists (3B R1). _Rich text, links/resources, images and video embeds remain open (3C)._
+- [x] Manual completion, derived progress (required steps) and resume position. _Private notes deferred._
 - [ ] Implement Markdown outline import and versioned JSON import/export with preview and validation.
-- [ ] Test cross-account isolation, hierarchy cycles, concurrent edits, ordering, import failures and progress calculations.
+- [x] Test cross-account isolation, hierarchy cycles, concurrent edits, ordering and progress calculations (integration script). _Import failure cases N/A until import exists._
 
 **Exit criteria:** A realistic embedded engineering guide can be imported, edited, studied and resumed on desktop/mobile. Existing problem tracker remains functional.
 

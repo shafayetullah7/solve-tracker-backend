@@ -24,9 +24,13 @@ import { learningNodes } from './learning/learning-nodes.table.js';
 import { learningEnrollments } from './learning/learning-enrollments.table.js';
 
 import { learningOperations } from './learning/learning-operations.table.js';
+import { learningBlocks } from './learning/learning-blocks.table.js';
+import { learningNodeProgress } from './learning/learning-node-progress.table.js';
 
 const tables = {
   learningOperations,
+  learningBlocks,
+  learningNodeProgress,
   learningGuides,
   learningNodes,
   learningEnrollments,

@@ -6,8 +6,8 @@ Recorded during 3A slice and Phase 0 closure. Branch discipline: no `main`, no p
 
 | Repository | Branch | SHA |
 |------------|--------|-----|
-| solve-tracker-backend | feature/learning-guides | `0f4234518f6be10d7fb4266954b1644597302f1c` |
-| solve-tracker-frontend | feature/learning-guides | `5a8aa1a7c9d35bca9a9e1f304698c689ac285483` |
+| solve-tracker-backend | feature/learning-guides | `d603b8392ff83cdb2f45b3a95493c7155327bc1c` |
+| solve-tracker-frontend | feature/learning-guides | `e7b5074e092fef7484623fa982554772045470d2` |
 
 ## Toolchain
 
@@ -40,6 +40,6 @@ Database: `postgresql://practice:practice_dev@127.0.0.1:5437/practice_tracker_te
 |---------|--------|
 | `pnpm db:migrate` (×2 idempotent) | pass |
 | `node scripts/test-topics-integration.mjs` (after `pnpm build`) | pass (16 assertions) |
-| `node scripts/test-learning-integration.mjs` (after `pnpm build`) | pass (16 assertions) after `LearningModule` wire-up |
+| `node scripts/test-learning-integration.mjs` (after `pnpm build`) | pass (27 assertions; 3A tree + 3B content/progress) |
 
-Frontend post-3A: `pnpm check` 429 tests pass; `pnpm api:check` pass.
+Frontend post-3B: `pnpm check` 433 tests pass; `pnpm build` + `api:check` pass. See [LEARNING_3B_RESULTS.md](./LEARNING_3B_RESULTS.md).

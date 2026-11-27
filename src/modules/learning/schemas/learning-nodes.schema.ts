@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { revisionSchema, guideTitleSchema } from './learning-guides.schema.js';
+import { progressSummarySchema } from './learning-blocks.schema.js';
 
 const placement = {
   parentId: z.uuid().nullable(),
@@ -24,10 +25,12 @@ export const nodeResponseSchema = z.strictObject({
   completionMode: z.enum(['structural', 'manual', 'gated']),
   contentRevision: revisionSchema,
   requirementRevision: revisionSchema,
+  completed: z.boolean(),
 });
 export const treeResponseSchema = z.strictObject({
   structureRevision: revisionSchema,
   nodes: z.array(nodeResponseSchema).max(2000),
+  progress: progressSummarySchema,
 });
 export type CreateNodeInput = z.infer<typeof createNodeSchema>;
 export type MoveNodeInput = z.infer<typeof moveNodeSchema>;

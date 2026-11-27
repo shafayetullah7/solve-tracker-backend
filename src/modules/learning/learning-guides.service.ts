@@ -21,6 +21,9 @@ export function toGuideResponse(row: LearningGuide): GuideResponse {
 
 import { buildHierarchy } from './learning-hierarchy.js';
 import type { CreateNodeInput, MoveNodeInput, PatchNodeInput, TreeResponse, RecoveryQuery, RecoveryResponse, EnrollmentResponse, ResumeInput } from './schemas/learning-nodes.schema.js';
+import type { NodeCompletionInput, NodeContentResponse, ReplaceNodeContentInput } from './schemas/learning-blocks.schema.js';
+import { toBlockResponse } from './schemas/learning-blocks.schema.js';
+import { summarizeProgress } from './learning-progress.js';
 
 @Injectable()
 export class LearningGuidesService {
@@ -65,14 +68,48 @@ export class LearningGuidesService {
     const first = rows[0];
     if (!first) throw learningError(404, 'NOT_FOUND', 'Guide was not found.');
     const nodes = rows.flatMap(row => row.node === null ? [] : [row.node]);
-    return {
+    const completedIds = await this.repository.findCompletedNodeIds(ownerId, this.parseId(id));
+    const preorder = buildHierarchy(nodes).preorder.map(node => ({
+      ...node,
+      contentRevision: node.contentRevision.toString(),
+      requirementRevision: node.requirementRevision.toString(),
+      completed: completedIds.has(node.id),
+    }));
+  return {
       structureRevision: first.structureRevision.toString(),
-      nodes: buildHierarchy(nodes).preorder.map(node => ({
-        ...node,
-        contentRevision: node.contentRevision.toString(),
-        requirementRevision: node.requirementRevision.toString(),
+      nodes: preorder,
+      progress: summarizeProgress(preorder, completedIds),
+    };
+  }
+
+  async nodeContent(ownerId: string, guideId: string, nodeId: string): Promise<NodeContentResponse> {
+    const row = await this.repository.findNodeBlocks(ownerId, this.parseId(guideId), this.parseId(nodeId));
+    if (!row) throw learningError(404, 'NOT_FOUND', 'Node was not found.');
+    return {
+      contentRevision: row.contentRevision.toString(),
+      blocks: row.blocks.map((block) => toBlockResponse({
+        ...block,
+        type: block.type as 'text' | 'code' | 'checklist',
       })),
     };
+  }
+
+  replaceNodeContent(ownerId: string, guideId: string, nodeId: string, input: ReplaceNodeContentInput) {
+    return this.mutations.replaceNodeContent(
+      ownerId,
+      this.parseId(guideId),
+      this.parseId(nodeId),
+      input,
+    );
+  }
+
+  setNodeCompletion(ownerId: string, guideId: string, nodeId: string, input: NodeCompletionInput) {
+    return this.mutations.setNodeCompletion(
+      ownerId,
+      this.parseId(guideId),
+      this.parseId(nodeId),
+      input,
+    );
   }
 
   createNode(ownerId: string, id: string, input: CreateNodeInput) {

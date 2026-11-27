@@ -2,17 +2,28 @@ import { Injectable } from '@nestjs/common';
 import { createHash, randomUUID } from 'node:crypto';
 import { and, count, eq, lte, isNull, inArray, sql } from 'drizzle-orm';
 import { UserLockRepository, type DbTx } from '../../database/user-lock.repository.js';
-import { learningGuides, learningEnrollments, learningOperations, learningNodes, type LearningGuide } from '../../database/schema/index.js';
+import {
+  learningGuides,
+  learningEnrollments,
+  learningOperations,
+  learningNodes,
+  learningBlocks,
+  learningNodeProgress,
+  type LearningGuide,
+} from '../../database/schema/index.js';
 import { learningError } from './learning.errors.js';
 import type { CreateGuideInput, PatchGuideInput } from './schemas/learning-guides.schema.js';
 
 import { buildHierarchy, planPlacement, HierarchyError, MAX_NODES } from './learning-hierarchy.js';
 import type { CreateNodeInput, MoveNodeInput, PatchNodeInput, ResumeInput } from './schemas/learning-nodes.schema.js';
+import type { NodeCompletionInput, ReplaceNodeContentInput } from './schemas/learning-blocks.schema.js';
+import { normalizeBlockPayload } from './learning-block-payload.js';
 
 const DAY = 86400000;
 const MAX_GUIDES = 100;
 const MAX_RETAINED_NODES = 4000;
 const MAX_RECEIPTS = 10000;
+const MAX_BLOCKS_PER_NODE = 200;
 
 type Lifecycle = 'archive' | 'unarchive' | 'delete' | 'restore';
 type Receipt = { resourceId: string; replayed: boolean };
@@ -437,5 +448,92 @@ export class LearningGuideMutationsRepository {
           .where(and(eq(learningGuides.ownerId, ownerId), eq(learningGuides.id, id)));
       return id;
     });
+  }
+
+  async replaceNodeContent(
+    ownerId: string,
+    guideId: string,
+    nodeId: string,
+    input: ReplaceNodeContentInput,
+  ): Promise<Receipt> {
+    return this.execute(ownerId, input.operationId, [
+      'node.content', guideId, nodeId, input.expectedContentRevision, input.blocks.length,
+    ], async (tx, now) => {
+      const guide = await this.lockGuide(tx, ownerId, guideId);
+      if (guide.deletedAt) throw learningError(404, 'NOT_FOUND', 'Guide was not found.');
+      if (guide.archivedAt) throw learningError(409, 'LEARNING_LIFECYCLE_CONFLICT', 'Guide is archived.');
+      const [node] = await tx.select().from(learningNodes).where(and(
+        eq(learningNodes.guideId, guideId),
+        eq(learningNodes.id, nodeId),
+        isNull(learningNodes.deletedAt),
+      ));
+      if (!node) throw learningError(404, 'NOT_FOUND', 'Node was not found.');
+      if (node.contentRevision.toString() !== input.expectedContentRevision)
+        throw learningError(409, 'LEARNING_REVISION_CONFLICT', 'Node content changed.');
+      if (input.blocks.length > MAX_BLOCKS_PER_NODE)
+        throw learningError(409, 'LEARNING_BLOCK_LIMIT', 'Block limit reached.');
+      await tx.delete(learningBlocks).where(and(
+        eq(learningBlocks.guideId, guideId),
+        eq(learningBlocks.nodeId, nodeId),
+      ));
+      if (input.blocks.length) {
+        await tx.insert(learningBlocks).values(
+          input.blocks.map((block, position) => ({
+            guideId,
+            nodeId,
+            position,
+            type: block.type,
+            payload: normalizeBlockPayload(block.type, block.payload),
+            schemaVersion: 1,
+          })),
+        );
+      }
+      await tx.update(learningNodes).set({
+        contentRevision: node.contentRevision + 1n,
+        updatedAt: now,
+      }).where(and(eq(learningNodes.guideId, guideId), eq(learningNodes.id, nodeId)));
+      return nodeId;
+    }, guideId);
+  }
+
+  async setNodeCompletion(
+    ownerId: string,
+    guideId: string,
+    nodeId: string,
+    input: NodeCompletionInput,
+  ): Promise<Receipt> {
+    return this.execute(ownerId, input.operationId, [
+      'node.completion', guideId, nodeId, input.complete,
+    ], async (tx, now) => {
+      const guide = await this.lockGuide(tx, ownerId, guideId);
+      if (guide.deletedAt) throw learningError(404, 'NOT_FOUND', 'Guide was not found.');
+      const [node] = await tx.select().from(learningNodes).where(and(
+        eq(learningNodes.guideId, guideId),
+        eq(learningNodes.id, nodeId),
+        isNull(learningNodes.deletedAt),
+      ));
+      if (!node) throw learningError(404, 'NOT_FOUND', 'Node was not found.');
+      const [enrollment] = await tx.select().from(learningEnrollments).where(and(
+        eq(learningEnrollments.guideId, guideId),
+        eq(learningEnrollments.learnerId, ownerId),
+      ));
+      if (!enrollment) throw learningError(404, 'NOT_FOUND', 'Enrollment was not found.');
+      if (input.complete) {
+        await tx.insert(learningNodeProgress).values({
+          enrollmentId: enrollment.id,
+          guideId,
+          nodeId,
+          completedAt: now,
+        }).onConflictDoNothing();
+      } else {
+        await tx.delete(learningNodeProgress).where(and(
+          eq(learningNodeProgress.enrollmentId, enrollment.id),
+          eq(learningNodeProgress.nodeId, nodeId),
+        ));
+      }
+      await tx.update(learningEnrollments).set({ lastActivityAt: now, updatedAt: now })
+        .where(eq(learningEnrollments.id, enrollment.id));
+      return nodeId;
+    }, guideId);
   }
 }

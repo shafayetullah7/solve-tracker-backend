@@ -170,17 +170,155 @@ try {
     'Move under descendant rejected',
   );
 
+  const treeBeforeSibling = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  const sibling = await createNode(
+    server,
+    userA.cookie,
+    guideId,
+    treeBeforeSibling.body.structureRevision,
+    'Sibling',
+    rootId,
+  );
+  check(sibling.status === 201, 'Create sibling node');
+  const treeAfterSibling = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  const siblingId = treeAfterSibling.body.nodes.find(
+    (n) => n.parentId === rootId && n.title === 'Sibling',
+  )?.id;
+  check(Boolean(siblingId), 'Sibling listed in tree');
+
+  const moveOp = randomUUID();
+  const moveOk = await request(server)
+    .patch(`/learning/guides/${guideId}/nodes/${childId}/placement`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      parentId: rootId,
+      beforeNodeId: siblingId,
+      expectedStructureRevision: treeAfterSibling.body.structureRevision,
+      operationId: moveOp,
+    });
+  check(moveOk.status === 200, 'Successful node reorder/move');
+
+  const moveReplay = await request(server)
+    .patch(`/learning/guides/${guideId}/nodes/${childId}/placement`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      parentId: rootId,
+      beforeNodeId: siblingId,
+      expectedStructureRevision: treeAfterSibling.body.structureRevision,
+      operationId: moveOp,
+    });
+  check(moveReplay.status === 200 && moveReplay.body.replayed === true, 'Operation replay idempotent');
+
+  const staleMove = await request(server)
+    .patch(`/learning/guides/${guideId}/nodes/${childId}/placement`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      parentId: rootId,
+      beforeNodeId: null,
+      expectedStructureRevision: '1',
+      operationId: randomUUID(),
+    });
+  check(
+    staleMove.status === 409 && staleMove.body.code === 'LEARNING_REVISION_CONFLICT',
+    'Stale structure revision on placement → 409',
+  );
+
+  const treeBeforePatch = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
   const patched = await request(server)
     .patch(`/learning/guides/${guideId}/nodes/${childId}`)
     .set(headers)
     .set('Cookie', userA.cookie)
     .send({
       title: 'Dynamic arrays',
-      expectedStructureRevision: tree2.body.structureRevision,
+      expectedStructureRevision: treeBeforePatch.body.structureRevision,
       operationId: randomUUID(),
     })
     .expect(200);
   check(patched.body.resourceId === childId, 'Patch node metadata');
+
+  const treeForContent = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  const nodeRow = treeForContent.body.nodes.find((n) => n.id === childId);
+  const putContent = await request(server)
+    .put(`/learning/guides/${guideId}/nodes/${childId}/content`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      expectedContentRevision: nodeRow.contentRevision,
+      operationId: randomUUID(),
+      blocks: [
+        { type: 'text', payload: { body: 'Hello <script>x</script>' } },
+        { type: 'code', payload: { language: 'ts', body: 'const x = 1;' } },
+      ],
+    });
+  check(putContent.status === 200, 'Replace node content');
+
+  const content = await request(server)
+    .get(`/learning/guides/${guideId}/nodes/${childId}/content`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(content.body.blocks.length === 2, 'Content blocks returned');
+  check(content.body.blocks[0].payload.body === 'Hello', 'Text payload sanitized on read');
+
+  await request(server)
+    .get(`/learning/guides/${guideId}/nodes/${childId}/content`)
+    .set(headers)
+    .set('Cookie', userB.cookie)
+    .expect(404);
+
+  const treeBeforeComplete = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  await request(server)
+    .patch(`/learning/guides/${guideId}/nodes/${childId}`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      completionMode: 'manual',
+      expectedStructureRevision: treeBeforeComplete.body.structureRevision,
+      operationId: randomUUID(),
+    })
+    .expect(200);
+
+  const completeOp = randomUUID();
+  const completion = await request(server)
+    .patch(`/learning/guides/${guideId}/nodes/${childId}/completion`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ operationId: completeOp, complete: true });
+  check(completion.status === 200, 'Mark node complete');
+
+  const treeProgress = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(treeProgress.body.progress.completedRequired >= 1, 'Progress summary reflects completion');
+  check(
+    treeProgress.body.nodes.find((n) => n.id === childId)?.completed === true,
+    'Completed flag on tree node',
+  );
 
   const enrollmentBefore = await request(server)
     .get(`/learning/guides/${guideId}/enrollment`)

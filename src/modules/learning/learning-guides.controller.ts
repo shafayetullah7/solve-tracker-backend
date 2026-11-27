@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Headers, HttpCode, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, HttpCode, Param, Patch, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiHeader, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccessGuard, type AuthenticatedRequest } from '../auth/access.guard.js';
 import { AuthSecurityGuard } from '../auth/auth-security.guard.js';
@@ -6,6 +6,13 @@ import { LearningGuidesService } from './learning-guides.service.js';
 import { guideListResponseSchema, guideResponseSchema, learningErrorSchema, listGuidesQuerySchema, type ListGuidesQuery, createGuideSchema, patchGuideSchema, guideLifecycleSchema, guideMutationReceiptSchema, type CreateGuideInput, type PatchGuideInput, type GuideLifecycleInput } from './schemas/learning-guides.schema.js';
 
 import { enrollmentResponseSchema, resumeSchema, type ResumeInput, recoveryQuerySchema, recoveryResponseSchema, type RecoveryQuery, createNodeSchema, moveNodeSchema, patchNodeSchema, treeResponseSchema, type CreateNodeInput, type MoveNodeInput, type PatchNodeInput } from './schemas/learning-nodes.schema.js';
+import {
+  nodeCompletionSchema,
+  nodeContentResponseSchema,
+  replaceNodeContentSchema,
+  type NodeCompletionInput,
+  type ReplaceNodeContentInput,
+} from './schemas/learning-blocks.schema.js';
 
 @ApiTags('Learning')
 @ApiResponse({ status: '4XX', standardSchema: learningErrorSchema })
@@ -90,6 +97,24 @@ export class LearningGuidesController {
   @ApiResponse({ status: 200, standardSchema: guideMutationReceiptSchema })
   moveNode(@Req() req: AuthenticatedRequest, @Param('guideId') guideId: string, @Param('nodeId') nodeId: string, @Body({ schema: moveNodeSchema }) body: MoveNodeInput) {
     return this.guides.moveNode(req.auth.user.id, guideId, nodeId, body);
+  }
+
+  @Get(':guideId/nodes/:nodeId/content')
+  @ApiResponse({ status: 200, standardSchema: nodeContentResponseSchema })
+  nodeContent(@Req() req: AuthenticatedRequest, @Param('guideId') guideId: string, @Param('nodeId') nodeId: string) {
+    return this.guides.nodeContent(req.auth.user.id, guideId, nodeId);
+  }
+
+  @Put(':guideId/nodes/:nodeId/content')
+  @ApiResponse({ status: 200, standardSchema: guideMutationReceiptSchema })
+  replaceNodeContent(@Req() req: AuthenticatedRequest, @Param('guideId') guideId: string, @Param('nodeId') nodeId: string, @Body({ schema: replaceNodeContentSchema }) body: ReplaceNodeContentInput) {
+    return this.guides.replaceNodeContent(req.auth.user.id, guideId, nodeId, body);
+  }
+
+  @Patch(':guideId/nodes/:nodeId/completion')
+  @ApiResponse({ status: 200, standardSchema: guideMutationReceiptSchema })
+  nodeCompletion(@Req() req: AuthenticatedRequest, @Param('guideId') guideId: string, @Param('nodeId') nodeId: string, @Body({ schema: nodeCompletionSchema }) body: NodeCompletionInput) {
+    return this.guides.setNodeCompletion(req.auth.user.id, guideId, nodeId, body);
   }
 
   @Post()

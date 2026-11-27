@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { and, count, desc, eq, isNull, isNotNull, sql } from 'drizzle-orm';
 import { DatabaseService } from '../../database/database.service.js';
-import { learningGuides, learningNodes, learningEnrollments } from '../../database/schema/index.js';
+import {
+  learningGuides,
+  learningNodes,
+  learningEnrollments,
+  learningBlocks,
+  learningNodeProgress,
+} from '../../database/schema/index.js';
 import type { LearningGuide } from '../../database/schema/index.js';
 import type { RecoveryQuery } from './schemas/learning-nodes.schema.js';
 import { MAX_NODES } from './learning-hierarchy.js';
@@ -76,5 +82,44 @@ export class LearningGuidesRepository {
       .orderBy(desc(learningGuides.updatedAt), desc(learningGuides.id))
       .limit(query.pageSize).offset((query.page - 1) * query.pageSize);
     return { items, total: total?.total ?? 0 };
+  }
+
+  async findNodeBlocks(ownerId: string, guideId: string, nodeId: string) {
+    const [node] = await this.database.db.select({
+      contentRevision: learningNodes.contentRevision,
+    }).from(learningNodes).innerJoin(learningGuides, eq(learningGuides.id, learningNodes.guideId))
+      .where(and(
+        eq(learningGuides.ownerId, ownerId),
+        eq(learningGuides.id, guideId),
+        eq(learningNodes.id, nodeId),
+        isNull(learningGuides.deletedAt),
+        isNull(learningNodes.deletedAt),
+      ));
+    if (!node) return undefined;
+    const blocks = await this.database.db.select({
+      id: learningBlocks.id,
+      position: learningBlocks.position,
+      type: learningBlocks.type,
+      payload: learningBlocks.payload,
+      schemaVersion: learningBlocks.schemaVersion,
+    }).from(learningBlocks).where(and(
+      eq(learningBlocks.guideId, guideId),
+      eq(learningBlocks.nodeId, nodeId),
+    )).orderBy(learningBlocks.position);
+    return { contentRevision: node.contentRevision, blocks };
+  }
+
+  async findCompletedNodeIds(ownerId: string, guideId: string): Promise<Set<string>> {
+    const rows = await this.database.db.select({ nodeId: learningNodeProgress.nodeId })
+      .from(learningNodeProgress)
+      .innerJoin(learningEnrollments, eq(learningEnrollments.id, learningNodeProgress.enrollmentId))
+      .innerJoin(learningGuides, eq(learningGuides.id, learningEnrollments.guideId))
+      .where(and(
+        eq(learningGuides.ownerId, ownerId),
+        eq(learningGuides.id, guideId),
+        eq(learningEnrollments.learnerId, ownerId),
+        isNull(learningGuides.deletedAt),
+      ));
+    return new Set(rows.map((row) => row.nodeId));
   }
 }
