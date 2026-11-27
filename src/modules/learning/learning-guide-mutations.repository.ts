@@ -7,7 +7,7 @@ import { learningError } from './learning.errors.js';
 import type { CreateGuideInput, PatchGuideInput } from './schemas/learning-guides.schema.js';
 
 import { buildHierarchy, planPlacement, HierarchyError, MAX_NODES } from './learning-hierarchy.js';
-import type { CreateNodeInput } from './schemas/learning-nodes.schema.js';
+import type { CreateNodeInput, MoveNodeInput } from './schemas/learning-nodes.schema.js';
 
 const DAY = 86400000;
 const MAX_GUIDES = 100;
@@ -125,6 +125,56 @@ export class LearningGuideMutationsRepository {
       await tx.update(learningGuides).set({ structureRevision: guide.structureRevision + 1n, updatedAt: now })
         .where(and(eq(learningGuides.id, guideId), eq(learningGuides.ownerId, ownerId)));
       return node.id;
+    }, guideId);
+  }
+
+  async moveNode(ownerId: string, guideId: string, nodeId: string, input: MoveNodeInput): Promise<Receipt> {
+    return this.execute(ownerId, input.operationId, [
+      'node.move', guideId, nodeId, input.expectedStructureRevision, input.parentId, input.beforeNodeId,
+    ], async (tx, now) => {
+      const guide = await this.lockGuide(tx, ownerId, guideId);
+      if (guide.deletedAt) throw learningError(404, 'NOT_FOUND', 'Guide was not found.');
+      if (guide.archivedAt) throw learningError(409, 'LEARNING_LIFECYCLE_CONFLICT', 'Guide is archived.');
+      if (guide.structureRevision.toString() !== input.expectedStructureRevision)
+        throw learningError(409, 'LEARNING_REVISION_CONFLICT', 'Guide structure changed.');
+      const nodes = await tx.select().from(learningNodes).where(and(
+        eq(learningNodes.guideId, guideId), isNull(learningNodes.deletedAt),
+      )).limit(MAX_NODES + 1);
+      const tree = buildHierarchy(nodes);
+      const moving = tree.byId.get(nodeId);
+      if (!moving) throw learningError(404, 'NOT_FOUND', 'Node was not found.');
+      const plan = (() => {
+        try {
+          return planPlacement(nodes, nodeId, input.parentId, input.beforeNodeId);
+        } catch (error) {
+          if (error instanceof HierarchyError)
+            throw learningError(409, 'LEARNING_INVALID_PLACEMENT', error.message);
+          throw error;
+        }
+      })();
+      if (plan.unchanged) return nodeId;
+      const destination = [...plan.destination];
+      destination.splice(plan.index, 0, moving);
+      const placements = destination.map((node, position) => ({ id: node.id, parentId: input.parentId, position }));
+      if (moving.parentId !== input.parentId)
+        placements.push(...plan.source.map((node, position) => ({ id: node.id, parentId: moving.parentId, position })));
+      const changed = placements.filter(placement => {
+        const previous = tree.byId.get(placement.id);
+        return previous?.parentId !== placement.parentId || previous.position !== placement.position;
+      });
+      const scope = and(eq(learningNodes.guideId, guideId), isNull(learningNodes.deletedAt),
+        inArray(learningNodes.id, changed.map(node => node.id)));
+      // Stage all changed positions before assigning any final position.
+      await tx.update(learningNodes).set({ position: sql`${learningNodes.position} + 1000` }).where(scope);
+      // Parameterized CASE expressions keep the number of statements bounded.
+      await tx.update(learningNodes).set({
+        parentId: sql`case ${learningNodes.id} ${sql.join(changed.map(node => sql`when ${node.id}::uuid then ${node.parentId}::uuid`), sql` `)} else ${learningNodes.parentId} end`,
+        position: sql`case ${learningNodes.id} ${sql.join(changed.map(node => sql`when ${node.id}::uuid then ${node.position}::integer`), sql` `)} else ${learningNodes.position} end`,
+        updatedAt: now,
+      }).where(scope);
+      await tx.update(learningGuides).set({ structureRevision: guide.structureRevision + 1n, updatedAt: now })
+        .where(and(eq(learningGuides.id, guideId), eq(learningGuides.ownerId, ownerId)));
+      return nodeId;
     }, guideId);
   }
 
