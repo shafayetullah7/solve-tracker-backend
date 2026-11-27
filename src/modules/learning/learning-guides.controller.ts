@@ -5,7 +5,7 @@ import { AuthSecurityGuard } from '../auth/auth-security.guard.js';
 import { LearningGuidesService } from './learning-guides.service.js';
 import { guideListResponseSchema, guideResponseSchema, learningErrorSchema, listGuidesQuerySchema, type ListGuidesQuery, createGuideSchema, patchGuideSchema, guideLifecycleSchema, guideMutationReceiptSchema, type CreateGuideInput, type PatchGuideInput, type GuideLifecycleInput } from './schemas/learning-guides.schema.js';
 
-import { createNodeSchema, treeResponseSchema, type CreateNodeInput } from './schemas/learning-nodes.schema.js';
+import { createNodeSchema, moveNodeSchema, treeResponseSchema, type CreateNodeInput, type MoveNodeInput } from './schemas/learning-nodes.schema.js';
 
 @ApiTags('Learning')
 @ApiResponse({ status: '4XX', standardSchema: learningErrorSchema })
@@ -36,6 +36,12 @@ export class LearningGuidesController {
   @ApiResponse({ status: 201, standardSchema: guideMutationReceiptSchema })
   createNode(@Req() req: AuthenticatedRequest, @Param('guideId') id: string, @Body({ schema: createNodeSchema }) body: CreateNodeInput) {
     return this.guides.createNode(req.auth.user.id, id, body);
+  }
+
+  @Patch(':guideId/nodes/:nodeId/placement')
+  @ApiResponse({ status: 200, standardSchema: guideMutationReceiptSchema })
+  moveNode(@Req() req: AuthenticatedRequest, @Param('guideId') guideId: string, @Param('nodeId') nodeId: string, @Body({ schema: moveNodeSchema }) body: MoveNodeInput) {
+    return this.guides.moveNode(req.auth.user.id, guideId, nodeId, body);
   }
 
   @Post()
