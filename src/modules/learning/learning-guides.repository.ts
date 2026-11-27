@@ -3,6 +3,7 @@ import { and, count, desc, eq, isNull, isNotNull, sql } from 'drizzle-orm';
 import { DatabaseService } from '../../database/database.service.js';
 import { learningGuides, learningNodes } from '../../database/schema/index.js';
 import type { LearningGuide } from '../../database/schema/index.js';
+import type { RecoveryQuery } from './schemas/learning-nodes.schema.js';
 import { MAX_NODES } from './learning-hierarchy.js';
 import type { ListGuidesQuery } from './schemas/learning-guides.schema.js';
 
@@ -35,6 +36,20 @@ export class LearningGuidesRepository {
       eq(learningGuides.ownerId, ownerId), eq(learningGuides.id, guideId),
       isNull(learningGuides.deletedAt),
     )).limit(MAX_NODES + 1);
+  }
+
+  async listRecoverable(ownerId: string, guideId: string, query: RecoveryQuery) {
+    return this.database.db.select({
+      id: learningNodes.id, title: learningNodes.title, parentId: learningNodes.parentId,
+      deletedAt: learningNodes.deletedAt,
+    }).from(learningNodes).innerJoin(learningGuides, eq(learningGuides.id, learningNodes.guideId))
+      .where(and(
+        eq(learningGuides.ownerId, ownerId), eq(learningGuides.id, guideId), isNull(learningGuides.deletedAt),
+        sql`${learningNodes.deletedAt} > now() - interval '30 days'`,
+        sql`not exists (select 1 from learning_nodes as p where p.guide_id = ${learningNodes.guideId}
+          and p.id = ${learningNodes.parentId} and p.deletion_batch_id = ${learningNodes.deletionBatchId})`,
+      )).orderBy(desc(learningNodes.deletedAt), desc(learningNodes.id))
+      .limit(query.pageSize + 1).offset((query.page - 1) * query.pageSize);
   }
 
   async listOwned(ownerId: string, query: ListGuidesQuery): Promise<{ items: LearningGuide[]; total: number }> {
