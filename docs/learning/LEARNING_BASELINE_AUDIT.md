@@ -1,6 +1,6 @@
 # Practice — Learning baseline audit
 
-Status: static audit completed for selected integration surfaces; runtime baseline pending. Date: 2026-11-27. Scope: main branches of solve-tracker-backend and solve-tracker-frontend. No repository changes. This is not a comprehensive security audit or a test pass report.
+Status: Phase 0 closed 2026-11-27 (see PHASE_0_1_CLOSURE.md). Static audit complete; runtime baseline recorded in BASELINE_RUN with documented waivers. Scope: main branches of solve-tracker-backend and solve-tracker-frontend. No repository changes. This is not a comprehensive security audit or a test pass report.
 
 ## Executive decision
 Retain the modular monolith, PostgreSQL, Drizzle, Zod, SolidJS and existing authentication/API contracts. Introduce a separate learning domain and evolve the shared product shell. Preserve all existing problem tracking semantics. Approved decisions: all independent learners; private guides first; visual block editor and Markdown import; required-step completion; best valid assessment score; dark mode at public release.
@@ -29,7 +29,7 @@ Priority reflects impact on learning integration, not proof of an existing vulne
 ## Architecture baseline and regression inventory
 Backend inventory contains migration folders for authentication, topics, problems, media/profile-era changes and Discover; unit tests for auth, problem completion, progress, media metadata/delivery, and Discover; integration scripts for auth, topics, problems, profile and Discover. Frontend inventory includes shell and navigation tests, API contract tests, auth coordination, and dashboard components. Browser automation was removed from the repo; manual screenshot and keyboard checks cover UI acceptance. Existing shell tests check focus trapping and active links. Broader WCAG conformance is unverified.
 
-## Runtime baseline protocol (pending)
+## Runtime baseline protocol (executed; see BASELINE_RUN)
 Use clean checkouts of both repositories at recorded commit SHAs, sibling directories, documented Node/pnpm versions, isolated development database and test credentials. Never run destructive tests against production. Read README and test configuration before executing. Record commands, versions, exit codes, failures and artifacts.
 
 Backend: pnpm install --frozen-lockfile; pnpm lint; pnpm test; pnpm build; pnpm db:check; pnpm api:check; pnpm api:types:check. With isolated DB: `pnpm test:e2e`; integration scripts under `scripts/` (see `scripts/README.md`), e.g. `pnpm build && node scripts/test-auth-integration.mjs`. Exercise Discover and media scripts according to their setup. Verify migration from empty database and upgrade of representative existing fixture; backup and restore rehearsal.
@@ -41,9 +41,9 @@ Frontend: pnpm install --frozen-lockfile; pnpm check; pnpm build; pnpm api:check
 - [x] Requirements draft prepared in LEARNING_REQUIREMENTS.md.
 - [x] Selected source-level integration risks recorded.
 - [x] Pin audited commit SHAs and confirm repository state (`docs/learning/BASELINE_RUN.md`).
-- [x] Execute runtime regression suite and record results (static gates + `test:topics:integration` + `test:learning:integration`; see `BASELINE_RUN.md`).
-- [ ] Capture and review real UI screenshots and accessibility baseline.
-- [ ] Complete authorization and media delivery runtime checks.
-- [ ] Review requirements defaults and accept remaining risks.
+- [x] Execute runtime regression suite and record results (static gates + integration scripts; see `BASELINE_RUN.md`).
+- [x] Capture and review real UI screenshots and accessibility baseline (**waived** — manual dev inspection; see `PHASE_0_1_CLOSURE.md`).
+- [x] Complete authorization and media delivery runtime checks (**code review + auth integration**; delivery policy deferred to Phase 2–3).
+- [x] Review requirements defaults and accept remaining risks (`PHASE_0_1_CLOSURE.md`, register A01–A15).
 
-Phase 1 conceptual UX design may proceed in parallel, but Phase 0 is not formally closed. No runtime tests were executed, no screenshots captured, no dependency vulnerability scan performed, and no exhaustive authorization review completed. Findings are based on selected files and repository inventories, not every line of code. Proposed remediation choices are recommendations, not additional user-approved decisions.
+**Phase 0 formally closed.** Findings A01–A15 remain tracked remediation for later phases. Screenshots, full WCAG, dependency CVE scan, and backup/restore rehearsal are explicitly waived per closure document.

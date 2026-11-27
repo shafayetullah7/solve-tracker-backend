@@ -1,7 +1,7 @@
 # Practice — Learning requirements
 
 Date: 2026-11-27  
-Status: Phase 0 requirements draft for review; six product decisions approved.  
+Status: Phase 0 closed 2026-11-27; six product decisions approved.  
 Companion documents: `LEARNING_A0_RESULTS.md`, `practice-learning-roadmap.md`.
 
 ## 1. Purpose and scope
@@ -121,7 +121,7 @@ Public guide publishing/discovery/forking, collaboration, AI generation/grading,
 
 Release requires all MUST requirements, approved responsive designs, both themes, security and accessibility verification, migration rehearsal, existing-feature regression checks and end-to-end tests for create/import → study → assess → practice → resume/export. Track requirement IDs in implementation issues and tests.
 
-Phase 0 is not closed by this document: runtime baseline, desktop/mobile visual audit, authorization/media audit and final requirements review remain pending. No repository changes or executed tests are claimed.
+Phase 0 closed: see [PHASE_0_1_CLOSURE.md](./PHASE_0_1_CLOSURE.md) and [BASELINE_RUN.md](./BASELINE_RUN.md).
 
 ## 9. Source references
 

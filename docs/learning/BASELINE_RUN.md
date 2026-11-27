@@ -1,13 +1,13 @@
 # Baseline run — feature/learning-guides
 
-Recorded during 3A slice close-out. Branch discipline: no `main`, no production migration.
+Recorded during 3A slice and Phase 0 closure. Branch discipline: no `main`, no production migration. Formal closure: [PHASE_0_1_CLOSURE.md](./PHASE_0_1_CLOSURE.md).
 
 ## Pinned refs
 
 | Repository | Branch | SHA |
 |------------|--------|-----|
-| solve-tracker-backend | feature/learning-guides | `e8a30b951050d46696bf2d38c2d193402fc1ae48` |
-| solve-tracker-frontend | feature/learning-guides | `27bbf2c8bcb9e6f0ab816c59ede730944f1a5615` |
+| solve-tracker-backend | feature/learning-guides | `0f4234518f6be10d7fb4266954b1644597302f1c` |
+| solve-tracker-frontend | feature/learning-guides | `5a8aa1a7c9d35bca9a9e1f304698c689ac285483` |
 
 ## Toolchain
 

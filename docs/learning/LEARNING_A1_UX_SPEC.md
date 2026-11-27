@@ -1,6 +1,6 @@
 # Practice — Phase 1 information architecture and UX specification
 
-Status: proposed for review; not a design lock. Phase 0 runtime gate remains open.
+Status: **approved for R1 implementation** (2026-11-27). Phase 0 closed; hi-fi mockups waived per [PHASE_0_1_CLOSURE.md](./PHASE_0_1_CLOSURE.md).
 
 ## 1. Principles
 
@@ -123,7 +123,7 @@ Extend existing theme.css tokens, not hardcoded component colors. Add reading ty
 
 ## 8. Validation and exit gate
 
-Create high-fidelity desktop/mobile designs for overview, guide library, guide overview, study, editor, import, assessment/results and settings; include both themes and key failure states. Test representative scenarios: coding-only account, learning-only account, mixed account, empty account, guide with hundreds of steps and deep nesting, long code/table, failed import, interrupted save, retake with lower score. Verify keyboard-only flows and screen-reader semantics. Validate editor compatibility with pinned SolidJS 2 RC before selecting a library. Review designs with owner; record decisions and unresolved issues. Phase 1 is not complete until these designs and journeys are approved. Phase 0 runtime checks remain a separate gate before implementation.
+Phase 1 **closed 2026-11-27**: journeys and screen responsibilities approved in this spec and companion `*_DESIGN.md` files. High-fidelity mockups and full scenario walkthrough list are **waived**; validate during implementation (Phase 3+). Editor library choice remains Phase 2 prototype work per A13.
 
 ## 9. Sources and limitations
 

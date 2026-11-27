@@ -1,7 +1,7 @@
 # Learning — Phase 0 decisions
 
 Date: 2026-11-27
-Status: Product decisions approved; baseline verification pending.
+Status: Product decisions approved; Phase 0 closed 2026-11-27 ([PHASE_0_1_CLOSURE.md](./PHASE_0_1_CLOSURE.md)).
 
 ## Approved decisions
 
@@ -35,17 +35,15 @@ The product is a self-directed learning and deliberate-practice workspace, not a
 - Existing media reference counting assumes gallery and avatar slots only; revise its lifecycle contract before attaching learning images.
 - Existing authentication and authorization conventions apply to every learning resource.
 
-## Remaining Phase 0 exit gates
+## Phase 0 exit gates
 
 - [x] Initial source review and product direction.
 - [x] Six product decisions approved.
-- [ ] Runtime baseline: builds, tests, migrations and API contract checks.
-- [ ] Desktop/mobile visual and accessibility audit.
-- [ ] Authorization and media lifecycle baseline review.
-- [ ] Finalize requirements and record baseline results.
-- [ ] Review Phase 0 exit criteria before Phase 1.
-
-No repository changes or runtime verification are claimed by this document.
+- [x] Runtime baseline: builds, tests, migrations and API contract checks ([BASELINE_RUN.md](./BASELINE_RUN.md)).
+- [x] Desktop/mobile visual and accessibility audit (**waived** — see closure).
+- [x] Authorization and media lifecycle baseline review (conventions + integration; private delivery policy Phase 2).
+- [x] Finalize requirements and record baseline results.
+- [x] Review Phase 0 exit criteria before Phase 1.
 
 ## Source references
 

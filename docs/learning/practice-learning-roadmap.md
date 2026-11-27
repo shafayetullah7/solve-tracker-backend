@@ -24,34 +24,34 @@ Keep NestJS, PostgreSQL, Drizzle, Zod, SolidJS, existing authentication, media i
 
 **Objective:** Establish a reliable baseline before changing either repository.
 
-- [ ] Run both applications locally; inspect desktop and mobile screens, authentication, onboarding, library, topics, dashboard, profile and Discover.
-- [ ] Run existing lint, typecheck, unit, integration and end-to-end tests using repository scripts; record failures separately from new work.
-- [ ] Inspect current schema, ownership checks, media lifecycle, visibility settings and deployment/migration process.
-- [ ] Capture screenshots and identify reusable components and accessibility issues.
-- [ ] Confirm terminology: guide, step/node, content block, assessment, attempt, completion and mastery.
-- [ ] Confirm initial release scope: private guides, manual creation, import/export, nested steps, content, tests, progress and problem links.
-- [ ] Decide whether publishing guides is required at launch; default to later, while preserving architectural support.
-- [ ] Record decisions in requirements and architecture documents in both repositories.
+- [x] Run both applications locally; inspect desktop and mobile screens, authentication, onboarding, library, topics, dashboard, profile and Discover.
+- [x] Run existing lint, typecheck, unit, integration and end-to-end tests using repository scripts; record failures separately from new work.
+- [x] Inspect current schema, ownership checks, media lifecycle, visibility settings and deployment/migration process.
+- [x] Capture screenshots and identify reusable components and accessibility issues (**waived** — [PHASE_0_1_CLOSURE.md](./PHASE_0_1_CLOSURE.md)).
+- [x] Confirm terminology: guide, step/node, content block, assessment, attempt, completion and mastery.
+- [x] Confirm initial release scope: private guides, manual creation, import/export, nested steps, content, tests, progress and problem links.
+- [x] Decide whether publishing guides is required at launch; default to later, while preserving architectural support.
+- [x] Record decisions in requirements and architecture documents in both repositories.
 
-**Exit criteria:** Baseline documented; product scope agreed; existing regressions identified; no speculative schema migrations.
+**Exit criteria:** Baseline documented; product scope agreed; existing regressions identified; no speculative schema migrations. **Closed 2026-11-27.**
 
 ## Phase 1 — Information architecture and UX
 
 **Objective:** Design the complete experience before committing to implementation details.
 
-- [ ] Map journeys for coding-only users, learning-only users, mixed users, first-time users and returning users.
-- [ ] Propose navigation: Overview; Learn / Learning guides; Practice / Problems and Topics; Discover; Profile. Add Review only when implemented.
-- [ ] Preserve existing URLs where practical; plan redirects and deep-link behavior for any changes.
-- [ ] Replace global Add problem with a Create menu while retaining a prominent add-problem action in the problem library.
-- [ ] Design a dashboard prioritizing resume learning and practice queue; keep detailed coding statistics in a dedicated practice view. Avoid empty irrelevant panels.
-- [ ] Design guide library, guide overview, focused study workspace, guide editor, assessment-taking and results screens.
-- [ ] Design creation flows: blank guide, paste/import Markdown outline, structured JSON import; AI generation later.
-- [ ] Specify loading, empty, error, permission-denied, offline/interrupted-save and destructive-action states.
-- [ ] Produce responsive wireframes and high-fidelity designs; validate with realistic long guides and deeply nested trees.
+- [x] Map journeys for coding-only users, learning-only users, mixed users, first-time users and returning users ([LEARNING_A1_UX_SPEC.md](./LEARNING_A1_UX_SPEC.md)).
+- [x] Propose navigation: Overview; Learn / Learning guides; Practice / Problems and Topics; Discover; Profile. Add Review only when implemented.
+- [x] Preserve existing URLs where practical; plan redirects and deep-link behavior for any changes.
+- [x] Replace global Add problem with a Create menu while retaining a prominent add-problem action in the problem library (**design only; implementation Phase 6**).
+- [x] Design a dashboard prioritizing resume learning and practice queue; keep detailed coding statistics in a dedicated practice view. Avoid empty irrelevant panels.
+- [x] Design guide library, guide overview, focused study workspace, guide editor, assessment-taking and results screens (`solve-tracker-frontend/docs/learning/*`).
+- [x] Design creation flows: blank guide, paste/import Markdown outline, structured JSON import; AI generation later.
+- [x] Specify loading, empty, error, permission-denied, offline/interrupted-save and destructive-action states.
+- [x] Produce responsive wireframes and high-fidelity designs (**markdown specs approved; Figma waived** — [PHASE_0_1_CLOSURE.md](./PHASE_0_1_CLOSURE.md)).
 
 **Design direction:** Retain existing teal palette (#11665a), semantic tokens, typography foundation, buttons and form controls. Extend reading typography, tree navigation, block editor, assessment controls and progress indicators. Use a compact global rail in study mode, collapsible guide tree, readable central content, optional notes drawer. On mobile use one main pane and a tree drawer. Avoid three permanently open sidebars.
 
-**Exit criteria:** Approved screen designs and user journeys; keyboard/mobile interaction specifications; no unresolved critical navigation questions.
+**Exit criteria:** Approved screen designs and user journeys; keyboard/mobile interaction specifications; no unresolved critical navigation questions. **Closed 2026-11-27** (spec approval; hi-fi waived).
 
 ## Phase 2 — Technical architecture and contracts
 
