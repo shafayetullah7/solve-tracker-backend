@@ -1,0 +1,1708 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "142f0faf-f7ee-45d1-ba52-4d22f9478b7f",
+  "prevIds": [
+    "e17f4f79-1424-4705-a752-ca5f1a09128c"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_guides"
+      ],
+      "writes": [
+        "s|tbl|public.learning_guides",
+        "n|tbl|public.learning_guides",
+        "e|tbl|public.learning_guides",
+        "n|rel|public.learning_guides",
+        "n|type|public.learning_guides",
+        "n|rel|public.learning_guides_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_nodes"
+      ],
+      "writes": [
+        "s|tbl|public.learning_nodes",
+        "n|tbl|public.learning_nodes",
+        "e|tbl|public.learning_nodes",
+        "n|rel|public.learning_nodes",
+        "n|type|public.learning_nodes",
+        "n|rel|public.learning_nodes_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_enrollments"
+      ],
+      "writes": [
+        "s|tbl|public.learning_enrollments",
+        "n|tbl|public.learning_enrollments",
+        "e|tbl|public.learning_enrollments",
+        "n|rel|public.learning_enrollments",
+        "n|type|public.learning_enrollments",
+        "n|rel|public.learning_enrollments_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_operations"
+      ],
+      "writes": [
+        "s|tbl|public.learning_operations",
+        "n|tbl|public.learning_operations",
+        "e|tbl|public.learning_operations",
+        "n|rel|public.learning_operations",
+        "n|type|public.learning_operations",
+        "n|rel|public.learning_operations_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "learning_guides",
+        "learning_guides_id_owner_uniq"
+      ],
+      "writes": [
+        "s|idx|public.learning_guides_id_owner_uniq",
+        "n|idx|public.learning_guides_id_owner_uniq",
+        "e|idx|public.learning_guides_id_owner_uniq",
+        "n|rel|public.learning_guides_id_owner_uniq"
+      ],
+      "reads": [
+        "n|tbl|public.learning_guides",
+        "n|sch|public",
+        "n|col|public.learning_guides.id",
+        "n|col|public.learning_guides.owner_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "learning_guides",
+        "learning_guides_owner_status_updated_idx"
+      ],
+      "writes": [
+        "s|idx|public.learning_guides_owner_status_updated_idx",
+        "n|idx|public.learning_guides_owner_status_updated_idx",
+        "e|idx|public.learning_guides_owner_status_updated_idx",
+        "n|rel|public.learning_guides_owner_status_updated_idx"
+      ],
+      "reads": [
+        "n|tbl|public.learning_guides",
+        "n|sch|public",
+        "n|col|public.learning_guides.owner_id",
+        "n|col|public.learning_guides.deleted_at",
+        "n|col|public.learning_guides.archived_at",
+        "n|col|public.learning_guides.updated_at",
+        "n|col|public.learning_guides.id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "learning_nodes",
+        "learning_nodes_guide_id_uniq"
+      ],
+      "writes": [
+        "s|idx|public.learning_nodes_guide_id_uniq",
+        "n|idx|public.learning_nodes_guide_id_uniq",
+        "e|idx|public.learning_nodes_guide_id_uniq",
+        "n|rel|public.learning_nodes_guide_id_uniq"
+      ],
+      "reads": [
+        "n|tbl|public.learning_nodes",
+        "n|sch|public",
+        "n|col|public.learning_nodes.guide_id",
+        "n|col|public.learning_nodes.id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "learning_nodes",
+        "learning_nodes_root_position_uniq"
+      ],
+      "writes": [
+        "s|idx|public.learning_nodes_root_position_uniq",
+        "n|idx|public.learning_nodes_root_position_uniq",
+        "e|idx|public.learning_nodes_root_position_uniq",
+        "n|rel|public.learning_nodes_root_position_uniq"
+      ],
+      "reads": [
+        "n|tbl|public.learning_nodes",
+        "n|sch|public",
+        "n|col|public.learning_nodes.guide_id",
+        "n|col|public.learning_nodes.position"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "learning_nodes",
+        "learning_nodes_child_position_uniq"
+      ],
+      "writes": [
+        "s|idx|public.learning_nodes_child_position_uniq",
+        "n|idx|public.learning_nodes_child_position_uniq",
+        "e|idx|public.learning_nodes_child_position_uniq",
+        "n|rel|public.learning_nodes_child_position_uniq"
+      ],
+      "reads": [
+        "n|tbl|public.learning_nodes",
+        "n|sch|public",
+        "n|col|public.learning_nodes.guide_id",
+        "n|col|public.learning_nodes.parent_id",
+        "n|col|public.learning_nodes.position"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "learning_nodes",
+        "learning_nodes_parent_idx"
+      ],
+      "writes": [
+        "s|idx|public.learning_nodes_parent_idx",
+        "n|idx|public.learning_nodes_parent_idx",
+        "e|idx|public.learning_nodes_parent_idx",
+        "n|rel|public.learning_nodes_parent_idx"
+      ],
+      "reads": [
+        "n|tbl|public.learning_nodes",
+        "n|sch|public",
+        "n|col|public.learning_nodes.guide_id",
+        "n|col|public.learning_nodes.parent_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "learning_nodes",
+        "learning_nodes_deletion_batch_idx"
+      ],
+      "writes": [
+        "s|idx|public.learning_nodes_deletion_batch_idx",
+        "n|idx|public.learning_nodes_deletion_batch_idx",
+        "e|idx|public.learning_nodes_deletion_batch_idx",
+        "n|rel|public.learning_nodes_deletion_batch_idx"
+      ],
+      "reads": [
+        "n|tbl|public.learning_nodes",
+        "n|sch|public",
+        "n|col|public.learning_nodes.guide_id",
+        "n|col|public.learning_nodes.deletion_batch_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "learning_enrollments",
+        "learning_enrollments_guide_learner_uniq"
+      ],
+      "writes": [
+        "s|idx|public.learning_enrollments_guide_learner_uniq",
+        "n|idx|public.learning_enrollments_guide_learner_uniq",
+        "e|idx|public.learning_enrollments_guide_learner_uniq",
+        "n|rel|public.learning_enrollments_guide_learner_uniq"
+      ],
+      "reads": [
+        "n|tbl|public.learning_enrollments",
+        "n|sch|public",
+        "n|col|public.learning_enrollments.guide_id",
+        "n|col|public.learning_enrollments.learner_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "learning_enrollments",
+        "learning_enrollments_guide_id_uniq"
+      ],
+      "writes": [
+        "s|idx|public.learning_enrollments_guide_id_uniq",
+        "n|idx|public.learning_enrollments_guide_id_uniq",
+        "e|idx|public.learning_enrollments_guide_id_uniq",
+        "n|rel|public.learning_enrollments_guide_id_uniq"
+      ],
+      "reads": [
+        "n|tbl|public.learning_enrollments",
+        "n|sch|public",
+        "n|col|public.learning_enrollments.guide_id",
+        "n|col|public.learning_enrollments.id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "learning_enrollments",
+        "learning_enrollments_learner_activity_idx"
+      ],
+      "writes": [
+        "s|idx|public.learning_enrollments_learner_activity_idx",
+        "n|idx|public.learning_enrollments_learner_activity_idx",
+        "e|idx|public.learning_enrollments_learner_activity_idx",
+        "n|rel|public.learning_enrollments_learner_activity_idx"
+      ],
+      "reads": [
+        "n|tbl|public.learning_enrollments",
+        "n|sch|public",
+        "n|col|public.learning_enrollments.learner_id",
+        "n|col|public.learning_enrollments.last_activity_at",
+        "n|col|public.learning_enrollments.id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "learning_operations",
+        "learning_operations_expiry_idx"
+      ],
+      "writes": [
+        "s|idx|public.learning_operations_expiry_idx",
+        "n|idx|public.learning_operations_expiry_idx",
+        "e|idx|public.learning_operations_expiry_idx",
+        "n|rel|public.learning_operations_expiry_idx"
+      ],
+      "reads": [
+        "n|tbl|public.learning_operations",
+        "n|sch|public",
+        "n|col|public.learning_operations.expires_at"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_guides"
+      ],
+      "writes": [
+        "s|fk|public.learning_guides.learning_guides_owner_id_users_id_fkey",
+        "n|fk|public.learning_guides.learning_guides_owner_id_users_id_fkey",
+        "e|fk|public.learning_guides.learning_guides_owner_id_users_id_fkey",
+        "n|con|public.learning_guides.learning_guides_owner_id_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.learning_guides",
+        "n|sch|public",
+        "n|tbl|public.users",
+        "n|sch|public",
+        "n|col|public.learning_guides.owner_id",
+        "n|col|public.users.id",
+        "e|uniqueness|public.users.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_nodes"
+      ],
+      "writes": [
+        "s|fk|public.learning_nodes.learning_nodes_guide_id_learning_guides_id_fkey",
+        "n|fk|public.learning_nodes.learning_nodes_guide_id_learning_guides_id_fkey",
+        "e|fk|public.learning_nodes.learning_nodes_guide_id_learning_guides_id_fkey",
+        "n|con|public.learning_nodes.learning_nodes_guide_id_learning_guides_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.learning_nodes",
+        "n|sch|public",
+        "n|tbl|public.learning_guides",
+        "n|sch|public",
+        "n|col|public.learning_nodes.guide_id",
+        "n|col|public.learning_guides.id",
+        "e|uniqueness|public.learning_guides.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_nodes"
+      ],
+      "writes": [
+        "s|fk|public.learning_nodes.learning_nodes_parent_fk",
+        "n|fk|public.learning_nodes.learning_nodes_parent_fk",
+        "e|fk|public.learning_nodes.learning_nodes_parent_fk",
+        "n|con|public.learning_nodes.learning_nodes_parent_fk"
+      ],
+      "reads": [
+        "n|tbl|public.learning_nodes",
+        "n|sch|public",
+        "n|tbl|public.learning_nodes",
+        "n|sch|public",
+        "n|col|public.learning_nodes.guide_id",
+        "n|col|public.learning_nodes.parent_id",
+        "n|col|public.learning_nodes.guide_id",
+        "n|col|public.learning_nodes.id",
+        "e|uniqueness|public.learning_nodes.guide_id.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_enrollments"
+      ],
+      "writes": [
+        "s|fk|public.learning_enrollments.learning_enrollments_owner_fk",
+        "n|fk|public.learning_enrollments.learning_enrollments_owner_fk",
+        "e|fk|public.learning_enrollments.learning_enrollments_owner_fk",
+        "n|con|public.learning_enrollments.learning_enrollments_owner_fk"
+      ],
+      "reads": [
+        "n|tbl|public.learning_enrollments",
+        "n|sch|public",
+        "n|tbl|public.learning_guides",
+        "n|sch|public",
+        "n|col|public.learning_enrollments.guide_id",
+        "n|col|public.learning_enrollments.learner_id",
+        "n|col|public.learning_guides.id",
+        "n|col|public.learning_guides.owner_id",
+        "e|uniqueness|public.learning_guides.id.owner_id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_enrollments"
+      ],
+      "writes": [
+        "s|fk|public.learning_enrollments.learning_enrollments_resume_fk",
+        "n|fk|public.learning_enrollments.learning_enrollments_resume_fk",
+        "e|fk|public.learning_enrollments.learning_enrollments_resume_fk",
+        "n|con|public.learning_enrollments.learning_enrollments_resume_fk"
+      ],
+      "reads": [
+        "n|tbl|public.learning_enrollments",
+        "n|sch|public",
+        "n|tbl|public.learning_nodes",
+        "n|sch|public",
+        "n|col|public.learning_enrollments.guide_id",
+        "n|col|public.learning_enrollments.resume_node_id",
+        "n|col|public.learning_nodes.guide_id",
+        "n|col|public.learning_nodes.id",
+        "e|uniqueness|public.learning_nodes.guide_id.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_operations"
+      ],
+      "writes": [
+        "s|fk|public.learning_operations.learning_operations_actor_id_users_id_fkey",
+        "n|fk|public.learning_operations.learning_operations_actor_id_users_id_fkey",
+        "e|fk|public.learning_operations.learning_operations_actor_id_users_id_fkey",
+        "n|con|public.learning_operations.learning_operations_actor_id_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.learning_operations",
+        "n|sch|public",
+        "n|tbl|public.users",
+        "n|sch|public",
+        "n|col|public.learning_operations.actor_id",
+        "n|col|public.users.id",
+        "e|uniqueness|public.users.id"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "learning_guides",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "learning_nodes",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "learning_enrollments",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "learning_operations",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_guides",
+        "name": "id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "gen_random_uuid()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_guides",
+        "name": "owner_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_guides",
+        "name": "title",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_guides",
+        "name": "description",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "''",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_guides",
+        "name": "structure_revision",
+        "type": "bigint",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "1",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_guides",
+        "name": "metadata_revision",
+        "type": "bigint",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "1",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_guides",
+        "name": "archived_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_guides",
+        "name": "deleted_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_guides",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_guides",
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "gen_random_uuid()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "guide_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "parent_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "title",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "position",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "required",
+        "type": "boolean",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "true",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "completion_mode",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'structural'",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "content_revision",
+        "type": "bigint",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "1",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "requirement_revision",
+        "type": "bigint",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "1",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "deleted_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "deletion_batch_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_enrollments",
+        "name": "id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "gen_random_uuid()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_enrollments",
+        "name": "guide_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_enrollments",
+        "name": "learner_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_enrollments",
+        "name": "resume_node_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_enrollments",
+        "name": "last_activity_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_enrollments",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_enrollments",
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_operations",
+        "name": "actor_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_operations",
+        "name": "operation_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_operations",
+        "name": "request_hash",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_operations",
+        "name": "resource_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_operations",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_operations",
+        "name": "expires_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_guides",
+        "name": "learning_guides_id_owner_uniq",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "owner_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": true,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_guides",
+        "name": "learning_guides_owner_status_updated_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "owner_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "deleted_at",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "archived_at",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "updated_at",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "learning_nodes_guide_id_uniq",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "guide_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": true,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "learning_nodes_root_position_uniq",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "guide_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "position",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": true,
+        "where": "\"parent_id\" is null and \"deleted_at\" is null",
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "learning_nodes_child_position_uniq",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "guide_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "parent_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "position",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": true,
+        "where": "\"parent_id\" is not null and \"deleted_at\" is null",
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "learning_nodes_parent_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "guide_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "parent_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "learning_nodes_deletion_batch_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "guide_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "deletion_batch_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_enrollments",
+        "name": "learning_enrollments_guide_learner_uniq",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "guide_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "learner_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": true,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_enrollments",
+        "name": "learning_enrollments_guide_id_uniq",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "guide_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": true,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_enrollments",
+        "name": "learning_enrollments_learner_activity_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "learner_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "last_activity_at",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_operations",
+        "name": "learning_operations_expiry_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "expires_at",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_guides",
+        "name": "learning_guides_owner_id_users_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "owner_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "users",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "learning_nodes_guide_id_learning_guides_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "guide_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "learning_guides",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "learning_nodes_parent_fk",
+        "nameExplicit": true,
+        "columns": [
+          "guide_id",
+          "parent_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "learning_nodes",
+        "columnsTo": [
+          "guide_id",
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "NO ACTION",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_enrollments",
+        "name": "learning_enrollments_owner_fk",
+        "nameExplicit": true,
+        "columns": [
+          "guide_id",
+          "learner_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "learning_guides",
+        "columnsTo": [
+          "id",
+          "owner_id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_enrollments",
+        "name": "learning_enrollments_resume_fk",
+        "nameExplicit": true,
+        "columns": [
+          "guide_id",
+          "resume_node_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "learning_nodes",
+        "columnsTo": [
+          "guide_id",
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "NO ACTION",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_operations",
+        "name": "learning_operations_actor_id_users_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "actor_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "users",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_operations",
+        "name": "learning_operations_pkey",
+        "columns": [
+          "actor_id",
+          "operation_id"
+        ],
+        "nameExplicit": true,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_guides",
+        "name": "learning_guides_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "learning_nodes_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_enrollments",
+        "name": "learning_enrollments_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_guides",
+        "name": "learning_guides_title_check",
+        "value": "length(btrim(\"title\")) > 0",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_guides",
+        "name": "learning_guides_revisions_check",
+        "value": "\"structure_revision\" > 0 and \"metadata_revision\" > 0",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "learning_nodes_parent_check",
+        "value": "\"parent_id\" is null or \"parent_id\" <> \"id\"",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "learning_nodes_position_check",
+        "value": "\"position\" >= 0",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "learning_nodes_title_check",
+        "value": "length(btrim(\"title\")) > 0",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "learning_nodes_mode_check",
+        "value": "\"completion_mode\" in ('structural', 'manual', 'gated')",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "learning_nodes_revisions_check",
+        "value": "\"content_revision\" > 0 and \"requirement_revision\" > 0",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_nodes",
+        "name": "learning_nodes_deletion_check",
+        "value": "(\"deleted_at\" is null) = (\"deletion_batch_id\" is null)",
+        "entityType": "checks"
+      }
+    }
+  ]
+}
