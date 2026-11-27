@@ -4,7 +4,7 @@ Implementation references: [Backend conventions](./BACKEND_CONVENTIONS.md),
 [Drizzle conventions](./DRIZZLE_CONVENTIONS.md), and
 [product requirements](./REQUIREMENTS.md).
 
-Use Node.js 24.15+ and pnpm 12.18.0 for host commands. Docker development requires Docker Engine and Docker Compose v2+ with permission to access the Docker daemon.
+Use Node.js 26.13.1 (26.x) and pnpm 12.18.0 for host commands. Docker development requires Docker Engine and Docker Compose v2+ with permission to access the Docker daemon.
 
 ## Run everything in Docker
 
