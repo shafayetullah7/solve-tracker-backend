@@ -19,6 +19,9 @@ export function toGuideResponse(row: LearningGuide): GuideResponse {
   };
 }
 
+import { buildHierarchy } from './learning-hierarchy.js';
+import type { CreateNodeInput, TreeResponse } from './schemas/learning-nodes.schema.js';
+
 @Injectable()
 export class LearningGuidesService {
   constructor(private readonly repository: LearningGuidesRepository, private readonly mutations: LearningGuideMutationsRepository) {}
@@ -29,6 +32,25 @@ export class LearningGuidesService {
     const row = await this.repository.findOwned(ownerId, id.data);
     if (!row) throw learningError(404, 'NOT_FOUND', 'Guide was not found.');
     return toGuideResponse(row);
+  }
+
+  async tree(ownerId: string, id: string): Promise<TreeResponse> {
+    const rows = await this.repository.findOwnedTree(ownerId, this.parseId(id));
+    const first = rows[0];
+    if (!first) throw learningError(404, 'NOT_FOUND', 'Guide was not found.');
+    const nodes = rows.flatMap(row => row.node === null ? [] : [row.node]);
+    return {
+      structureRevision: first.structureRevision.toString(),
+      nodes: buildHierarchy(nodes).preorder.map(node => ({
+        ...node,
+        contentRevision: node.contentRevision.toString(),
+        requirementRevision: node.requirementRevision.toString(),
+      })),
+    };
+  }
+
+  createNode(ownerId: string, id: string, input: CreateNodeInput) {
+    return this.mutations.createNode(ownerId, this.parseId(id), input);
   }
 
   async list(ownerId: string, query: ListGuidesQuery) {
