@@ -58,3 +58,13 @@ export const recoveryResponseSchema = z.strictObject({
 });
 export type RecoveryQuery = z.infer<typeof recoveryQuerySchema>;
 export type RecoveryResponse = z.infer<typeof recoveryResponseSchema>;
+
+export const enrollmentResponseSchema = z.strictObject({
+  id: z.uuid(), guideId: z.uuid(), resumeNodeId: z.uuid().nullable(),
+  lastActivityAt: z.iso.datetime().nullable(),
+});
+export const resumeSchema = z.strictObject({
+  nodeId: z.uuid().nullable(), expectedStructureRevision: revisionSchema, operationId: z.uuid(),
+});
+export type EnrollmentResponse = z.infer<typeof enrollmentResponseSchema>;
+export type ResumeInput = z.infer<typeof resumeSchema>;
