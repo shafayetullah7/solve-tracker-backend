@@ -53,6 +53,14 @@ export class LearningGuidesService {
     return this.mutations.createNode(ownerId, this.parseId(id), input);
   }
 
+  async deleteNode(ownerId: string, guideId: string, nodeId: string, rawRevision: unknown, rawOperation: unknown): Promise<void> {
+    const revision = revisionSchema.safeParse(rawRevision);
+    const operation = guideIdSchema.safeParse(rawOperation);
+    if (!revision.success || !operation.success)
+      throw learningError(400, 'VALIDATION_ERROR', 'Valid revision and operation headers are required.');
+    await this.mutations.deleteNode(ownerId, this.parseId(guideId), this.parseId(nodeId), revision.data, operation.data);
+  }
+
   patchNode(ownerId: string, guideId: string, nodeId: string, input: PatchNodeInput) {
     return this.mutations.patchNode(ownerId, this.parseId(guideId), this.parseId(nodeId), input);
   }
