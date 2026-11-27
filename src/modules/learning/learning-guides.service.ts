@@ -65,6 +65,10 @@ export class LearningGuidesService {
     return this.mutations.patchNode(ownerId, this.parseId(guideId), this.parseId(nodeId), input);
   }
 
+  restoreNode(ownerId: string, guideId: string, nodeId: string, input: MoveNodeInput) {
+    return this.mutations.restoreNode(ownerId, this.parseId(guideId), this.parseId(nodeId), input);
+  }
+
   moveNode(ownerId: string, guideId: string, nodeId: string, input: MoveNodeInput) {
     return this.mutations.moveNode(ownerId, this.parseId(guideId), this.parseId(nodeId), input);
   }
