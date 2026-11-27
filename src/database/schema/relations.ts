@@ -19,7 +19,14 @@ import { userFollows } from './follows/user-follows.table.js';
 import { discoverReports } from './discover-safety/discover-reports.table.js';
 import { userBlocks } from './discover-safety/user-blocks.table.js';
 
+import { learningGuides } from './learning/learning-guides.table.js';
+import { learningNodes } from './learning/learning-nodes.table.js';
+import { learningEnrollments } from './learning/learning-enrollments.table.js';
+
 const tables = {
+  learningGuides,
+  learningNodes,
+  learningEnrollments,
   platforms,
   users,
   authSessions,
