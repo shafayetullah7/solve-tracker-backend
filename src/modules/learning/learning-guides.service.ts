@@ -20,7 +20,7 @@ export function toGuideResponse(row: LearningGuide): GuideResponse {
 }
 
 import { buildHierarchy } from './learning-hierarchy.js';
-import type { CreateNodeInput, TreeResponse } from './schemas/learning-nodes.schema.js';
+import type { CreateNodeInput, MoveNodeInput, TreeResponse } from './schemas/learning-nodes.schema.js';
 
 @Injectable()
 export class LearningGuidesService {
@@ -51,6 +51,10 @@ export class LearningGuidesService {
 
   createNode(ownerId: string, id: string, input: CreateNodeInput) {
     return this.mutations.createNode(ownerId, this.parseId(id), input);
+  }
+
+  moveNode(ownerId: string, guideId: string, nodeId: string, input: MoveNodeInput) {
+    return this.mutations.moveNode(ownerId, this.parseId(guideId), this.parseId(nodeId), input);
   }
 
   async list(ownerId: string, query: ListGuidesQuery) {
