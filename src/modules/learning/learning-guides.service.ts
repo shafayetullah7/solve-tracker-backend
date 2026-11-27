@@ -20,7 +20,7 @@ export function toGuideResponse(row: LearningGuide): GuideResponse {
 }
 
 import { buildHierarchy } from './learning-hierarchy.js';
-import type { CreateNodeInput, MoveNodeInput, PatchNodeInput, TreeResponse } from './schemas/learning-nodes.schema.js';
+import type { CreateNodeInput, MoveNodeInput, PatchNodeInput, TreeResponse, RecoveryQuery, RecoveryResponse } from './schemas/learning-nodes.schema.js';
 
 @Injectable()
 export class LearningGuidesService {
@@ -32,6 +32,22 @@ export class LearningGuidesService {
     const row = await this.repository.findOwned(ownerId, id.data);
     if (!row) throw learningError(404, 'NOT_FOUND', 'Guide was not found.');
     return toGuideResponse(row);
+  }
+
+  async recoverable(ownerId: string, rawId: string, query: RecoveryQuery): Promise<RecoveryResponse> {
+    const id = this.parseId(rawId);
+    if (!await this.repository.findOwned(ownerId, id))
+      throw learningError(404, 'NOT_FOUND', 'Guide was not found.');
+    const rows = await this.repository.listRecoverable(ownerId, id, query);
+    return {
+      items: rows.slice(0, query.pageSize).map(row => {
+        if (!row.deletedAt) throw new Error('Missing deletion timestamp.');
+        return { id: row.id, title: row.title, parentId: row.parentId,
+          deletedAt: row.deletedAt.toISOString(),
+          expiresAt: new Date(row.deletedAt.getTime() + 30 * 86400000).toISOString() };
+      }),
+      page: query.page, pageSize: query.pageSize, hasMore: rows.length > query.pageSize,
+    };
   }
 
   async tree(ownerId: string, id: string): Promise<TreeResponse> {
