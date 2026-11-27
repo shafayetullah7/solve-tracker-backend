@@ -7,7 +7,7 @@ import { learningError } from './learning.errors.js';
 import type { CreateGuideInput, PatchGuideInput } from './schemas/learning-guides.schema.js';
 
 import { buildHierarchy, planPlacement, HierarchyError, MAX_NODES } from './learning-hierarchy.js';
-import type { CreateNodeInput, MoveNodeInput } from './schemas/learning-nodes.schema.js';
+import type { CreateNodeInput, MoveNodeInput, PatchNodeInput } from './schemas/learning-nodes.schema.js';
 
 const DAY = 86400000;
 const MAX_GUIDES = 100;
@@ -125,6 +125,35 @@ export class LearningGuideMutationsRepository {
       await tx.update(learningGuides).set({ structureRevision: guide.structureRevision + 1n, updatedAt: now })
         .where(and(eq(learningGuides.id, guideId), eq(learningGuides.ownerId, ownerId)));
       return node.id;
+    }, guideId);
+  }
+
+  async patchNode(ownerId: string, guideId: string, nodeId: string, input: PatchNodeInput): Promise<Receipt> {
+    return this.execute(ownerId, input.operationId, [
+      'node.patch', guideId, nodeId, input.expectedStructureRevision,
+      input.title ?? null, input.required ?? null, input.completionMode ?? null,
+    ], async (tx, now) => {
+      const guide = await this.lockGuide(tx, ownerId, guideId);
+      if (guide.deletedAt) throw learningError(404, 'NOT_FOUND', 'Guide was not found.');
+      if (guide.archivedAt) throw learningError(409, 'LEARNING_LIFECYCLE_CONFLICT', 'Guide is archived.');
+      if (guide.structureRevision.toString() !== input.expectedStructureRevision)
+        throw learningError(409, 'LEARNING_REVISION_CONFLICT', 'Guide structure changed.');
+      const scope = and(eq(learningNodes.guideId, guideId), eq(learningNodes.id, nodeId), isNull(learningNodes.deletedAt));
+      const [node] = await tx.select().from(learningNodes).where(scope);
+      if (!node) throw learningError(404, 'NOT_FOUND', 'Node was not found.');
+      const title = input.title ?? node.title;
+      const required = input.required ?? node.required;
+      const completionMode = input.completionMode ?? node.completionMode;
+      const requirementChanged = required !== node.required || completionMode !== node.completionMode;
+      if (title === node.title && !requirementChanged) return nodeId;
+      await tx.update(learningNodes).set({
+        title, required, completionMode,
+        requirementRevision: node.requirementRevision + (requirementChanged ? 1n : 0n),
+        updatedAt: now,
+      }).where(scope);
+      await tx.update(learningGuides).set({ structureRevision: guide.structureRevision + 1n, updatedAt: now })
+        .where(and(eq(learningGuides.id, guideId), eq(learningGuides.ownerId, ownerId)));
+      return nodeId;
     }, guideId);
   }
 
