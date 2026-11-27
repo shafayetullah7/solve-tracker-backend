@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { and, count, eq, lte, isNull, inArray, sql } from 'drizzle-orm';
 import { UserLockRepository, type DbTx } from '../../database/user-lock.repository.js';
 import { learningGuides, learningEnrollments, learningOperations, learningNodes, type LearningGuide } from '../../database/schema/index.js';
@@ -125,6 +125,47 @@ export class LearningGuideMutationsRepository {
       await tx.update(learningGuides).set({ structureRevision: guide.structureRevision + 1n, updatedAt: now })
         .where(and(eq(learningGuides.id, guideId), eq(learningGuides.ownerId, ownerId)));
       return node.id;
+    }, guideId);
+  }
+
+  async deleteNode(ownerId: string, guideId: string, nodeId: string, expected: string, operationId: string): Promise<Receipt> {
+    return this.execute(ownerId, operationId, ['node.delete', guideId, nodeId, expected], async (tx, now) => {
+      const guide = await this.lockGuide(tx, ownerId, guideId);
+      if (guide.deletedAt) throw learningError(404, 'NOT_FOUND', 'Guide was not found.');
+      if (guide.archivedAt) throw learningError(409, 'LEARNING_LIFECYCLE_CONFLICT', 'Guide is archived.');
+      if (guide.structureRevision.toString() !== expected)
+        throw learningError(409, 'LEARNING_REVISION_CONFLICT', 'Guide structure changed.');
+      const nodes = await tx.select().from(learningNodes).where(and(
+        eq(learningNodes.guideId, guideId), isNull(learningNodes.deletedAt),
+      )).limit(MAX_NODES + 1);
+      const tree = buildHierarchy(nodes);
+      const root = tree.byId.get(nodeId);
+      if (!root) throw learningError(404, 'NOT_FOUND', 'Node was not found.');
+      const start = tree.preorder.findIndex(node => node.id === nodeId);
+      const depth = tree.depths.get(nodeId);
+      if (depth === undefined) throw new Error('Missing subtree depth.');
+      let end = start + 1;
+      while (end < tree.preorder.length) {
+        const next = tree.preorder[end];
+        if (!next || (tree.depths.get(next.id) ?? 0) <= depth) break;
+        end++;
+      }
+      const ids = tree.preorder.slice(start, end).map(node => node.id);
+      const fallback = tree.preorder[end]?.id ?? tree.preorder[start - 1]?.id ?? null;
+      await tx.update(learningNodes).set({ deletedAt: now, deletionBatchId: randomUUID(), updatedAt: now })
+        .where(and(eq(learningNodes.guideId, guideId), inArray(learningNodes.id, ids), isNull(learningNodes.deletedAt)));
+      const shifted = (tree.children.get(root.parentId) ?? []).filter(node => node.position > root.position).map(node => node.id);
+      if (shifted.length) {
+        const scope = and(eq(learningNodes.guideId, guideId), isNull(learningNodes.deletedAt), inArray(learningNodes.id, shifted));
+        await tx.update(learningNodes).set({ position: sql`${learningNodes.position} + 1000` }).where(scope);
+        await tx.update(learningNodes).set({ position: sql`${learningNodes.position} - 1001`, updatedAt: now }).where(scope);
+      }
+      await tx.update(learningEnrollments).set({ resumeNodeId: fallback, updatedAt: now }).where(and(
+        eq(learningEnrollments.guideId, guideId), inArray(learningEnrollments.resumeNodeId, ids),
+      ));
+      await tx.update(learningGuides).set({ structureRevision: guide.structureRevision + 1n, updatedAt: now })
+        .where(and(eq(learningGuides.id, guideId), eq(learningGuides.ownerId, ownerId)));
+      return nodeId;
     }, guideId);
   }
 
