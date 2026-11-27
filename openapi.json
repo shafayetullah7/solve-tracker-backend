@@ -4158,6 +4158,75 @@
         ]
       }
     },
+    "/users/me": {
+      "delete": {
+        "operationId": "ProfileController_eraseAccount",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "password": {
+                    "type": "string",
+                    "description": "8–128 Unicode code points; spaces are preserved."
+                  },
+                  "confirmation": {
+                    "type": "string",
+                    "enum": [
+                      "DELETE"
+                    ]
+                  }
+                },
+                "required": [
+                  "password",
+                  "confirmation"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Account permanently deleted; all sessions revoked"
+          },
+          "4XX": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "statusCode",
+                    "code",
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Profile"
+        ]
+      }
+    },
     "/public/people/{handle}": {
       "get": {
         "operationId": "PublicPeopleController_getProfile",

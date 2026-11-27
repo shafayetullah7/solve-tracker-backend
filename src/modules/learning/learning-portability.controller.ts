@@ -1,4 +1,5 @@
 import { Body, Controller, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { LearningImportRateLimitGuard } from './learning-import-rate-limit.guard.js';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccessGuard, type AuthenticatedRequest } from '../auth/access.guard.js';
 import { AuthSecurityGuard } from '../auth/auth-security.guard.js';
@@ -31,12 +32,14 @@ export class LearningPortabilityController {
   constructor(private readonly portability: LearningPortabilityService) {}
 
   @Post('preview')
+  @UseGuards(LearningImportRateLimitGuard)
   @ApiResponse({ status: 201, standardSchema: importPreviewResponseSchema })
   preview(@Req() req: AuthenticatedRequest, @Body({ schema: importPreviewSchema }) body: z.infer<typeof importPreviewSchema>) {
     return this.portability.previewImport(req.auth.user.id, body);
   }
 
   @Post(':importId/commit')
+  @UseGuards(LearningImportRateLimitGuard)
   @ApiResponse({ status: 200, standardSchema: guideMutationReceiptSchema })
   commit(
     @Req() req: AuthenticatedRequest,

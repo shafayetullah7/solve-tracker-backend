@@ -537,6 +537,26 @@ export class AuthService {
     return updated.length;
   }
 
+  async eraseAccount(userId: string, input: { password: string }): Promise<void> {
+    const erased = await this.repo.withUser(userId, async (tx, user) => {
+      if (user.passwordHash == null) {
+        throw authError(
+          403,
+          'PASSWORD_REQUIRED',
+          'Set a password on your account before you can delete it.',
+        );
+      }
+      const valid = await this.passwords.verify(input.password, user.passwordHash);
+      if (!valid) {
+        throw authError(401, 'INVALID_CREDENTIALS', 'Password is incorrect.');
+      }
+      await this.revokeAllSessionsForUser(user.id, 'account-erasure', tx);
+      await tx.delete(users).where(eq(users.id, user.id));
+      return true;
+    });
+    if (!erased) throw authError(404, 'NOT_FOUND', 'Account was not found.');
+  }
+
   async changePassword(userId: string, input: ChangePasswordInput) {
     const passwordHash = await this.repo.withUser(userId, async (tx, user) => {
       const valid = await this.passwords.verify(

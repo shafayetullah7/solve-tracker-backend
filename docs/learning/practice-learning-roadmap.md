@@ -159,18 +159,22 @@ Proposed routes: `/learning/guides`, `/learning/guides/:guideId/nodes`, node/blo
 
 ## Phase 7 — Public release hardening
 
-**Objective:** Safely release the integrated product to real users.
+**Objective:** Safely release the integrated product to real users. **Execution slices:** [LEARNING_7_SLICE_PLAN.md](./LEARNING_7_SLICE_PLAN.md).
 
-- [ ] Review authorization, session security, content sanitization, URL/embed restrictions, upload quotas, rate limits and import abuse limits.
-- [ ] Verify private notes, attempts, progress and media cannot leak through public profile or Discover APIs.
-- [ ] Benchmark large guide trees, progress aggregation and assessment history; inspect query plans and add evidence-based indexes.
-- [ ] Test migrations against representative existing data; verify backup/restore and rollback or forward-fix procedure.
-- [ ] Run unit, integration, end-to-end, accessibility and responsive regression tests; test supported browsers and mobile devices.
-- [ ] Add operational metrics, error reporting without sensitive content, resource limits and deployment health checks.
-- [ ] Prepare account/data deletion, export, privacy information, feedback channel and abuse reporting appropriate to released features.
-- [ ] Roll out behind a feature flag to a small beta group; collect usability feedback, fix blockers, then expand access.
+- [x] **7.0** — Baseline, launch decisions, audit map ([LEARNING_7_0_RESULTS.md](./LEARNING_7_0_RESULTS.md), [LEARNING_7_0_BASELINE.md](./LEARNING_7_0_BASELINE.md), [LEARNING_7_DECISIONS.md](./LEARNING_7_DECISIONS.md)).
+- [x] **7A** — Authorization, sanitization, URL/embed restrictions, upload quotas, rate limits, import abuse ([LEARNING_7A_RESULTS.md](./LEARNING_7A_RESULTS.md)).
+- [x] **7B** — Privacy regression: notes, attempts, progress, media not in Discover/profile ([LEARNING_7B_RESULTS.md](./LEARNING_7B_RESULTS.md)).
+- [x] **7C** — Large guide trees, progress aggregation, assessment history; query plans and indexes ([LEARNING_7C_RESULTS.md](./LEARNING_7C_RESULTS.md)).
+- [x] **7D** — Migrations on representative data; backup/restore and rollback ([LEARNING_7D_RESULTS.md](./LEARNING_7D_RESULTS.md)).
+- [x] **7E** — Unit, integration, E2E, accessibility, responsive and browser regression ([LEARNING_7E_RESULTS.md](./LEARNING_7E_RESULTS.md)).
+- [x] **7F** — Operational metrics, safe error reporting, resource limits, health checks ([LEARNING_7F_RESULTS.md](./LEARNING_7F_RESULTS.md)).
+- [x] **7G** — Account/data deletion, export, privacy information, feedback and abuse reporting ([LEARNING_7G_RESULTS.md](./LEARNING_7G_RESULTS.md)).
+- [x] **7H** — Beta rollout behind `VITE_LEARNING_GUIDES_ENABLED`; feedback and blockers ([LEARNING_7H_RESULTS.md](./LEARNING_7H_RESULTS.md)).
+- [ ] **7I** — Requirements §8 alignment, phase signoff, `BASELINE_RUN` ([LEARNING_7_PHASE_SIGNOFF.md](./LEARNING_7_PHASE_SIGNOFF.md) — pending).
 
 **Exit criteria:** No known critical security/data-loss/accessibility blockers; baseline regression suite passes; recovery procedure tested; beta feedback reviewed.
+
+**Depends on:** [LEARNING_6_PHASE_SIGNOFF.md](./LEARNING_6_PHASE_SIGNOFF.md).
 
 ## Phase 8 — Post-release extensions
 

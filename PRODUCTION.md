@@ -27,6 +27,11 @@ Both responses set `Cache-Control: no-store`.
 
 - Run `pnpm db:migrate` before starting new backend versions.
 - **Learning guides:** private-guide APIs ship with the learning schema migrations; there is **no** separate backend feature flag. Frontend visibility is controlled at build time via `VITE_LEARNING_GUIDES_ENABLED` ([LEARNING_6_PHASE_SIGNOFF.md](docs/learning/LEARNING_6_PHASE_SIGNOFF.md)).
+- **Rollforward:** do not drop learning tables in production; fix schema forward with new migrations. App rollback = prior container + frontend flag off ([LEARNING_7D_RESULTS.md](docs/learning/LEARNING_7D_RESULTS.md)).
+- **Learning beta (ops):** staging checklist, rate-limit env tuning, and probe/smoke steps — [LEARNING_7F_RESULTS.md](docs/learning/LEARNING_7F_RESULTS.md).
+- **Learning beta (data rights):** export scope, account erasure API, and operator feedback env — [LEARNING_7G_RESULTS.md](docs/learning/LEARNING_7G_RESULTS.md).
+- **Learning beta (rollout):** staging smoke, cohort widen, rollback — [LEARNING_BETA_RUNBOOK.md](docs/learning/LEARNING_BETA_RUNBOOK.md) ([LEARNING_7H_RESULTS.md](docs/learning/LEARNING_7H_RESULTS.md)).
+- **Backups:** use logical dumps (`pg_dump`); restoring the database does not restore external media bytes. Rehearsal script: `node scripts/rehearse-learning-migration-upgrade.mjs` (see [scripts/README.md](scripts/README.md)).
 - **User handles:** deploy **both** migrations `drizzle/20261118102214_add-user-handle` (nullable rollout) and `drizzle/20261118103421_backfill-user-handle-not-null` (backfill + `NOT NULL` + unique index) before starting an app build that expects `users.handle` on every row. Skipping the second migration leaves nullable handles and breaks register/session contracts. Details: [docs/USER_HANDLE_RESULTS.md](docs/USER_HANDLE_RESULTS.md).
 - `pnpm db:seed` only inserts shared platform reference rows (idempotent); it does not create users.
 - Use TLS in `DATABASE_URL` when the provider requires it.

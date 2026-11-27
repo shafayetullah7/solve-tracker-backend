@@ -7,6 +7,8 @@ Working directory: `solve-tracker-backend/`. Most HTTP integration scripts need 
 ```bash
 pnpm build
 export TEST_DATABASE_URL=postgresql://practice:practice_dev@127.0.0.1:5437/practice_tracker_test
+# optional: MIGRATION_REHEARSAL_DATABASE_URL (defaults to practice_tracker_rehearsal)
+# LEARNING_MIGRATION_REHEARSAL_SKIP_RESTORE=1 skips pg_dump when client tools are installed
 node scripts/test-auth-integration.mjs
 ```
 
@@ -19,6 +21,19 @@ node scripts/test-auth-integration.mjs
 | `test-problems-integration.mjs` | Problems, progress-related matrix |
 | `test-profile-integration.mjs` | Profile / media linkage |
 | `test-learning-integration.mjs` | Learning guides API |
+| `test-learning-privacy-integration.mjs` | Learning data must not leak via Discover/profile/public/progress (`DISCOVER_MODE=full`) |
+| `seed-learning-perf-fixture.ts` | Synthetic learning perf data (`--tier=ci\|large`; stress needs `LEARNING_PERF_STRESS=1`) |
+| `benchmark-learning-reads.mjs` | `EXPLAIN` + warmed HTTP on list/tree/attempt reads; `--ci` for soft regression asserts |
+| `seed-coding-only-rehearsal.ts` | Pre-learning coding fixture for migration rehearsal |
+| `rehearse-learning-migration-upgrade.mjs` | Pre-learning → learning upgrade on `practice_tracker_rehearsal`; `--ci` skips dump/restore |
+| `seed-learning-e2e.ts` | Optional manual staging fixture; emits `E2E_LEARNING_JSON` |
+| `verify-learning-7e.mjs` | Phase 7E cumulative gates; `E2E_LIVE=1` for `verify-ssr-2` only |
+| `audit-learning-safe-logging.mjs` | Phase 7F static log audit (learning + assessments) |
+| `test-learning-ops-integration.mjs` | Phase 7F health probes, attempt DTO safety, import size |
+| `verify-learning-7f.mjs` | Phase 7F exit gate (audit + 7E static + ops integration); `OPS_LIVE=1` optional probe |
+| `test-learning-data-rights-integration.mjs` | Phase 7G export/delete/account erasure integration |
+| `verify-learning-7g.mjs` | Phase 7G exit gate (7F + data-rights integration) |
+| `verify-learning-7h.mjs` | Phase 7H exit gate (7G + optional `BETA_FLAG_BUILD=1` dual frontend build) |
 | `test-discover-integration.mjs` | Discover core |
 | `test-discover-people-integration.mjs` | Discover people |
 | `test-discover-compare-integration.mjs` | Compare flows |

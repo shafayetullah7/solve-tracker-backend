@@ -9,11 +9,15 @@ import {
   Post,
   Query,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccessGuard, type AuthenticatedRequest } from '../auth/access.guard.js';
+import { AuthCookies } from '../auth/auth.cookies.js';
 import { AuthSecurityGuard } from '../auth/auth-security.guard.js';
+import { AuthService } from '../auth/auth.service.js';
 import { ProfileService } from './profile.service.js';
 import { DiscoverCountersService } from '../discover/discover-counters.service.js';
 import {
@@ -24,6 +28,7 @@ import {
 import {
   createEducationEntrySchema,
   createWorkEntrySchema,
+  deleteAccountSchema,
   educationEntryResponseSchema,
   errorSchema,
   patchProfileSchema,
@@ -33,6 +38,7 @@ import {
   workEntryResponseSchema,
   type CreateEducationEntryInput,
   type CreateWorkEntryInput,
+  type DeleteAccountInput,
   type PatchProfileInput,
   type UpdateEducationEntryInput,
   type UpdateWorkEntryInput,
@@ -56,6 +62,8 @@ export class ProfileController {
     private readonly profile: ProfileService,
     private readonly discoverCounters: DiscoverCountersService,
     private readonly follows: FollowsService,
+    private readonly auth: AuthService,
+    private readonly cookies: AuthCookies,
   ) {}
 
   @Get('following')
@@ -158,5 +166,20 @@ export class ProfileController {
     @Param('id') id: string,
   ) {
     return this.profile.deleteEducation(req.auth.user.id, id);
+  }
+
+  @Delete()
+  @HttpCode(204)
+  @ApiResponse({
+    status: 204,
+    description: 'Account permanently deleted; all sessions revoked',
+  })
+  async eraseAccount(
+    @Req() req: AuthenticatedRequest,
+    @Body({ schema: deleteAccountSchema }) input: DeleteAccountInput,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    await this.auth.eraseAccount(req.auth.user.id, input);
+    this.cookies.clear(res);
   }
 }

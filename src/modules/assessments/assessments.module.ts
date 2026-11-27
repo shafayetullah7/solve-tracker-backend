@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from '../../database/database.module.js';
 import { AuthModule } from '../auth/auth.module.js';
+import { LearningRateLimitModule } from '../learning/learning-rate-limit.module.js';
 import { AssessmentMutationsRepository } from './assessment-mutations.repository.js';
 import { AttemptMutationsRepository } from './attempt-mutations.repository.js';
 import { AssessmentsController } from './assessments.controller.js';
@@ -11,7 +12,7 @@ import { AttemptsRepository } from './attempts.repository.js';
 import { AttemptsService } from './attempts.service.js';
 
 @Module({
-  imports: [DatabaseModule, AuthModule],
+  imports: [DatabaseModule, AuthModule, LearningRateLimitModule],
   controllers: [AssessmentsController, AttemptsController],
   providers: [
     AssessmentsRepository,

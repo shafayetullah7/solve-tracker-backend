@@ -10,9 +10,11 @@ import { LearningGuidesService } from './learning-guides.service.js';
 import { LearningPortabilityController } from './learning-portability.controller.js';
 import { LearningPortabilityService } from './learning-portability.service.js';
 import { LearningGatedCompletionService } from './learning-gated-completion.service.js';
+import { LearningRateLimitModule } from './learning-rate-limit.module.js';
 
 @Module({
-  imports: [DatabaseModule, AuthModule, AssessmentsModule, ProblemsModule],
+  imports: [DatabaseModule, AuthModule, AssessmentsModule, ProblemsModule, LearningRateLimitModule],
+  exports: [LearningRateLimitModule],
   controllers: [LearningGuidesController, LearningPortabilityController],
   providers: [
     LearningGuidesRepository,

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { passwordSchema } from '../../auth/schemas/auth.schema.js';
 import {
   practiceGoalPatchSchema,
   practiceVisibilitySchema,
@@ -96,6 +97,11 @@ export const updateEducationEntrySchema = z.strictObject({
 
 export const entryIdParamSchema = uuidParam;
 
+export const deleteAccountSchema = z.strictObject({
+  password: passwordSchema,
+  confirmation: z.literal('DELETE'),
+});
+
 export const errorSchema = z.object({
   statusCode: z.number(),
   code: z.string(),
@@ -103,6 +109,7 @@ export const errorSchema = z.object({
   details: z.unknown().optional(),
 });
 
+export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;
 export type PatchProfileInput = z.infer<typeof patchProfileSchema>;
 export type CreateWorkEntryInput = z.infer<typeof createWorkEntrySchema>;
 export type UpdateWorkEntryInput = z.infer<typeof updateWorkEntrySchema>;

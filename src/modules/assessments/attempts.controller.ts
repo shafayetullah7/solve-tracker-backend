@@ -3,6 +3,7 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { AccessGuard, type AuthenticatedRequest } from '../auth/access.guard.js';
 import { AuthSecurityGuard } from '../auth/auth-security.guard.js';
+import { LearningAttemptRateLimitGuard } from '../learning/learning-attempt-rate-limit.guard.js';
 import { learningErrorSchema } from '../learning/schemas/learning-guides.schema.js';
 import { AttemptsService } from './attempts.service.js';
 import { attemptResponseSchema, saveAnswerSchema, submitAttemptSchema } from './schemas/attempt.schema.js';
@@ -16,6 +17,7 @@ export class AttemptsController {
   constructor(private readonly attempts: AttemptsService) {}
 
   @Post(':assessmentId/attempts')
+  @UseGuards(LearningAttemptRateLimitGuard)
   @ApiResponse({ status: 200, standardSchema: attemptResponseSchema })
   @ApiResponse({ status: 201, standardSchema: attemptResponseSchema })
   async startAttempt(

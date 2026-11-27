@@ -22,6 +22,7 @@ Object.assign(process.env, authTestEnvironment, {
   PORT: '3000',
   HOST: '127.0.0.1',
   SWAGGER_ENABLED: 'true',
+  LEARNING_RATE_LIMIT_IMPORT_PER_HOUR: '3',
 });
 
 const pool = new pg.Pool({ connectionString: target });
@@ -128,6 +129,12 @@ try {
     .set(headers)
     .set('Cookie', userB.cookie)
     .expect(404);
+
+  const enrollCross = await request(server)
+    .get(`/learning/guides/${guideId}/enrollment`)
+    .set(headers)
+    .set('Cookie', userB.cookie);
+  check(enrollCross.status === 404, 'Other user cannot read enrollment');
 
   let structureRevision = emptyTree.body.structureRevision;
   const root = await createNode(server, userA.cookie, guideId, structureRevision, 'Introduction');
@@ -279,6 +286,34 @@ try {
   check(content.body.blocks.length === 2, 'Content blocks returned');
   check(content.body.blocks[0].payload.body === 'Hello', 'Text payload sanitized on read');
 
+  const crossContentGet = await request(server)
+    .get(`/learning/guides/${guideId}/nodes/${childId}/content`)
+    .set(headers)
+    .set('Cookie', userB.cookie);
+  check(crossContentGet.status === 404, 'Other user cannot read node content');
+
+  const crossPatchNode = await request(server)
+    .patch(`/learning/guides/${guideId}/nodes/${childId}`)
+    .set(headers)
+    .set('Cookie', userB.cookie)
+    .send({
+      title: 'Hijack',
+      expectedStructureRevision: structureRevision,
+      operationId: randomUUID(),
+    });
+  check(crossPatchNode.status === 404, 'Other user cannot patch node');
+
+  const crossPutContent = await request(server)
+    .put(`/learning/guides/${guideId}/nodes/${childId}/content`)
+    .set(headers)
+    .set('Cookie', userB.cookie)
+    .send({
+      expectedContentRevision: content.body.contentRevision,
+      operationId: randomUUID(),
+      blocks: [{ type: 'text', payload: { body: 'Blocked' } }],
+    });
+  check(crossPutContent.status === 404, 'Other user cannot replace node content');
+
   const treeProblemBlock = await request(server)
     .get(`/learning/guides/${guideId}/tree`)
     .set(headers)
@@ -316,6 +351,17 @@ try {
       unsupportedProblem.body.code === 'PROBLEM_PLATFORM_UNSUPPORTED',
     'Problem block rejects unsupported platform host',
   );
+
+  const invalidLink = await request(server)
+    .put(`/learning/guides/${guideId}/nodes/${childId}/content`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      expectedContentRevision: problemContentRevision,
+      operationId: randomUUID(),
+      blocks: [{ type: 'link', payload: { url: 'javascript:alert(1)', label: 'Bad' } }],
+    });
+  check(invalidLink.status === 400, 'Link block rejects non-http URL scheme');
 
   await request(server)
     .put(`/learning/guides/${guideId}/nodes/${childId}/content`)
@@ -856,6 +902,11 @@ try {
     .set(headers)
     .set('Cookie', userB.cookie);
   check(crossGet.status === 404, 'Other user cannot read attempt');
+  const crossStartAttempt = await request(server)
+    .post(`/learning/guides/${guideId}/assessments/${assessmentId}/attempts`)
+    .set(headers)
+    .set('Cookie', userB.cookie);
+  check(crossStartAttempt.status === 404, 'Other user cannot start attempt on foreign guide');
   const submitOp = randomUUID();
   const submit = await request(server)
     .post(`/learning/guides/${guideId}/assessments/${assessmentId}/attempts/${attemptId}/submissions`)
@@ -1428,6 +1479,49 @@ try {
     .set(headers)
     .expect(401);
   count++;
+
+  const csrfCreateGuide = await request(server)
+    .post('/learning/guides')
+    .set('Origin', headers.Origin)
+    .set('Cookie', userA.cookie)
+    .send({ title: 'CSRF', description: '', operationId: randomUUID() });
+  check(csrfCreateGuide.status === 403, 'Guide create requires X-Requested-With');
+
+  const csrfImportPreview = await request(server)
+    .post('/learning/imports/preview')
+    .set('Origin', headers.Origin)
+    .set('Cookie', userA.cookie)
+    .send({ format: 'markdown', content: '# CSRF\n' });
+  check(csrfImportPreview.status === 403, 'Import preview requires X-Requested-With');
+
+  const previewForCross = await request(server)
+    .post('/learning/imports/preview')
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ format: 'markdown', content: '# Cross commit\n' })
+    .expect(201);
+  const crossImportCommit = await request(server)
+    .post(`/learning/imports/${previewForCross.body.importId}/commit`)
+    .set(headers)
+    .set('Cookie', userB.cookie)
+    .send({ operationId: randomUUID() });
+  check(crossImportCommit.status === 404, 'Other user cannot commit foreign import preview');
+
+  let importRateLimited = false;
+  for (let i = 0; i < 5; i++) {
+    const previewRes = await request(server)
+      .post('/learning/imports/preview')
+      .set(headers)
+      .set('Cookie', userB.cookie)
+      .send({ format: 'markdown', content: `# Limit ${i}\n` });
+    if (previewRes.status === 429) {
+      importRateLimited = true;
+      check(previewRes.body.code === 'RATE_LIMITED', 'Import rate limit uses RATE_LIMITED code');
+      break;
+    }
+    check(previewRes.status === 201, 'Import preview allowed under rate limit');
+  }
+  check(importRateLimited, 'Import preview returns 429 after hourly threshold');
 
   const doc = createApiDocument(app);
   check(
