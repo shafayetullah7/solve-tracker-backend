@@ -33,3 +33,14 @@ export type CreateNodeInput = z.infer<typeof createNodeSchema>;
 export type MoveNodeInput = z.infer<typeof moveNodeSchema>;
 export type NodeResponse = z.infer<typeof nodeResponseSchema>;
 export type TreeResponse = z.infer<typeof treeResponseSchema>;
+
+export const patchNodeSchema = z.strictObject({
+  title: guideTitleSchema.optional(),
+  required: z.boolean().optional(),
+  completionMode: z.enum(['structural', 'manual']).optional(),
+  expectedStructureRevision: revisionSchema,
+  operationId: z.uuid(),
+}).refine(input => input.title !== undefined || input.required !== undefined || input.completionMode !== undefined, {
+  message: 'At least one metadata field is required.',
+});
+export type PatchNodeInput = z.infer<typeof patchNodeSchema>;
