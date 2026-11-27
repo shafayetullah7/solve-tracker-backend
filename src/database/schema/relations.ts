@@ -23,7 +23,10 @@ import { learningGuides } from './learning/learning-guides.table.js';
 import { learningNodes } from './learning/learning-nodes.table.js';
 import { learningEnrollments } from './learning/learning-enrollments.table.js';
 
+import { learningOperations } from './learning/learning-operations.table.js';
+
 const tables = {
+  learningOperations,
   learningGuides,
   learningNodes,
   learningEnrollments,
