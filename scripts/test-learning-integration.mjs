@@ -1,0 +1,299 @@
+import 'reflect-metadata';
+import 'dotenv/config';
+import assert from 'node:assert/strict';
+import pg from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { migrate } from 'drizzle-orm/node-postgres/migrator';
+import { Test } from '@nestjs/testing';
+import request from 'supertest';
+import { randomUUID } from 'node:crypto';
+import { authTestEnvironment } from '../test/auth-env.ts';
+import { EmailService } from '../dist/modules/email/email.service.js';
+
+const target = process.env.TEST_DATABASE_URL;
+if (!target || !new URL(target).pathname.endsWith('_test'))
+  throw new Error(
+    'Provide a dedicated TEST_DATABASE_URL ending in _test; no application DATABASE_URL fallback is allowed.',
+  );
+
+Object.assign(process.env, authTestEnvironment, {
+  NODE_ENV: 'test',
+  DATABASE_URL: target,
+  PORT: '3000',
+  HOST: '127.0.0.1',
+  SWAGGER_ENABLED: 'true',
+});
+
+const pool = new pg.Pool({ connectionString: target });
+const { AppModule } = await import('../dist/app.module.js');
+const { configureApp, createApiDocument } = await import('../dist/configure-app.js');
+
+const headers = {
+  Origin: 'http://localhost:3001',
+  'X-Requested-With': 'practice',
+};
+
+const emails = [];
+let count = 0;
+const check = (condition, message) => {
+  assert.ok(condition, message);
+  count++;
+};
+
+async function registerAndLogin(server, label) {
+  const email = `learning-${label}-${randomUUID()}@example.test`;
+  const password = 'a long testing passphrase 🌱';
+  emails.push(email);
+  await request(server)
+    .post('/auth/register')
+    .set(headers)
+    .send({ name: `User ${label}`, email, password })
+    .expect(201);
+  const login = await request(server)
+    .post('/auth/login')
+    .set(headers)
+    .send({ email, password })
+    .expect(200);
+  const cookie = login.headers['set-cookie'].map((c) => c.split(';')[0]).join('; ');
+  return { email, cookie };
+}
+
+async function createGuide(server, cookie, title) {
+  const op = randomUUID();
+  const created = await request(server)
+    .post('/learning/guides')
+    .set(headers)
+    .set('Cookie', cookie)
+    .send({ title, description: '', operationId: op })
+    .expect(201);
+  const guide = await request(server)
+    .get(`/learning/guides/${created.body.resourceId}`)
+    .set(headers)
+    .set('Cookie', cookie)
+    .expect(200);
+  return { guideId: created.body.resourceId, guide: guide.body };
+}
+
+async function createNode(server, cookie, guideId, structureRevision, title, parentId = null) {
+  const body = {
+    title,
+    parentId,
+    beforeNodeId: null,
+    expectedStructureRevision: structureRevision,
+    operationId: randomUUID(),
+  };
+  const res = await request(server)
+    .post(`/learning/guides/${guideId}/nodes`)
+    .set(headers)
+    .set('Cookie', cookie)
+    .send(body);
+  return res;
+}
+
+const module = await Test.createTestingModule({ imports: [AppModule] })
+  .overrideProvider(EmailService)
+  .useValue({ sendReset: async () => {} })
+  .compile();
+const app = module.createNestApplication({ logger: false });
+configureApp(app, true);
+
+try {
+  await migrate(drizzle({ client: pool }), { migrationsFolder: './drizzle' });
+  await migrate(drizzle({ client: pool }), { migrationsFolder: './drizzle' });
+  await app.init();
+  const server = app.getHttpServer();
+
+  const userA = await registerAndLogin(server, 'A');
+  const userB = await registerAndLogin(server, 'B');
+
+  const emptyList = await request(server)
+    .get('/learning/guides')
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(emptyList.body.meta.total === 0, 'Empty guide library');
+
+  const { guideId, guide: guideMeta } = await createGuide(server, userA.cookie, 'Algorithms');
+  check(guideMeta.structureRevision === '1', 'New guide structure revision');
+
+  const emptyTree = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(emptyTree.body.nodes.length === 0, 'Empty guide tree');
+
+  await request(server)
+    .get(`/learning/guides/${guideId}`)
+    .set(headers)
+    .set('Cookie', userB.cookie)
+    .expect(404);
+
+  let structureRevision = emptyTree.body.structureRevision;
+  const root = await createNode(server, userA.cookie, guideId, structureRevision, 'Introduction');
+  check(root.status === 201, 'Create root node');
+  structureRevision = String(BigInt(structureRevision) + 1n);
+
+  const tree1 = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(tree1.body.nodes.length === 1, 'Tree has root');
+  const rootId = tree1.body.nodes[0].id;
+
+  const child = await createNode(server, userA.cookie, guideId, tree1.body.structureRevision, 'Arrays', rootId);
+  check(child.status === 201, 'Create child node');
+  const tree2 = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  const childId = tree2.body.nodes.find((n) => n.parentId === rootId)?.id;
+  check(Boolean(childId), 'Child exists in tree');
+
+  const stale = await createNode(server, userA.cookie, guideId, '1', 'Stale');
+  check(stale.status === 409 && stale.body.code === 'LEARNING_REVISION_CONFLICT', 'Stale structure revision → 409');
+
+  const cycle = await request(server)
+    .patch(`/learning/guides/${guideId}/nodes/${rootId}/placement`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      parentId: childId,
+      beforeNodeId: null,
+      expectedStructureRevision: tree2.body.structureRevision,
+      operationId: randomUUID(),
+    });
+  check(
+    cycle.status === 409 && cycle.body.code === 'LEARNING_INVALID_PLACEMENT',
+    'Move under descendant rejected',
+  );
+
+  const patched = await request(server)
+    .patch(`/learning/guides/${guideId}/nodes/${childId}`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      title: 'Dynamic arrays',
+      expectedStructureRevision: tree2.body.structureRevision,
+      operationId: randomUUID(),
+    })
+    .expect(200);
+  check(patched.body.resourceId === childId, 'Patch node metadata');
+
+  const enrollmentBefore = await request(server)
+    .get(`/learning/guides/${guideId}/enrollment`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(enrollmentBefore.body.guideId === guideId, 'Owner enrollment exists');
+
+  const tree3 = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+
+  await request(server)
+    .patch(`/learning/guides/${guideId}/enrollment/resume`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      nodeId: childId,
+      expectedStructureRevision: tree3.body.structureRevision,
+      operationId: randomUUID(),
+    })
+    .expect(200);
+
+  const enrollmentAfter = await request(server)
+    .get(`/learning/guides/${guideId}/enrollment`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(enrollmentAfter.body.resumeNodeId === childId, 'Resume position updated');
+
+  const guideDetail = await request(server)
+    .get(`/learning/guides/${guideId}`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+
+  await request(server)
+    .patch(`/learning/guides/${guideId}/lifecycle`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      action: 'archive',
+      expectedMetadataRevision: guideDetail.body.metadataRevision,
+      operationId: randomUUID(),
+    })
+    .expect(200);
+
+  const archivedCreate = await createNode(
+    server,
+    userA.cookie,
+    guideId,
+    tree3.body.structureRevision,
+    'Blocked',
+  );
+  check(
+    archivedCreate.status === 409 && archivedCreate.body.code === 'LEARNING_LIFECYCLE_CONFLICT',
+    'Archived guide rejects node create',
+  );
+
+  await request(server)
+    .patch(`/learning/guides/${guideId}/lifecycle`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      action: 'unarchive',
+      expectedMetadataRevision: String(BigInt(guideDetail.body.metadataRevision) + 1n),
+      operationId: randomUUID(),
+    })
+    .expect(200);
+
+  const treeBeforeDelete = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+
+  await request(server)
+    .delete(`/learning/guides/${guideId}/nodes/${childId}`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .set('X-Expected-Revision', treeBeforeDelete.body.structureRevision)
+    .set('X-Operation-Id', randomUUID())
+    .expect(204);
+
+  const recovery = await request(server)
+    .get(`/learning/guides/${guideId}/recovery`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(recovery.body.items.some((item) => item.id === childId), 'Deleted subtree appears in recovery');
+
+  await request(server)
+    .get('/learning/guides')
+    .set(headers)
+    .expect(401);
+  count++;
+
+  const doc = createApiDocument(app);
+  check(
+    ['/learning/guides', '/learning/guides/{guideId}/tree'].every((path) => path in doc.paths),
+    'Swagger documents learning guide and tree routes',
+  );
+
+  console.log(
+    `Passed ${count} PostgreSQL/HTTP learning assertions. Users: ${emails.length}.`,
+  );
+} finally {
+  if (emails.length)
+    await pool
+      .query('delete from users where email=ANY($1::text[])', [emails])
+      .catch(() => {});
+  await app.close();
+  await pool.end();
+}

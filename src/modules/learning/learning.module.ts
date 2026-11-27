@@ -6,7 +6,6 @@ import { LearningGuidesRepository } from './learning-guides.repository.js';
 import { LearningGuideMutationsRepository } from './learning-guide-mutations.repository.js';
 import { LearningGuidesService } from './learning-guides.service.js';
 
-// Register in AppModule only after migration and runtime verification.
 @Module({
   imports: [DatabaseModule, AuthModule],
   controllers: [LearningGuidesController],

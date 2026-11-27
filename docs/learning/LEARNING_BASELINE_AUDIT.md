@@ -40,8 +40,8 @@ Frontend: pnpm install --frozen-lockfile; pnpm check; pnpm build; pnpm api:check
 - [x] Approved product decisions documented in LEARNING_A0_RESULTS.md.
 - [x] Requirements draft prepared in LEARNING_REQUIREMENTS.md.
 - [x] Selected source-level integration risks recorded.
-- [ ] Pin audited commit SHAs and confirm repository state.
-- [ ] Execute runtime regression suite and record results.
+- [x] Pin audited commit SHAs and confirm repository state (`docs/learning/BASELINE_RUN.md`).
+- [x] Execute runtime regression suite and record results (static gates + `test:topics:integration` + `test:learning:integration`; see `BASELINE_RUN.md`).
 - [ ] Capture and review real UI screenshots and accessibility baseline.
 - [ ] Complete authorization and media delivery runtime checks.
 - [ ] Review requirements defaults and accept remaining risks.

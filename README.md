@@ -313,6 +313,16 @@ pnpm test:topics:integration
 
 The suite exercises create/list/rename/delete, per-user name uniqueness, cross-account **404** on foreign ids, concurrent duplicate create, and Swagger path coverage. Users created during the run are deleted on teardown (cascade removes their topics).
 
+### Real PostgreSQL learning guides tests
+
+With the same `TEST_DATABASE_URL` rules:
+
+```bash
+pnpm test:learning:integration
+```
+
+Requires the learning schema migration applied. Covers guide create/list/tree, node create/patch, placement invariants, owner enrollment resume, archive write guard, subtree delete and recovery listing, cross-account **404**, and Swagger `/learning/guides` paths.
+
 ### Real PostgreSQL problems tests
 
 With the same `TEST_DATABASE_URL` rules:
