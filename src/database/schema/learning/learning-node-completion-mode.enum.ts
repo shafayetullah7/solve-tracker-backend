@@ -13,10 +13,11 @@ export const LEARNING_NODE_COMPLETION_MODES = [
   learningNodeCompletionMode.Gated,
 ] as const;
 
-/** Create, patch, and portable import/export until gated UX ships. */
+/** Create, patch, and portable import/export (gated requires assessment block on step). */
 export const WRITABLE_LEARNING_NODE_COMPLETION_MODES = [
   learningNodeCompletionMode.Structural,
   learningNodeCompletionMode.Manual,
+  learningNodeCompletionMode.Gated,
 ] as const;
 
 export type LearningNodeCompletionMode =

@@ -26,6 +26,12 @@ import { learningEnrollments } from './learning/learning-enrollments.table.js';
 import { learningOperations } from './learning/learning-operations.table.js';
 import { learningBlocks } from './learning/learning-blocks.table.js';
 import { learningNodeProgress } from './learning/learning-node-progress.table.js';
+import { learningAssessments } from './learning/learning-assessments.table.js';
+import { learningAssessmentRevisions } from './learning/learning-assessment-revisions.table.js';
+import { learningQuestions } from './learning/learning-questions.table.js';
+import { learningAttempts } from './learning/learning-attempts.table.js';
+import { learningAnswers } from './learning/learning-answers.table.js';
+import { learningAssessmentLinks } from './learning/learning-assessment-links.table.js';
 
 const tables = {
   learningOperations,
@@ -34,6 +40,12 @@ const tables = {
   learningGuides,
   learningNodes,
   learningEnrollments,
+  learningAssessments,
+  learningAssessmentRevisions,
+  learningQuestions,
+  learningAttempts,
+  learningAnswers,
+  learningAssessmentLinks,
   platforms,
   users,
   authSessions,

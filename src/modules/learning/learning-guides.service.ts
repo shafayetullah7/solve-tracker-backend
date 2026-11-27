@@ -24,10 +24,15 @@ import type { CreateNodeInput, MoveNodeInput, PatchNodeInput, TreeResponse, Reco
 import type { NodeCompletionInput, NodeContentResponse, ReplaceNodeContentInput } from './schemas/learning-blocks.schema.js';
 import { toBlockResponse } from './schemas/learning-blocks.schema.js';
 import { summarizeProgress } from './learning-progress.js';
+import { AttemptsService } from '../assessments/attempts.service.js';
 
 @Injectable()
 export class LearningGuidesService {
-  constructor(private readonly repository: LearningGuidesRepository, private readonly mutations: LearningGuideMutationsRepository) {}
+  constructor(
+    private readonly repository: LearningGuidesRepository,
+    private readonly mutations: LearningGuideMutationsRepository,
+    private readonly attempts: AttemptsService,
+  ) {}
 
   async get(ownerId: string, rawGuideId: string): Promise<GuideResponse> {
     const id = guideIdSchema.safeParse(rawGuideId);
@@ -68,7 +73,20 @@ export class LearningGuidesService {
     const first = rows[0];
     if (!first) throw learningError(404, 'NOT_FOUND', 'Guide was not found.');
     const nodes = rows.flatMap(row => row.node === null ? [] : [row.node]);
-    const completedIds = await this.repository.findCompletedNodeIds(ownerId, this.parseId(id));
+    const manualCompleted = await this.repository.findCompletedNodeIds(ownerId, this.parseId(id));
+    const gatedNodeIds = new Set(
+      nodes.filter((node) => node.completionMode === 'gated').map((node) => node.id),
+    );
+    const enrollment = await this.repository.findEnrollment(ownerId, this.parseId(id));
+    const gatedCompleted =
+      enrollment
+        ? await this.attempts.resolveGatedCompleteNodeIds(enrollment.id, this.parseId(id))
+        : new Set<string>();
+    const completedIds = new Set<string>();
+    for (const nodeId of manualCompleted) {
+      if (!gatedNodeIds.has(nodeId)) completedIds.add(nodeId);
+    }
+    for (const nodeId of gatedCompleted) completedIds.add(nodeId);
     const preorder = buildHierarchy(nodes).preorder.map(node => ({
       ...node,
       contentRevision: node.contentRevision.toString(),
@@ -89,7 +107,7 @@ export class LearningGuidesService {
       contentRevision: row.contentRevision.toString(),
       blocks: row.blocks.map((block) => toBlockResponse({
         ...block,
-        type: block.type as 'text' | 'code' | 'checklist',
+        type: block.type as 'text' | 'code' | 'checklist' | 'link' | 'assessment',
       })),
     };
   }

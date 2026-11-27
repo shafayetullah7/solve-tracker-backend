@@ -6,8 +6,8 @@ Recorded during 3A slice and Phase 0 closure. Branch discipline: no `main`, no p
 
 | Repository | Branch | SHA |
 |------------|--------|-----|
-| solve-tracker-backend | feature/learning-guides | `d603b8392ff83cdb2f45b3a95493c7155327bc1c` |
-| solve-tracker-frontend | feature/learning-guides | `e7b5074e092fef7484623fa982554772045470d2` |
+| solve-tracker-backend | feature/learning-guides | `552cc1c7e08938a385f1e3ccba7cef2e349f9296` (+ Phase 4 R1 working tree, 2026-11-27) |
+| solve-tracker-frontend | feature/learning-guides | `fc621ea9ba98f5e7d3b1e382f433cec6b3fe1664` (+ Phase 4 R1 working tree, 2026-11-27) |
 
 ## Toolchain
 
@@ -16,21 +16,23 @@ Recorded during 3A slice and Phase 0 closure. Branch discipline: no `main`, no p
 
 ## Static gates (no Postgres)
 
-### Backend @ e8a30b9
+Phase 4 R1 signoff: [LEARNING_4_PHASE_SIGNOFF.md](./LEARNING_4_PHASE_SIGNOFF.md).
+
+### Backend (2026-11-27)
 
 | Command | Result |
 |---------|--------|
 | `pnpm lint` | pass (existing warnings only) |
-| `pnpm test --run` | 293 passed |
+| `pnpm test --run` | 307 passed |
 | `pnpm build` | pass |
 | `pnpm db:check` | pass |
-| `pnpm api:check` | pass (pre–LearningModule wire) |
+| `pnpm api:check` | pass |
 
-### Frontend @ 27bbf2c
+### Frontend (2026-11-27)
 
 | Command | Result |
 |---------|--------|
-| `pnpm check` | pass (423 tests) |
+| `pnpm check` | pass (439 tests) |
 
 ## Runtime gates (Postgres `TEST_DATABASE_URL` …/_test)
 
@@ -40,6 +42,6 @@ Database: `postgresql://practice:practice_dev@127.0.0.1:5437/practice_tracker_te
 |---------|--------|
 | `pnpm db:migrate` (×2 idempotent) | pass |
 | `node scripts/test-topics-integration.mjs` (after `pnpm build`) | pass (16 assertions) |
-| `node scripts/test-learning-integration.mjs` (after `pnpm build`) | pass (27 assertions; 3A tree + 3B content/progress) |
+| `node scripts/test-learning-integration.mjs` (after `pnpm build`) | pass (46 assertions; through 4D.1 question types) |
 
-Frontend post-3B: `pnpm check` 433 tests pass; `pnpm build` + `api:check` pass. See [LEARNING_3B_RESULTS.md](./LEARNING_3B_RESULTS.md).
+Frontend: `pnpm build` + `api:check` pass with backend. Historical 3B: [LEARNING_3B_RESULTS.md](./LEARNING_3B_RESULTS.md).

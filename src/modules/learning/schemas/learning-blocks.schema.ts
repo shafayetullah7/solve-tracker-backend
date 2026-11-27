@@ -8,6 +8,7 @@ import { revisionSchema } from './learning-guides.schema.js';
 import {
   checklistPayloadSchema,
   codePayloadSchema,
+  assessmentPayloadSchema,
   linkPayloadSchema,
   normalizeBlockPayload,
   textPayloadSchema,
@@ -23,6 +24,10 @@ const blockInputSchema = z.discriminatedUnion('type', [
     payload: checklistPayloadSchema,
   }),
   z.strictObject({ type: z.literal(learningBlockType.Link), payload: linkPayloadSchema }),
+  z.strictObject({
+    type: z.literal(learningBlockType.Assessment),
+    payload: assessmentPayloadSchema,
+  }),
 ]);
 
 export const replaceNodeContentSchema = z.strictObject({

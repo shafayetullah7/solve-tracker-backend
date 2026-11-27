@@ -11,6 +11,7 @@ import { HealthModule } from './modules/health/health.module.js';
 import { ProfileModule } from './modules/profile/profile.module.js';
 import { DiscoverModule } from './modules/discover/discover.module.js';
 import { LearningModule } from './modules/learning/learning.module.js';
+import { AssessmentsModule } from './modules/assessments/assessments.module.js';
 import { MediaModule } from './modules/media/media.module.js';
 import { PlatformsModule } from './modules/platforms/platforms.module.js';
 import { DatabaseModule } from './database/database.module.js';
@@ -35,6 +36,7 @@ import { DatabaseModule } from './database/database.module.js';
     ProfileModule,
     DiscoverModule,
     LearningModule,
+    AssessmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

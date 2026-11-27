@@ -6,6 +6,7 @@ export const learningBlockType = {
   Code: 'code',
   Checklist: 'checklist',
   Link: 'link',
+  Assessment: 'assessment',
 } as const;
 
 export const LEARNING_BLOCK_TYPES = [
@@ -13,6 +14,7 @@ export const LEARNING_BLOCK_TYPES = [
   learningBlockType.Code,
   learningBlockType.Checklist,
   learningBlockType.Link,
+  learningBlockType.Assessment,
 ] as const;
 
 export type LearningBlockType = (typeof LEARNING_BLOCK_TYPES)[number];

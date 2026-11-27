@@ -35,6 +35,7 @@ export const learningBlocks = pgTable(
       columns: [t.guideId],
       foreignColumns: [learningGuides.id],
     }).onDelete('cascade'),
+    uniqueIndex('learning_blocks_guide_id_uniq').on(t.guideId, t.id),
     uniqueIndex('learning_blocks_node_position_uniq').on(t.guideId, t.nodeId, t.position),
     index('learning_blocks_node_idx').on(t.guideId, t.nodeId),
     check('learning_blocks_position_check', sql`${t.position} >= 0`),

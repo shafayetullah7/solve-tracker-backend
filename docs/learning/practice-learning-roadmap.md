@@ -112,18 +112,17 @@ Proposed routes: `/learning/guides`, `/learning/guides/:guideId/nodes`, node/blo
 
 ## Phase 4 — Assessment engine
 
-**Objective:** Test knowledge at any step or parent section.
+**Objective:** Test knowledge at any step or parent section. **Execution slices:** [LEARNING_4_SLICE_PLAN.md](./LEARNING_4_SLICE_PLAN.md).
 
-- [ ] Implement assessment authoring, immutable revisions, question ordering, attempts and answers.
-- [ ] Start with single/multiple choice, true/false and numerical questions with explicit tolerances; add short-answer/manual review when needed.
-- [ ] Define a question-type registry: prompt schema, response schema, grading configuration, renderer/editor and server-side grader.
-- [ ] Support passing thresholds, retakes, feedback/explanation reveal policy and attempt history.
-- [ ] Implement assessment workspace with save/resume, accessible controls, submission confirmation and results/review.
-- [ ] Integrate passing an assessment into configurable node completion rules.
-- [ ] Test scoring boundaries, duplicate submission, concurrent submission, revision changes, ownership and answer leakage.
-- [ ] Defer executable coding sandboxes, AI grading and simulations until their security and cost models are defined.
+- [x] **4A** — Assessment CRUD, draft revision, questions (single choice / true-false), publish immutable revision v1; AssessmentsModule; owner API only.
+- [x] **4B** — Attempts/answers, objective grading, learner workspace (start/save/submit/results); no grading keys in learner DTO.
+- [x] **4C** — Assessment block type + `learning_assessment_links`; **gated** node completion from best valid score vs threshold.
+- [x] **4D** — Multiple choice (multi), numerical tolerance, retakes/best score, question navigator, republish v2; in-flight attempts stay on bound revision. _(Portable assessment JSON deferred — see signoff.)_
+- [ ] Defer question banks, flashcards, short-answer self-review at scale, timers/sweeper polish, executable sandboxes, AI grading (R2/R3).
 
-**Exit criteria:** A learner can take and retake a test; scores are reproducible and historical attempts remain valid after edits.
+**Exit criteria:** A learner on a gated step can pass a required assessment; scores reproducible; attempts preserved; full 4A–4D signoff docs and gates green.
+
+**R1 signoff (2026-11-27):** [LEARNING_4_PHASE_SIGNOFF.md](./LEARNING_4_PHASE_SIGNOFF.md)
 
 ## Phase 5 — Existing problem tracker integration
 

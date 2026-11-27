@@ -1,0 +1,1 @@
+ALTER TABLE "learning_assessments" ADD CONSTRAINT "learning_assessments_active_revision_fk" FOREIGN KEY ("guide_id","id","active_revision_id") REFERENCES "learning_assessment_revisions"("guide_id","assessment_id","id");

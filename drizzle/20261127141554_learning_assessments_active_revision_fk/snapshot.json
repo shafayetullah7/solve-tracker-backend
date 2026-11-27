@@ -1,0 +1,116 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "d638a3b4-7e9d-4622-8913-ccc4988f489e",
+  "prevIds": [
+    "c894c190-fff7-41e3-862c-a66c0aa8b032"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "learning_blocks",
+        "learning_blocks_guide_id_uniq"
+      ],
+      "writes": [
+        "s|idx|public.learning_blocks_guide_id_uniq",
+        "n|idx|public.learning_blocks_guide_id_uniq",
+        "e|idx|public.learning_blocks_guide_id_uniq",
+        "n|rel|public.learning_blocks_guide_id_uniq"
+      ],
+      "reads": [
+        "n|tbl|public.learning_blocks",
+        "n|sch|public",
+        "n|col|public.learning_blocks.guide_id",
+        "n|col|public.learning_blocks.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_assessments"
+      ],
+      "writes": [
+        "s|fk|public.learning_assessments.learning_assessments_active_revision_fk",
+        "n|fk|public.learning_assessments.learning_assessments_active_revision_fk",
+        "e|fk|public.learning_assessments.learning_assessments_active_revision_fk",
+        "n|con|public.learning_assessments.learning_assessments_active_revision_fk"
+      ],
+      "reads": [
+        "n|tbl|public.learning_assessments",
+        "n|sch|public",
+        "n|tbl|public.learning_assessment_revisions",
+        "n|sch|public",
+        "n|col|public.learning_assessments.guide_id",
+        "n|col|public.learning_assessments.id",
+        "n|col|public.learning_assessments.active_revision_id",
+        "n|col|public.learning_assessment_revisions.guide_id",
+        "n|col|public.learning_assessment_revisions.assessment_id",
+        "n|col|public.learning_assessment_revisions.id",
+        "e|uniqueness|public.learning_assessment_revisions.assessment_id.guide_id.id"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_blocks",
+        "name": "learning_blocks_guide_id_uniq",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "guide_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": true,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessments",
+        "name": "learning_assessments_active_revision_fk",
+        "nameExplicit": true,
+        "columns": [
+          "guide_id",
+          "id",
+          "active_revision_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "learning_assessment_revisions",
+        "columnsTo": [
+          "guide_id",
+          "assessment_id",
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "NO ACTION",
+        "entityType": "fks"
+      }
+    }
+  ]
+}

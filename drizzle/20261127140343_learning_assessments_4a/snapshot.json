@@ -1,0 +1,1229 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "334cc1f6-6eb6-40c5-9bd9-2f23fa0f67cc",
+  "prevIds": [
+    "adf2f6b5-a066-42a4-93f4-e1c5c91de594"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "learning_question_kind"
+      ],
+      "writes": [
+        "s|enum|public.learning_question_kind",
+        "n|enum|public.learning_question_kind",
+        "e|enum|public.learning_question_kind",
+        "n|type|public.learning_question_kind"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "learning_assessment_feedback_policy"
+      ],
+      "writes": [
+        "s|enum|public.learning_assessment_feedback_policy",
+        "n|enum|public.learning_assessment_feedback_policy",
+        "e|enum|public.learning_assessment_feedback_policy",
+        "n|type|public.learning_assessment_feedback_policy"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_assessments"
+      ],
+      "writes": [
+        "s|tbl|public.learning_assessments",
+        "n|tbl|public.learning_assessments",
+        "e|tbl|public.learning_assessments",
+        "n|rel|public.learning_assessments",
+        "n|type|public.learning_assessments",
+        "n|rel|public.learning_assessments_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_assessment_revisions"
+      ],
+      "writes": [
+        "s|tbl|public.learning_assessment_revisions",
+        "n|tbl|public.learning_assessment_revisions",
+        "e|tbl|public.learning_assessment_revisions",
+        "n|rel|public.learning_assessment_revisions",
+        "n|type|public.learning_assessment_revisions",
+        "n|rel|public.learning_assessment_revisions_pkey"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.learning_assessment_feedback_policy"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_questions"
+      ],
+      "writes": [
+        "s|tbl|public.learning_questions",
+        "n|tbl|public.learning_questions",
+        "e|tbl|public.learning_questions",
+        "n|rel|public.learning_questions",
+        "n|type|public.learning_questions",
+        "n|rel|public.learning_questions_pkey"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.learning_question_kind"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "learning_assessments",
+        "learning_assessments_guide_id_uniq"
+      ],
+      "writes": [
+        "s|idx|public.learning_assessments_guide_id_uniq",
+        "n|idx|public.learning_assessments_guide_id_uniq",
+        "e|idx|public.learning_assessments_guide_id_uniq",
+        "n|rel|public.learning_assessments_guide_id_uniq"
+      ],
+      "reads": [
+        "n|tbl|public.learning_assessments",
+        "n|sch|public",
+        "n|col|public.learning_assessments.guide_id",
+        "n|col|public.learning_assessments.id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "learning_assessments",
+        "learning_assessments_guide_idx"
+      ],
+      "writes": [
+        "s|idx|public.learning_assessments_guide_idx",
+        "n|idx|public.learning_assessments_guide_idx",
+        "e|idx|public.learning_assessments_guide_idx",
+        "n|rel|public.learning_assessments_guide_idx"
+      ],
+      "reads": [
+        "n|tbl|public.learning_assessments",
+        "n|sch|public",
+        "n|col|public.learning_assessments.guide_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "learning_assessment_revisions",
+        "learning_assessment_revisions_assessment_rev_uniq"
+      ],
+      "writes": [
+        "s|idx|public.learning_assessment_revisions_assessment_rev_uniq",
+        "n|idx|public.learning_assessment_revisions_assessment_rev_uniq",
+        "e|idx|public.learning_assessment_revisions_assessment_rev_uniq",
+        "n|rel|public.learning_assessment_revisions_assessment_rev_uniq"
+      ],
+      "reads": [
+        "n|tbl|public.learning_assessment_revisions",
+        "n|sch|public",
+        "n|col|public.learning_assessment_revisions.assessment_id",
+        "n|col|public.learning_assessment_revisions.revision_number"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "learning_assessment_revisions",
+        "learning_assessment_revisions_guide_rev_uniq"
+      ],
+      "writes": [
+        "s|idx|public.learning_assessment_revisions_guide_rev_uniq",
+        "n|idx|public.learning_assessment_revisions_guide_rev_uniq",
+        "e|idx|public.learning_assessment_revisions_guide_rev_uniq",
+        "n|rel|public.learning_assessment_revisions_guide_rev_uniq"
+      ],
+      "reads": [
+        "n|tbl|public.learning_assessment_revisions",
+        "n|sch|public",
+        "n|col|public.learning_assessment_revisions.guide_id",
+        "n|col|public.learning_assessment_revisions.assessment_id",
+        "n|col|public.learning_assessment_revisions.id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "learning_assessment_revisions",
+        "learning_assessment_revisions_assessment_idx"
+      ],
+      "writes": [
+        "s|idx|public.learning_assessment_revisions_assessment_idx",
+        "n|idx|public.learning_assessment_revisions_assessment_idx",
+        "e|idx|public.learning_assessment_revisions_assessment_idx",
+        "n|rel|public.learning_assessment_revisions_assessment_idx"
+      ],
+      "reads": [
+        "n|tbl|public.learning_assessment_revisions",
+        "n|sch|public",
+        "n|col|public.learning_assessment_revisions.assessment_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "learning_questions",
+        "learning_questions_revision_position_uniq"
+      ],
+      "writes": [
+        "s|idx|public.learning_questions_revision_position_uniq",
+        "n|idx|public.learning_questions_revision_position_uniq",
+        "e|idx|public.learning_questions_revision_position_uniq",
+        "n|rel|public.learning_questions_revision_position_uniq"
+      ],
+      "reads": [
+        "n|tbl|public.learning_questions",
+        "n|sch|public",
+        "n|col|public.learning_questions.revision_id",
+        "n|col|public.learning_questions.position"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "learning_questions",
+        "learning_questions_revision_id_uniq"
+      ],
+      "writes": [
+        "s|idx|public.learning_questions_revision_id_uniq",
+        "n|idx|public.learning_questions_revision_id_uniq",
+        "e|idx|public.learning_questions_revision_id_uniq",
+        "n|rel|public.learning_questions_revision_id_uniq"
+      ],
+      "reads": [
+        "n|tbl|public.learning_questions",
+        "n|sch|public",
+        "n|col|public.learning_questions.revision_id",
+        "n|col|public.learning_questions.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_assessments"
+      ],
+      "writes": [
+        "s|fk|public.learning_assessments.learning_assessments_guide_id_learning_guides_id_fkey",
+        "n|fk|public.learning_assessments.learning_assessments_guide_id_learning_guides_id_fkey",
+        "e|fk|public.learning_assessments.learning_assessments_guide_id_learning_guides_id_fkey",
+        "n|con|public.learning_assessments.learning_assessments_guide_id_learning_guides_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.learning_assessments",
+        "n|sch|public",
+        "n|tbl|public.learning_guides",
+        "n|sch|public",
+        "n|col|public.learning_assessments.guide_id",
+        "n|col|public.learning_guides.id",
+        "e|uniqueness|public.learning_guides.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_assessment_revisions"
+      ],
+      "writes": [
+        "s|fk|public.learning_assessment_revisions.learning_assessment_revisions_guide_assessment_fk",
+        "n|fk|public.learning_assessment_revisions.learning_assessment_revisions_guide_assessment_fk",
+        "e|fk|public.learning_assessment_revisions.learning_assessment_revisions_guide_assessment_fk",
+        "n|con|public.learning_assessment_revisions.learning_assessment_revisions_guide_assessment_fk"
+      ],
+      "reads": [
+        "n|tbl|public.learning_assessment_revisions",
+        "n|sch|public",
+        "n|tbl|public.learning_assessments",
+        "n|sch|public",
+        "n|col|public.learning_assessment_revisions.guide_id",
+        "n|col|public.learning_assessment_revisions.assessment_id",
+        "n|col|public.learning_assessments.guide_id",
+        "n|col|public.learning_assessments.id",
+        "e|uniqueness|public.learning_assessments.guide_id.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_assessment_revisions"
+      ],
+      "writes": [
+        "s|fk|public.learning_assessment_revisions.learning_assessment_revisions_guide_fk",
+        "n|fk|public.learning_assessment_revisions.learning_assessment_revisions_guide_fk",
+        "e|fk|public.learning_assessment_revisions.learning_assessment_revisions_guide_fk",
+        "n|con|public.learning_assessment_revisions.learning_assessment_revisions_guide_fk"
+      ],
+      "reads": [
+        "n|tbl|public.learning_assessment_revisions",
+        "n|sch|public",
+        "n|tbl|public.learning_guides",
+        "n|sch|public",
+        "n|col|public.learning_assessment_revisions.guide_id",
+        "n|col|public.learning_guides.id",
+        "e|uniqueness|public.learning_guides.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_questions"
+      ],
+      "writes": [
+        "s|fk|public.learning_questions.learning_questions_revision_fk",
+        "n|fk|public.learning_questions.learning_questions_revision_fk",
+        "e|fk|public.learning_questions.learning_questions_revision_fk",
+        "n|con|public.learning_questions.learning_questions_revision_fk"
+      ],
+      "reads": [
+        "n|tbl|public.learning_questions",
+        "n|sch|public",
+        "n|tbl|public.learning_assessment_revisions",
+        "n|sch|public",
+        "n|col|public.learning_questions.guide_id",
+        "n|col|public.learning_questions.assessment_id",
+        "n|col|public.learning_questions.revision_id",
+        "n|col|public.learning_assessment_revisions.guide_id",
+        "n|col|public.learning_assessment_revisions.assessment_id",
+        "n|col|public.learning_assessment_revisions.id",
+        "e|uniqueness|public.learning_assessment_revisions.assessment_id.guide_id.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_questions"
+      ],
+      "writes": [
+        "s|fk|public.learning_questions.learning_questions_assessment_fk",
+        "n|fk|public.learning_questions.learning_questions_assessment_fk",
+        "e|fk|public.learning_questions.learning_questions_assessment_fk",
+        "n|con|public.learning_questions.learning_questions_assessment_fk"
+      ],
+      "reads": [
+        "n|tbl|public.learning_questions",
+        "n|sch|public",
+        "n|tbl|public.learning_assessments",
+        "n|sch|public",
+        "n|col|public.learning_questions.guide_id",
+        "n|col|public.learning_questions.assessment_id",
+        "n|col|public.learning_assessments.guide_id",
+        "n|col|public.learning_assessments.id",
+        "e|uniqueness|public.learning_assessments.guide_id.id"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "learning_assessments",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "learning_assessment_revisions",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "learning_questions",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "learning_question_kind",
+        "values": [
+          "single_choice",
+          "true_false",
+          "multiple_choice",
+          "numerical"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "learning_assessment_feedback_policy",
+        "values": [
+          "never",
+          "after_submit"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessments",
+        "name": "id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "gen_random_uuid()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessments",
+        "name": "guide_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessments",
+        "name": "title",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessments",
+        "name": "active_revision_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessments",
+        "name": "archived_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessments",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessments",
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessment_revisions",
+        "name": "id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "gen_random_uuid()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessment_revisions",
+        "name": "guide_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessment_revisions",
+        "name": "assessment_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessment_revisions",
+        "name": "revision_number",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessment_revisions",
+        "name": "passing_basis_points",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "7000",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessment_revisions",
+        "name": "grading_policy_version",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "1",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessment_revisions",
+        "name": "feedback_policy",
+        "type": "learning_assessment_feedback_policy",
+        "typeSchema": "public",
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'after_submit'",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessment_revisions",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_questions",
+        "name": "id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "gen_random_uuid()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_questions",
+        "name": "guide_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_questions",
+        "name": "assessment_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_questions",
+        "name": "revision_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_questions",
+        "name": "position",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_questions",
+        "name": "kind",
+        "type": "learning_question_kind",
+        "typeSchema": "public",
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_questions",
+        "name": "prompt",
+        "type": "jsonb",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_questions",
+        "name": "grading_config",
+        "type": "jsonb",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_questions",
+        "name": "points",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "1",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessments",
+        "name": "learning_assessments_guide_id_uniq",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "guide_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": true,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessments",
+        "name": "learning_assessments_guide_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "guide_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessment_revisions",
+        "name": "learning_assessment_revisions_assessment_rev_uniq",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "assessment_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "revision_number",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": true,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessment_revisions",
+        "name": "learning_assessment_revisions_guide_rev_uniq",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "guide_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "assessment_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": true,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessment_revisions",
+        "name": "learning_assessment_revisions_assessment_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "assessment_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_questions",
+        "name": "learning_questions_revision_position_uniq",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "revision_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "position",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": true,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_questions",
+        "name": "learning_questions_revision_id_uniq",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "revision_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": true,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessments",
+        "name": "learning_assessments_guide_id_learning_guides_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "guide_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "learning_guides",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessment_revisions",
+        "name": "learning_assessment_revisions_guide_assessment_fk",
+        "nameExplicit": true,
+        "columns": [
+          "guide_id",
+          "assessment_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "learning_assessments",
+        "columnsTo": [
+          "guide_id",
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessment_revisions",
+        "name": "learning_assessment_revisions_guide_fk",
+        "nameExplicit": true,
+        "columns": [
+          "guide_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "learning_guides",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_questions",
+        "name": "learning_questions_revision_fk",
+        "nameExplicit": true,
+        "columns": [
+          "guide_id",
+          "assessment_id",
+          "revision_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "learning_assessment_revisions",
+        "columnsTo": [
+          "guide_id",
+          "assessment_id",
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_questions",
+        "name": "learning_questions_assessment_fk",
+        "nameExplicit": true,
+        "columns": [
+          "guide_id",
+          "assessment_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "learning_assessments",
+        "columnsTo": [
+          "guide_id",
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "CASCADE",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessments",
+        "name": "learning_assessments_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessment_revisions",
+        "name": "learning_assessment_revisions_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_questions",
+        "name": "learning_questions_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessments",
+        "name": "learning_assessments_title_check",
+        "value": "length(btrim(\"title\")) > 0",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessment_revisions",
+        "name": "learning_assessment_revisions_number_check",
+        "value": "\"revision_number\" >= 0",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessment_revisions",
+        "name": "learning_assessment_revisions_passing_check",
+        "value": "\"passing_basis_points\" >= 0 and \"passing_basis_points\" <= 10000",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_assessment_revisions",
+        "name": "learning_assessment_revisions_policy_check",
+        "value": "\"grading_policy_version\" > 0",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_questions",
+        "name": "learning_questions_position_check",
+        "value": "\"position\" >= 0",
+        "entityType": "checks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "learning_questions",
+        "name": "learning_questions_points_check",
+        "value": "\"points\" > 0 and \"points\" <= 100",
+        "entityType": "checks"
+      }
+    }
+  ]
+}

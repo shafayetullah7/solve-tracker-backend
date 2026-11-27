@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from '../../database/database.module.js';
 import { AuthModule } from '../auth/auth.module.js';
+import { AssessmentsModule } from '../assessments/assessments.module.js';
 import { LearningGuidesController } from './learning-guides.controller.js';
 import { LearningGuidesRepository } from './learning-guides.repository.js';
 import { LearningGuideMutationsRepository } from './learning-guide-mutations.repository.js';
@@ -9,7 +10,7 @@ import { LearningPortabilityController } from './learning-portability.controller
 import { LearningPortabilityService } from './learning-portability.service.js';
 
 @Module({
-  imports: [DatabaseModule, AuthModule],
+  imports: [DatabaseModule, AuthModule, AssessmentsModule],
   controllers: [LearningGuidesController, LearningPortabilityController],
   providers: [LearningGuidesRepository, LearningGuidesService, LearningGuideMutationsRepository, LearningPortabilityService],
 })

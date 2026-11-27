@@ -351,6 +351,364 @@ try {
     .expect(200);
   check(enrollmentAfter.body.resumeNodeId === childId, 'Resume position updated');
 
+  const correctOptionId = randomUUID();
+  const wrongOptionId = randomUUID();
+  const createAssessmentOp = randomUUID();
+  const assessmentCreate = await request(server)
+    .post(`/learning/guides/${guideId}/assessments`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ title: 'Integration quiz', operationId: createAssessmentOp })
+    .expect(201);
+  const assessmentId = assessmentCreate.body.id;
+  const createReplay = await request(server)
+    .post(`/learning/guides/${guideId}/assessments`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ title: 'Integration quiz', operationId: createAssessmentOp });
+  check(
+    createReplay.status === 201 && createReplay.body.id === assessmentId,
+    'Assessment create idempotent replay returns same resource',
+  );
+  const createConflict = await request(server)
+    .post(`/learning/guides/${guideId}/assessments`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ title: 'Different title', operationId: createAssessmentOp });
+  check(
+    createConflict.status === 409 && createConflict.body.code === 'LEARNING_OPERATION_CONFLICT',
+    'Assessment create rejects operationId reuse with different payload',
+  );
+  await request(server)
+    .post(`/learning/guides/${guideId}/assessments/${assessmentId}/questions`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      kind: 'single_choice',
+      prompt: {
+        stem: 'Pick one',
+        options: [
+          { id: correctOptionId, label: 'Right' },
+          { id: wrongOptionId, label: 'Wrong' },
+        ],
+      },
+      gradingConfig: { correctOptionId },
+      points: 1,
+      operationId: randomUUID(),
+    })
+    .expect(201);
+  const wrongOnlyId = randomUUID();
+  await request(server)
+    .post(`/learning/guides/${guideId}/assessments/${assessmentId}/questions`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      kind: 'single_choice',
+      prompt: {
+        stem: 'Pick two',
+        options: [
+          { id: wrongOnlyId, label: 'No' },
+          { id: randomUUID(), label: 'Also no' },
+        ],
+      },
+      gradingConfig: { correctOptionId: wrongOnlyId },
+      points: 1,
+      operationId: randomUUID(),
+    })
+    .expect(201);
+  const publishOp = randomUUID();
+  await request(server)
+    .post(`/learning/guides/${guideId}/assessments/${assessmentId}/revisions`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ passingBasisPoints: 4000, operationId: publishOp })
+    .expect(201);
+  const publishReplay = await request(server)
+    .post(`/learning/guides/${guideId}/assessments/${assessmentId}/publish`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ passingBasisPoints: 4000, operationId: publishOp });
+  check(publishReplay.status === 201, 'Publish idempotent replay');
+
+  const draftOnly = await request(server)
+    .post(`/learning/guides/${guideId}/assessments`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ title: 'Draft gate quiz', operationId: randomUUID() })
+    .expect(201);
+  const draftAssessmentId = draftOnly.body.id;
+  await request(server)
+    .post(`/learning/guides/${guideId}/assessments/${draftAssessmentId}/questions`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      kind: 'true_false',
+      prompt: { stem: 'True?' },
+      gradingConfig: { correctValue: true },
+      points: 1,
+      operationId: randomUUID(),
+    })
+    .expect(201);
+
+  const treeForGate = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  await request(server)
+    .patch(`/learning/guides/${guideId}/nodes/${childId}`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      completionMode: 'gated',
+      expectedStructureRevision: treeForGate.body.structureRevision,
+      operationId: randomUUID(),
+    })
+    .expect(200);
+
+  const treeGateContent = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  const gatedNode = treeGateContent.body.nodes.find((n) => n.id === childId);
+  const bogusLink = await request(server)
+    .put(`/learning/guides/${guideId}/nodes/${childId}/content`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      expectedContentRevision: gatedNode.contentRevision,
+      operationId: randomUUID(),
+      blocks: [{ type: 'assessment', payload: { assessmentId: randomUUID(), label: 'Bad' } }],
+    });
+  check(bogusLink.status === 404, 'Assessment block rejects unknown assessmentId');
+  const unpublishedLink = await request(server)
+    .put(`/learning/guides/${guideId}/nodes/${childId}/content`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      expectedContentRevision: gatedNode.contentRevision,
+      operationId: randomUUID(),
+      blocks: [{ type: 'assessment', payload: { assessmentId: draftAssessmentId, label: 'Draft' } }],
+    });
+  check(
+    unpublishedLink.status === 409 && unpublishedLink.body.code === 'ASSESSMENT_UNPUBLISHED',
+    'Assessment block rejects unpublished assessment',
+  );
+  await request(server)
+    .put(`/learning/guides/${guideId}/nodes/${childId}/content`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      expectedContentRevision: gatedNode.contentRevision,
+      operationId: randomUUID(),
+      blocks: [{ type: 'assessment', payload: { assessmentId, label: 'Quiz' } }],
+    })
+    .expect(200);
+
+  const treeBeforePass = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(
+    treeBeforePass.body.nodes.find((n) => n.id === childId)?.completed === false,
+    'Gated node incomplete before pass',
+  );
+
+  const attemptStart = await request(server)
+    .post(`/learning/guides/${guideId}/assessments/${assessmentId}/attempts`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(201);
+  const attemptId = attemptStart.body.id;
+  const attemptResume = await request(server)
+    .post(`/learning/guides/${guideId}/assessments/${assessmentId}/attempts`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(attemptResume.body.id === attemptId, 'Resume in-progress attempt returns 200');
+  const questionId = attemptStart.body.questions[0].id;
+  const saveOp = randomUUID();
+  await request(server)
+    .patch(`/learning/guides/${guideId}/assessments/${assessmentId}/attempts/${attemptId}/answers`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      questionId,
+      response: { selectedOptionId: correctOptionId },
+      operationId: saveOp,
+    })
+    .expect(200);
+  const saveConflict = await request(server)
+    .patch(`/learning/guides/${guideId}/assessments/${assessmentId}/attempts/${attemptId}/answers`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      questionId,
+      response: { value: false },
+      operationId: saveOp,
+    });
+  check(
+    saveConflict.status === 409 && saveConflict.body.code === 'LEARNING_OPERATION_CONFLICT',
+    'Save rejects operationId reuse with different payload',
+  );
+  const crossGet = await request(server)
+    .get(`/learning/guides/${guideId}/assessments/${assessmentId}/attempts/${attemptId}`)
+    .set(headers)
+    .set('Cookie', userB.cookie);
+  check(crossGet.status === 404, 'Other user cannot read attempt');
+  const submitOp = randomUUID();
+  const submit = await request(server)
+    .post(`/learning/guides/${guideId}/assessments/${assessmentId}/attempts/${attemptId}/submissions`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ operationId: submitOp })
+    .expect(201);
+  check(submit.body.scoreBasisPoints === 5000, 'Partial attempt scores half of basis points');
+  check(submit.body.passed === true, 'Attempt passes threshold');
+  const submitReplay = await request(server)
+    .post(`/learning/guides/${guideId}/assessments/${assessmentId}/attempts/${attemptId}/submit`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ operationId: submitOp })
+    .expect(201);
+  check(
+    submitReplay.body.scoreBasisPoints === submit.body.scoreBasisPoints,
+    'Submit operation idempotent replay',
+  );
+
+  const treeAfterPass = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(
+    treeAfterPass.body.nodes.find((n) => n.id === childId)?.completed === true,
+    'Gated node complete after assessment pass',
+  );
+
+  await request(server)
+    .post(`/learning/guides/${guideId}/assessments/${assessmentId}/revisions`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ passingBasisPoints: 6000, operationId: randomUUID() })
+    .expect(201);
+  const treeAfterHigherThreshold = await request(server)
+    .get(`/learning/guides/${guideId}/tree`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(200);
+  check(
+    treeAfterHigherThreshold.body.nodes.find((n) => n.id === childId)?.completed === false,
+    'Gated node reopens when active revision threshold rises',
+  );
+
+  const gatedManual = await request(server)
+    .patch(`/learning/guides/${guideId}/nodes/${childId}/completion`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ operationId: randomUUID(), complete: false });
+  check(
+    gatedManual.status === 409 && gatedManual.body.code === 'GATED_COMPLETION',
+    'Manual completion blocked on gated node',
+  );
+
+  const mcA = randomUUID();
+  const mcB = randomUUID();
+  const typesAssessmentCreate = await request(server)
+    .post(`/learning/guides/${guideId}/assessments`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ title: 'Types quiz', operationId: randomUUID() })
+    .expect(201);
+  const typesAssessmentId = typesAssessmentCreate.body.id;
+  await request(server)
+    .post(`/learning/guides/${guideId}/assessments/${typesAssessmentId}/questions`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      kind: 'multiple_choice',
+      prompt: {
+        stem: 'Select all',
+        options: [
+          { id: mcA, label: 'A' },
+          { id: mcB, label: 'B' },
+        ],
+      },
+      gradingConfig: { correctOptionIds: [mcA, mcB] },
+      points: 1,
+      operationId: randomUUID(),
+    })
+    .expect(201);
+  await request(server)
+    .post(`/learning/guides/${guideId}/assessments/${typesAssessmentId}/questions`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      kind: 'numerical',
+      prompt: { stem: 'Value', unit: 'units' },
+      gradingConfig: { correctValueScaled: 1050, toleranceScaled: 50 },
+      points: 1,
+      operationId: randomUUID(),
+    })
+    .expect(201);
+  await request(server)
+    .post(`/learning/guides/${guideId}/assessments/${typesAssessmentId}/revisions`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ passingBasisPoints: 7000, operationId: randomUUID() })
+    .expect(201);
+  const typesStart = await request(server)
+    .post(`/learning/guides/${guideId}/assessments/${typesAssessmentId}/attempts`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(201);
+  const typesAttemptId = typesStart.body.id;
+  const mcQuestion = typesStart.body.questions.find((q) => q.kind === 'multiple_choice');
+  const numQuestion = typesStart.body.questions.find((q) => q.kind === 'numerical');
+  check(mcQuestion && numQuestion, 'MC and numerical questions on attempt');
+  await request(server)
+    .patch(
+      `/learning/guides/${guideId}/assessments/${typesAssessmentId}/attempts/${typesAttemptId}/answers`,
+    )
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      questionId: mcQuestion.id,
+      response: { selectedOptionIds: [mcB, mcA] },
+      operationId: randomUUID(),
+    })
+    .expect(200);
+  await request(server)
+    .patch(
+      `/learning/guides/${guideId}/assessments/${typesAssessmentId}/attempts/${typesAttemptId}/answers`,
+    )
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({
+      questionId: numQuestion.id,
+      response: { valueScaled: 1040 },
+      operationId: randomUUID(),
+    })
+    .expect(200);
+  const typesSubmit = await request(server)
+    .post(
+      `/learning/guides/${guideId}/assessments/${typesAssessmentId}/attempts/${typesAttemptId}/submit`,
+    )
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .send({ operationId: randomUUID() })
+    .expect(201);
+  check(typesSubmit.body.passed === true, 'MC and numerical attempt passes');
+  check(typesSubmit.body.scoreBasisPoints === 10000, 'Full score on MC + numerical');
+  const typesRetake = await request(server)
+    .post(`/learning/guides/${guideId}/assessments/${typesAssessmentId}/attempts`)
+    .set(headers)
+    .set('Cookie', userA.cookie)
+    .expect(201);
+  check(typesRetake.body.id !== typesAttemptId, 'Retake starts new attempt after finalize');
+
   const guideDetail = await request(server)
     .get(`/learning/guides/${guideId}`)
     .set(headers)

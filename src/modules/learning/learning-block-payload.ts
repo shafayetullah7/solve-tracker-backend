@@ -29,6 +29,11 @@ export const linkPayloadSchema = z.strictObject({
   label: z.string().max(500),
 });
 
+export const assessmentPayloadSchema = z.strictObject({
+  assessmentId: z.uuid(),
+  label: z.string().max(200).optional(),
+});
+
 export function stripMarkup(value: string): string {
   return value.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '').replace(/<[^>]+>/g, '');
 }
@@ -49,6 +54,10 @@ export function normalizeBlockPayload(type: LearningBlockType, payload: unknown)
   if (type === learningBlockType.Link) {
     const parsed = linkPayloadSchema.parse(payload);
     return { url: parsed.url.trim(), label: stripMarkup(parsed.label).trim() };
+  }
+  if (type === learningBlockType.Assessment) {
+    const parsed = assessmentPayloadSchema.parse(payload);
+    return { assessmentId: parsed.assessmentId, label: parsed.label?.trim() };
   }
   const parsed = checklistPayloadSchema.parse(payload);
   return {
