@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { and, count, desc, eq, isNull, isNotNull, sql } from 'drizzle-orm';
 import { DatabaseService } from '../../database/database.service.js';
-import { learningGuides, learningNodes } from '../../database/schema/index.js';
+import { learningGuides, learningNodes, learningEnrollments } from '../../database/schema/index.js';
 import type { LearningGuide } from '../../database/schema/index.js';
 import type { RecoveryQuery } from './schemas/learning-nodes.schema.js';
 import { MAX_NODES } from './learning-hierarchy.js';
@@ -36,6 +36,16 @@ export class LearningGuidesRepository {
       eq(learningGuides.ownerId, ownerId), eq(learningGuides.id, guideId),
       isNull(learningGuides.deletedAt),
     )).limit(MAX_NODES + 1);
+  }
+
+  async findEnrollment(ownerId: string, guideId: string) {
+    const [row] = await this.database.db.select({
+      id: learningEnrollments.id, guideId: learningEnrollments.guideId,
+      resumeNodeId: learningEnrollments.resumeNodeId, lastActivityAt: learningEnrollments.lastActivityAt,
+    }).from(learningEnrollments).innerJoin(learningGuides, eq(learningGuides.id, learningEnrollments.guideId))
+      .where(and(eq(learningGuides.ownerId, ownerId), eq(learningGuides.id, guideId),
+        eq(learningEnrollments.learnerId, ownerId), isNull(learningGuides.deletedAt)));
+    return row;
   }
 
   async listRecoverable(ownerId: string, guideId: string, query: RecoveryQuery) {
