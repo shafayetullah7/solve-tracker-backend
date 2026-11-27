@@ -1,0 +1,21 @@
+# Phase 2.1 — Domain architecture
+
+Status: proposed architecture, not implementation. Based on feature branch AppModule, ProblemsModule, MediaModule, AGENTS.md and LEARNING_DESIGN_REVIEW.md. Existing conventions and approved product decisions remain binding.
+
+## Deployment and boundaries
+Retain one NestJS Express application, PostgreSQL, pinned Drizzle/Zod, existing auth and media. No Redis, broker, separate database or microservice requirement. Logical domains are not necessarily Nest modules. R1 LearningModule contains guides, nodes, blocks, completion, notes, portability and practice links; AssessmentsModule owns questions, revisions, attempts and grading. R2 introduces review, projects, planner and advanced knowledge/analytics only when implemented. Existing ProgressModule retains coding semantics. Database tables remain under central schema folders and root registry. Do not create empty future modules.
+
+## Layering
+Controllers validate HTTP input using existing StandardSchema conventions and authenticated identity; services own business rules, authorization scope and transactions; repositories own typed queries and locking; database enforces relational invariants. Pure grading/completion functions may be extracted. No generic CRUD, base repositories, unrelated dependency upgrades or HTTP calls between local modules. ESM .js imports and existing explicit response conventions.
+
+## Dependency direction
+AppModule composes feature modules. Learning and Assessments depend on existing AuthModule and DatabaseModule. Learning uses a narrow assessment read contract for eligible results, and a narrow existing problem read contract for owned normalized identity and solved state; ProblemsModule currently exports nothing, so any export requires deliberate change and tests. Assessments must not import LearningModule back: validate owned step association through a narrowly scoped persistence/read boundary, or move cross-domain orchestration into a higher composition service. Final wiring subject to ERD and contract review; no forwardRef as default. MediaModule currently exports MediaService; revise lifecycle/privacy before attaching learning assets, not ad hoc image columns. Analytics consumes read models without owning canonical completion or scores. Future review/planner depend on stable content identities, not editor internals.
+
+## Transactions and consistency
+Use direct in-process calls with explicit shared transaction context when atomic writes span domains; repositories must not start independent transactions inside a use case. Guide structural writes serialize per guide and validate cycles/ownership within transaction; exact lock protocol in schema design. Assessment finalization atomically persists answers, immutable result and attempt status; completion initially derived from authoritative eligible results and current requirements, with explicit manual completion state and no stale asynchronous gate. Coding solved state remains authoritative in existing domain. Do not use fire-and-forget events for correctness. Optional notifications/analytics may use post-commit events only when loss is acceptable; durable delivery requires a later outbox decision. External media calls outside long database transactions, with explicit staged lifecycle/reconciliation. Define lock order, retries, idempotency and revision checks in subsequent specs.
+
+## Security and tests
+Reuse AuthSecurityGuard/AccessGuard; identity comes from authenticated request, not client owner fields. Scope every nested lookup and write to authorized guide/owner; database composite constraints supplement service checks. No grading secrets in learner responses, no private data in Discover/profile. Test domain functions, repository integration with real PostgreSQL, cross-account IDs, concurrent moves/submits, rollback and existing coding regressions. Generated OpenAPI contracts remain source for frontend types.
+
+## Next decisions
+ERD and constraints, tree ordering/locking, exact completion rules, assessment revision policy, media migration, API/error contracts and performance budgets. Installed package declarations and runtime baseline remain unverified; no application source or migrations changed. Phase 0/1 formal gates remain open.
