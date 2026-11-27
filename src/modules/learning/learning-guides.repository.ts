@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { and, count, desc, eq, isNull, isNotNull, sql } from 'drizzle-orm';
 import { DatabaseService } from '../../database/database.service.js';
-import { learningGuides } from '../../database/schema/index.js';
+import { learningGuides, learningNodes } from '../../database/schema/index.js';
 import type { LearningGuide } from '../../database/schema/index.js';
+import { MAX_NODES } from './learning-hierarchy.js';
 import type { ListGuidesQuery } from './schemas/learning-guides.schema.js';
 
 @Injectable()
@@ -16,6 +17,24 @@ export class LearningGuidesRepository {
       isNull(learningGuides.deletedAt),
     ));
     return row;
+  }
+
+  async findOwnedTree(ownerId: string, guideId: string) {
+    // One statement gives the revision and active nodes from the same snapshot.
+    return this.database.db.select({
+      structureRevision: learningGuides.structureRevision,
+      node: {
+        id: learningNodes.id, parentId: learningNodes.parentId,
+        title: learningNodes.title, position: learningNodes.position,
+        required: learningNodes.required, completionMode: learningNodes.completionMode,
+        contentRevision: learningNodes.contentRevision, requirementRevision: learningNodes.requirementRevision,
+      },
+    }).from(learningGuides).leftJoin(learningNodes, and(
+      eq(learningNodes.guideId, learningGuides.id), isNull(learningNodes.deletedAt),
+    )).where(and(
+      eq(learningGuides.ownerId, ownerId), eq(learningGuides.id, guideId),
+      isNull(learningGuides.deletedAt),
+    )).limit(MAX_NODES + 1);
   }
 
   async listOwned(ownerId: string, query: ListGuidesQuery): Promise<{ items: LearningGuide[]; total: number }> {
