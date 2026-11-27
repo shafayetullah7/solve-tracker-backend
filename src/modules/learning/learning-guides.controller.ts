@@ -1,9 +1,9 @@
-import { Controller, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Headers, HttpCode, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { ApiHeader, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccessGuard, type AuthenticatedRequest } from '../auth/access.guard.js';
 import { AuthSecurityGuard } from '../auth/auth-security.guard.js';
 import { LearningGuidesService } from './learning-guides.service.js';
-import { guideListResponseSchema, guideResponseSchema, learningErrorSchema, listGuidesQuerySchema, type ListGuidesQuery } from './schemas/learning-guides.schema.js';
+import { guideListResponseSchema, guideResponseSchema, learningErrorSchema, listGuidesQuerySchema, type ListGuidesQuery, createGuideSchema, patchGuideSchema, guideLifecycleSchema, guideMutationReceiptSchema, type CreateGuideInput, type PatchGuideInput, type GuideLifecycleInput } from './schemas/learning-guides.schema.js';
 
 @ApiTags('Learning')
 @ApiResponse({ status: '4XX', standardSchema: learningErrorSchema })
@@ -22,5 +22,34 @@ export class LearningGuidesController {
   @ApiResponse({ status: 200, standardSchema: guideResponseSchema })
   get(@Req() req: AuthenticatedRequest, @Param('guideId') guideId: string) {
     return this.guides.get(req.auth.user.id, guideId);
+  }
+
+  @Post()
+  @ApiResponse({ status: 201, standardSchema: guideMutationReceiptSchema })
+  create(@Req() req: AuthenticatedRequest, @Body({ schema: createGuideSchema }) body: CreateGuideInput) {
+    return this.guides.create(req.auth.user.id, body);
+  }
+
+  @Patch(':guideId')
+  @ApiResponse({ status: 200, standardSchema: guideMutationReceiptSchema })
+  patch(@Req() req: AuthenticatedRequest, @Param('guideId') id: string, @Body({ schema: patchGuideSchema }) body: PatchGuideInput) {
+    return this.guides.patch(req.auth.user.id, id, body);
+  }
+
+  @Patch(':guideId/lifecycle')
+  @ApiResponse({ status: 200, standardSchema: guideMutationReceiptSchema })
+  lifecycle(@Req() req: AuthenticatedRequest, @Param('guideId') id: string, @Body({ schema: guideLifecycleSchema }) body: GuideLifecycleInput) {
+    return this.guides.lifecycle(req.auth.user.id, id, body);
+  }
+
+  @Delete(':guideId')
+  @HttpCode(204)
+  @ApiHeader({ name: 'X-Expected-Revision', required: true })
+  @ApiHeader({ name: 'X-Operation-Id', required: true })
+  @ApiResponse({ status: 204, description: 'Guide soft deleted' })
+  async remove(@Req() req: AuthenticatedRequest, @Param('guideId') id: string,
+    @Headers('x-expected-revision') revision: string | undefined,
+    @Headers('x-operation-id') operation: string | undefined) {
+    await this.guides.remove(req.auth.user.id, id, revision, operation);
   }
 }
