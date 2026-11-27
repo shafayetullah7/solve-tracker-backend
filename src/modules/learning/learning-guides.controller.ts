@@ -55,6 +55,13 @@ export class LearningGuidesController {
     return this.guides.patchNode(req.auth.user.id, guideId, nodeId, body);
   }
 
+  @Post(':guideId/nodes/:nodeId/restore')
+  @HttpCode(200)
+  @ApiResponse({ status: 200, standardSchema: guideMutationReceiptSchema })
+  restoreNode(@Req() req: AuthenticatedRequest, @Param('guideId') guideId: string, @Param('nodeId') nodeId: string, @Body({ schema: moveNodeSchema }) body: MoveNodeInput) {
+    return this.guides.restoreNode(req.auth.user.id, guideId, nodeId, body);
+  }
+
   @Patch(':guideId/nodes/:nodeId/placement')
   @ApiResponse({ status: 200, standardSchema: guideMutationReceiptSchema })
   moveNode(@Req() req: AuthenticatedRequest, @Param('guideId') guideId: string, @Param('nodeId') nodeId: string, @Body({ schema: moveNodeSchema }) body: MoveNodeInput) {
