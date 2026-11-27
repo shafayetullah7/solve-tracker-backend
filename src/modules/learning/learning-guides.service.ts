@@ -20,7 +20,7 @@ export function toGuideResponse(row: LearningGuide): GuideResponse {
 }
 
 import { buildHierarchy } from './learning-hierarchy.js';
-import type { CreateNodeInput, MoveNodeInput, PatchNodeInput, TreeResponse, RecoveryQuery, RecoveryResponse } from './schemas/learning-nodes.schema.js';
+import type { CreateNodeInput, MoveNodeInput, PatchNodeInput, TreeResponse, RecoveryQuery, RecoveryResponse, EnrollmentResponse, ResumeInput } from './schemas/learning-nodes.schema.js';
 
 @Injectable()
 export class LearningGuidesService {
@@ -32,6 +32,16 @@ export class LearningGuidesService {
     const row = await this.repository.findOwned(ownerId, id.data);
     if (!row) throw learningError(404, 'NOT_FOUND', 'Guide was not found.');
     return toGuideResponse(row);
+  }
+
+  async enrollment(ownerId: string, id: string): Promise<EnrollmentResponse> {
+    const row = await this.repository.findEnrollment(ownerId, this.parseId(id));
+    if (!row) throw learningError(404, 'NOT_FOUND', 'Enrollment was not found.');
+    return { ...row, lastActivityAt: row.lastActivityAt?.toISOString() ?? null };
+  }
+
+  resume(ownerId: string, id: string, input: ResumeInput) {
+    return this.mutations.resume(ownerId, this.parseId(id), input);
   }
 
   async recoverable(ownerId: string, rawId: string, query: RecoveryQuery): Promise<RecoveryResponse> {
