@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { and, eq, inArray, ne, sql } from 'drizzle-orm';
 import { DatabaseService } from '../../database/database.service.js';
+import type { PracticeGoal } from '../../database/schema/users/practice-goal.enum.js';
 import {
   problemTopics,
   problems,
@@ -266,7 +267,7 @@ export class TopicMaterialRepository {
   }
 
   async loadGoalCohortTopicCounts(
-    goal: string,
+    goal: PracticeGoal,
   ): Promise<{ normalizedName: string; name: string; count: number }[]> {
     const cohort = await this.db
       .select({ id: users.id })
@@ -294,7 +295,7 @@ export class TopicMaterialRepository {
     }));
   }
 
-  async countGoalCohort(goal: string): Promise<number> {
+  async countGoalCohort(goal: PracticeGoal): Promise<number> {
     const [row] = await this.db
       .select({ count: sql<number>`count(*)::int` })
       .from(users)

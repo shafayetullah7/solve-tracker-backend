@@ -1,0 +1,476 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "adf2f6b5-a066-42a4-93f4-e1c5c91de594",
+  "prevIds": [
+    "42daf87c-1e0f-40bd-8359-a436978daf4c"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "practice_goal"
+      ],
+      "writes": [
+        "s|enum|public.practice_goal",
+        "n|enum|public.practice_goal",
+        "e|enum|public.practice_goal",
+        "n|type|public.practice_goal"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "practice_visibility"
+      ],
+      "writes": [
+        "s|enum|public.practice_visibility",
+        "n|enum|public.practice_visibility",
+        "e|enum|public.practice_visibility",
+        "n|type|public.practice_visibility"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "auth_provider"
+      ],
+      "writes": [
+        "s|enum|public.auth_provider",
+        "n|enum|public.auth_provider",
+        "e|enum|public.auth_provider",
+        "n|type|public.auth_provider"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "learning_block_type"
+      ],
+      "writes": [
+        "s|enum|public.learning_block_type",
+        "n|enum|public.learning_block_type",
+        "e|enum|public.learning_block_type",
+        "n|type|public.learning_block_type"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "learning_node_completion_mode"
+      ],
+      "writes": [
+        "s|enum|public.learning_node_completion_mode",
+        "n|enum|public.learning_node_completion_mode",
+        "e|enum|public.learning_node_completion_mode",
+        "n|type|public.learning_node_completion_mode"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "learning_import_source_kind"
+      ],
+      "writes": [
+        "s|enum|public.learning_import_source_kind",
+        "n|enum|public.learning_import_source_kind",
+        "e|enum|public.learning_import_source_kind",
+        "n|type|public.learning_import_source_kind"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "drop_check",
+      "statementTarget": [
+        "table",
+        "public",
+        "auth_provider_identities"
+      ],
+      "writes": [
+        "s|ck|public.auth_provider_identities.auth_provider_identities_provider_google",
+        "n|ck|public.auth_provider_identities.auth_provider_identities_provider_google",
+        "e|ck|public.auth_provider_identities.auth_provider_identities_provider_google",
+        "n|con|public.auth_provider_identities.auth_provider_identities_provider_google"
+      ],
+      "reads": [
+        "n|tbl|public.auth_provider_identities",
+        "n|sch|public",
+        "e|col|public.auth_provider_identities.provider"
+      ]
+    },
+    {
+      "statementType": "drop_check",
+      "statementTarget": [
+        "table",
+        "public",
+        "users"
+      ],
+      "writes": [
+        "s|ck|public.users.users_practice_visibility_check",
+        "n|ck|public.users.users_practice_visibility_check",
+        "e|ck|public.users.users_practice_visibility_check",
+        "n|con|public.users.users_practice_visibility_check"
+      ],
+      "reads": [
+        "n|tbl|public.users",
+        "n|sch|public",
+        "e|col|public.users.practice_visibility"
+      ]
+    },
+    {
+      "statementType": "drop_check",
+      "statementTarget": [
+        "table",
+        "public",
+        "users"
+      ],
+      "writes": [
+        "s|ck|public.users.users_practice_goal_check",
+        "n|ck|public.users.users_practice_goal_check",
+        "e|ck|public.users.users_practice_goal_check",
+        "n|con|public.users.users_practice_goal_check"
+      ],
+      "reads": [
+        "n|tbl|public.users",
+        "n|sch|public",
+        "e|col|public.users.practice_goal"
+      ]
+    },
+    {
+      "statementType": "drop_check",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_nodes"
+      ],
+      "writes": [
+        "s|ck|public.learning_nodes.learning_nodes_mode_check",
+        "n|ck|public.learning_nodes.learning_nodes_mode_check",
+        "e|ck|public.learning_nodes.learning_nodes_mode_check",
+        "n|con|public.learning_nodes.learning_nodes_mode_check"
+      ],
+      "reads": [
+        "n|tbl|public.learning_nodes",
+        "n|sch|public",
+        "e|col|public.learning_nodes.completion_mode"
+      ]
+    },
+    {
+      "statementType": "drop_check",
+      "statementTarget": [
+        "table",
+        "public",
+        "learning_blocks"
+      ],
+      "writes": [
+        "s|ck|public.learning_blocks.learning_blocks_type_check",
+        "n|ck|public.learning_blocks.learning_blocks_type_check",
+        "e|ck|public.learning_blocks.learning_blocks_type_check",
+        "n|con|public.learning_blocks.learning_blocks_type_check"
+      ],
+      "reads": [
+        "n|tbl|public.learning_blocks",
+        "n|sch|public",
+        "e|col|public.learning_blocks.type"
+      ]
+    },
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "auth_provider_identities",
+        "provider"
+      ],
+      "writes": [
+        "s|colprop|public.auth_provider_identities.provider.type",
+        "s|colprop|public.auth_provider_identities.provider.default"
+      ],
+      "reads": [
+        "n|tbl|public.auth_provider_identities",
+        "n|sch|public",
+        "n|col|public.auth_provider_identities.provider",
+        "n|enum|public.auth_provider"
+      ],
+      "sqlHash": "7dce27ba75662140"
+    },
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "users",
+        "practice_visibility"
+      ],
+      "writes": [
+        "s|colprop|public.users.practice_visibility.type",
+        "s|colprop|public.users.practice_visibility.default"
+      ],
+      "reads": [
+        "n|tbl|public.users",
+        "n|sch|public",
+        "n|col|public.users.practice_visibility",
+        "n|enum|public.practice_visibility"
+      ],
+      "sqlHash": "3eeb32738dc1bba0"
+    },
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "users",
+        "practice_goal"
+      ],
+      "writes": [
+        "s|colprop|public.users.practice_goal.type",
+        "s|colprop|public.users.practice_goal.default"
+      ],
+      "reads": [
+        "n|tbl|public.users",
+        "n|sch|public",
+        "n|col|public.users.practice_goal",
+        "n|enum|public.practice_goal"
+      ],
+      "sqlHash": "980d3e462451750c"
+    },
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "learning_nodes",
+        "completion_mode"
+      ],
+      "writes": [
+        "s|colprop|public.learning_nodes.completion_mode.type",
+        "s|colprop|public.learning_nodes.completion_mode.default"
+      ],
+      "reads": [
+        "n|tbl|public.learning_nodes",
+        "n|sch|public",
+        "n|col|public.learning_nodes.completion_mode",
+        "n|enum|public.learning_node_completion_mode"
+      ],
+      "sqlHash": "b40d71e488b5726b"
+    },
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "learning_blocks",
+        "type"
+      ],
+      "writes": [
+        "s|colprop|public.learning_blocks.type.type",
+        "s|colprop|public.learning_blocks.type.default"
+      ],
+      "reads": [
+        "n|tbl|public.learning_blocks",
+        "n|sch|public",
+        "n|col|public.learning_blocks.type",
+        "n|enum|public.learning_block_type"
+      ],
+      "sqlHash": "964bf515bf7b1f93"
+    },
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "learning_import_previews",
+        "source_kind"
+      ],
+      "writes": [
+        "s|colprop|public.learning_import_previews.source_kind.type",
+        "s|colprop|public.learning_import_previews.source_kind.default"
+      ],
+      "reads": [
+        "n|tbl|public.learning_import_previews",
+        "n|sch|public",
+        "n|col|public.learning_import_previews.source_kind",
+        "n|enum|public.learning_import_source_kind"
+      ],
+      "sqlHash": "1abe76b3ef11b63b"
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "practice_goal",
+        "values": [
+          "interview",
+          "contests",
+          "fundamentals",
+          "coaching"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "practice_visibility",
+        "values": [
+          "private",
+          "summary",
+          "topics"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "auth_provider",
+        "values": [
+          "google"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "learning_block_type",
+        "values": [
+          "text",
+          "code",
+          "checklist",
+          "link"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "learning_node_completion_mode",
+        "values": [
+          "structural",
+          "manual",
+          "gated"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "learning_import_source_kind",
+        "values": [
+          "markdown",
+          "json",
+          "bundle"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "drop",
+      "key": "checks\u0000[\"public\",\"auth_provider_identities\",\"auth_provider_identities_provider_google\"]"
+    },
+    {
+      "op": "drop",
+      "key": "checks\u0000[\"public\",\"users\",\"users_practice_visibility_check\"]"
+    },
+    {
+      "op": "drop",
+      "key": "checks\u0000[\"public\",\"users\",\"users_practice_goal_check\"]"
+    },
+    {
+      "op": "drop",
+      "key": "checks\u0000[\"public\",\"learning_nodes\",\"learning_nodes_mode_check\"]"
+    },
+    {
+      "op": "drop",
+      "key": "checks\u0000[\"public\",\"learning_blocks\",\"learning_blocks_type_check\"]"
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"auth_provider_identities\",\"provider\"]",
+      "set": {
+        "type": "auth_provider",
+        "typeSchema": "public"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"users\",\"practice_visibility\"]",
+      "set": {
+        "type": "practice_visibility",
+        "typeSchema": "public"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"users\",\"practice_goal\"]",
+      "set": {
+        "type": "practice_goal",
+        "typeSchema": "public"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"learning_nodes\",\"completion_mode\"]",
+      "set": {
+        "type": "learning_node_completion_mode",
+        "typeSchema": "public"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"learning_blocks\",\"type\"]",
+      "set": {
+        "type": "learning_block_type",
+        "typeSchema": "public"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"learning_import_previews\",\"source_kind\"]",
+      "set": {
+        "type": "learning_import_source_kind",
+        "typeSchema": "public"
+      }
+    }
+  ]
+}

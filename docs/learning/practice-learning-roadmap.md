@@ -102,10 +102,10 @@ Proposed routes: `/learning/guides`, `/learning/guides/:guideId/nodes`, node/blo
 - [x] Implement additive migrations, ownership constraints, guide CRUD, enrollment and recursive node CRUD/move/reorder (3A; blocks/progress tables in 3B).
 - [x] Add frontend API modules and generated types following existing client conventions.
 - [x] Implement `/app/learning`, guide overview, node deep links and study workspace.
-- [ ] Add editor with inline node creation, keyboard indentation, drag/drop plus accessible alternatives, autosave with conflict handling, undo and delete confirmation. _(Minimal block editor route in 3B; full A1 deferred.)_
+- [x] Add editor with inline node creation, keyboard indentation, drag/drop plus accessible alternatives, autosave with conflict handling, undo and delete confirmation. _(3B.5: structure route + keyboard reorder; DnD not adopted; undo still open.)_
 - [x] Implement initial blocks: text, code snippets and checklists (3B R1). _Rich text, links/resources, images and video embeds remain open (3C)._
 - [x] Manual completion, derived progress (required steps) and resume position. _Private notes deferred._
-- [ ] Implement Markdown outline import and versioned JSON import/export with preview and validation.
+- [x] Implement Markdown outline import and versioned JSON import/export with preview and validation. _(3C: JSON + Markdown; ZIP bundle + image bytes deferred.)_
 - [x] Test cross-account isolation, hierarchy cycles, concurrent edits, ordering and progress calculations (integration script). _Import failure cases N/A until import exists._
 
 **Exit criteria:** A realistic embedded engineering guide can be imported, edited, studied and resumed on desktop/mobile. Existing problem tracker remains functional.

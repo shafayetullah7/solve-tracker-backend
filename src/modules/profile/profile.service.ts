@@ -10,6 +10,7 @@ import {
 } from '../../common/schemas/user-handle-assign.js';
 import { USER_HANDLE_ERROR } from '../../common/schemas/user-handle.errors.js';
 import { users } from '../../database/schema/index.js';
+import { practiceVisibility } from '../../database/schema/users/practice-visibility.enum.js';
 import { media } from '../../database/schema/media/media.table.js';
 import type { UserEducationEntry } from '../../database/schema/profile/user-education-entries.table.js';
 import type { User } from '../../database/schema/index.js';
@@ -151,7 +152,7 @@ export class ProfileService {
         if (input.practiceVisibility !== user.practiceVisibility) {
           updates.practiceVisibility = input.practiceVisibility;
           discoverBump = true;
-          if (input.practiceVisibility === 'private') {
+          if (input.practiceVisibility === practiceVisibility.Private) {
             updates.publicWeb = false;
           }
         }
@@ -159,7 +160,7 @@ export class ProfileService {
       if (input.publicWeb !== undefined) {
         const nextVisibility =
           input.practiceVisibility ?? user.practiceVisibility;
-        if (nextVisibility === 'private') {
+        if (nextVisibility === practiceVisibility.Private) {
           if (input.publicWeb) {
             throw profileError(400, 'VALIDATION_ERROR', 'Invalid profile input.', {
               publicWeb: 'Public page requires a sharing visibility level.',

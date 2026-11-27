@@ -18,6 +18,7 @@ import { buildHierarchy, planPlacement, HierarchyError, MAX_NODES } from './lear
 import type { CreateNodeInput, MoveNodeInput, PatchNodeInput, ResumeInput } from './schemas/learning-nodes.schema.js';
 import type { NodeCompletionInput, ReplaceNodeContentInput } from './schemas/learning-blocks.schema.js';
 import { normalizeBlockPayload } from './learning-block-payload.js';
+import type { PortableGuide } from './schemas/learning-portable.schema.js';
 
 const DAY = 86400000;
 const MAX_GUIDES = 100;
@@ -535,5 +536,75 @@ export class LearningGuideMutationsRepository {
         .where(eq(learningEnrollments.id, enrollment.id));
       return nodeId;
     }, guideId);
+  }
+
+  async importPortableGuide(ownerId: string, operationId: string, guide: PortableGuide): Promise<Receipt> {
+    return this.execute(ownerId, operationId, ['import', guide.title, guide.nodes.length], async (tx, now) => {
+      const [usage] = await tx.select({ total: count() }).from(learningGuides)
+        .where(eq(learningGuides.ownerId, ownerId));
+      if ((usage?.total ?? 0) >= MAX_GUIDES)
+        throw learningError(409, 'LEARNING_GUIDE_LIMIT', 'Retained guide limit reached.');
+      if (guide.nodes.length > MAX_NODES) throw learningError(409, 'LEARNING_NODE_LIMIT', 'Node limit exceeded.');
+      const idByKey = new Map<string, string>();
+      const pending = [...guide.nodes];
+      const staged: { node: PortableGuide['nodes'][number]; parentId: string | null; position: number }[] = [];
+      const positionCount = new Map<string | null, number>();
+      while (pending.length) {
+        const ready = pending.filter((node) => !node.parentLocalKey || idByKey.has(node.parentLocalKey));
+        if (!ready.length) throw learningError(400, 'VALIDATION_ERROR', 'Invalid node parent references.');
+        for (const node of ready) {
+          const parentKey = node.parentLocalKey;
+          const position = positionCount.get(parentKey) ?? 0;
+          positionCount.set(parentKey, position + 1);
+          const parentId = parentKey ? idByKey.get(parentKey) ?? null : null;
+          const id = randomUUID();
+          idByKey.set(node.localKey, id);
+          staged.push({ node, parentId, position });
+          pending.splice(pending.indexOf(node), 1);
+        }
+      }
+      buildHierarchy(staged.map((row) => ({
+        id: idByKey.get(row.node.localKey)!,
+        parentId: row.parentId,
+        position: row.position,
+      })));
+      const [inserted] = await tx.insert(learningGuides).values({
+        ownerId,
+        title: guide.title,
+        description: guide.description,
+      }).returning({ id: learningGuides.id });
+      if (!inserted) throw new Error('Guide insert failed.');
+      const guideId = inserted.id;
+      await tx.insert(learningEnrollments).values({ guideId, learnerId: ownerId });
+      for (const row of staged) {
+        const id = idByKey.get(row.node.localKey)!;
+        await tx.insert(learningNodes).values({
+          id,
+          guideId,
+          parentId: row.parentId,
+          title: row.node.title,
+          position: row.position,
+          required: row.node.required,
+          completionMode: row.node.completionMode,
+        });
+        if (row.node.blocks.length) {
+          await tx.insert(learningBlocks).values(
+            row.node.blocks.map((block, position) => ({
+              guideId,
+              nodeId: id,
+              position,
+              type: block.type,
+              payload: normalizeBlockPayload(block.type, block.payload),
+              schemaVersion: 1,
+            })),
+          );
+        }
+      }
+      await tx.update(learningGuides).set({
+        structureRevision: sql`${learningGuides.structureRevision} + 1`,
+        updatedAt: now,
+      }).where(eq(learningGuides.id, guideId));
+      return guideId;
+    });
   }
 }

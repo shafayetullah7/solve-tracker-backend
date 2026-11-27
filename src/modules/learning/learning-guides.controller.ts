@@ -1,8 +1,13 @@
-import { Body, Controller, Delete, Get, Headers, HttpCode, Param, Patch, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, HttpCode, Param, Patch, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiHeader, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccessGuard, type AuthenticatedRequest } from '../auth/access.guard.js';
 import { AuthSecurityGuard } from '../auth/auth-security.guard.js';
 import { LearningGuidesService } from './learning-guides.service.js';
+import { learningImportSourceKind } from '../../database/schema/learning/learning-import-source-kind.enum.js';
+import { LearningPortabilityService } from './learning-portability.service.js';
+import { guideExportQuerySchema } from './schemas/learning-portable.schema.js';
+import { z } from 'zod';
 import { guideListResponseSchema, guideResponseSchema, learningErrorSchema, listGuidesQuerySchema, type ListGuidesQuery, createGuideSchema, patchGuideSchema, guideLifecycleSchema, guideMutationReceiptSchema, type CreateGuideInput, type PatchGuideInput, type GuideLifecycleInput } from './schemas/learning-guides.schema.js';
 
 import { enrollmentResponseSchema, resumeSchema, type ResumeInput, recoveryQuerySchema, recoveryResponseSchema, type RecoveryQuery, createNodeSchema, moveNodeSchema, patchNodeSchema, treeResponseSchema, type CreateNodeInput, type MoveNodeInput, type PatchNodeInput } from './schemas/learning-nodes.schema.js';
@@ -14,12 +19,17 @@ import {
   type ReplaceNodeContentInput,
 } from './schemas/learning-blocks.schema.js';
 
+const guideCopySchema = z.strictObject({ operationId: z.uuid() });
+
 @ApiTags('Learning')
 @ApiResponse({ status: '4XX', standardSchema: learningErrorSchema })
 @UseGuards(AuthSecurityGuard, AccessGuard)
 @Controller('learning/guides')
 export class LearningGuidesController {
-  constructor(private readonly guides: LearningGuidesService) {}
+  constructor(
+    private readonly guides: LearningGuidesService,
+    private readonly portability: LearningPortabilityService,
+  ) {}
 
   @Get()
   @ApiResponse({ status: 200, standardSchema: guideListResponseSchema })
@@ -55,6 +65,31 @@ export class LearningGuidesController {
   @ApiResponse({ status: 200, standardSchema: treeResponseSchema })
   tree(@Req() req: AuthenticatedRequest, @Param('guideId') id: string) {
     return this.guides.tree(req.auth.user.id, id);
+  }
+
+  @Get(':guideId/export')
+  async exportGuide(
+    @Req() req: AuthenticatedRequest,
+    @Param('guideId') id: string,
+    @Query({ schema: guideExportQuerySchema }) query: z.infer<typeof guideExportQuerySchema>,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const exported = await this.portability.exportGuide(req.auth.user.id, id, query.format);
+    if (exported.format === learningImportSourceKind.Markdown) {
+      res.type('text/markdown; charset=utf-8');
+      return exported.body;
+    }
+    return exported.body;
+  }
+
+  @Post(':guideId/copies')
+  @ApiResponse({ status: 201, standardSchema: guideMutationReceiptSchema })
+  copyGuide(
+    @Req() req: AuthenticatedRequest,
+    @Param('guideId') id: string,
+    @Body({ schema: guideCopySchema }) body: z.infer<typeof guideCopySchema>,
+  ) {
+    return this.portability.copyGuide(req.auth.user.id, id, body.operationId);
   }
 
   @Post(':guideId/nodes')

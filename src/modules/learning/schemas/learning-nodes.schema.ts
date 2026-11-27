@@ -1,4 +1,9 @@
 import { z } from 'zod';
+import {
+  LEARNING_NODE_COMPLETION_MODES,
+  WRITABLE_LEARNING_NODE_COMPLETION_MODES,
+  learningNodeCompletionMode,
+} from '../../../database/schema/learning/learning-node-completion-mode.enum.js';
 import { revisionSchema, guideTitleSchema } from './learning-guides.schema.js';
 import { progressSummarySchema } from './learning-blocks.schema.js';
 
@@ -13,7 +18,9 @@ export const createNodeSchema = z.strictObject({
   ...placement,
   title: guideTitleSchema,
   required: z.boolean().default(true),
-  completionMode: z.enum(['structural', 'manual']).default('structural'),
+  completionMode: z
+    .enum(WRITABLE_LEARNING_NODE_COMPLETION_MODES)
+    .default(learningNodeCompletionMode.Structural),
 });
 export const moveNodeSchema = z.strictObject(placement);
 export const nodeResponseSchema = z.strictObject({
@@ -22,7 +29,7 @@ export const nodeResponseSchema = z.strictObject({
   title: z.string(),
   position: z.number().int().nonnegative(),
   required: z.boolean(),
-  completionMode: z.enum(['structural', 'manual', 'gated']),
+  completionMode: z.enum(LEARNING_NODE_COMPLETION_MODES),
   contentRevision: revisionSchema,
   requirementRevision: revisionSchema,
   completed: z.boolean(),
@@ -40,7 +47,7 @@ export type TreeResponse = z.infer<typeof treeResponseSchema>;
 export const patchNodeSchema = z.strictObject({
   title: guideTitleSchema.optional(),
   required: z.boolean().optional(),
-  completionMode: z.enum(['structural', 'manual']).optional(),
+  completionMode: z.enum(WRITABLE_LEARNING_NODE_COMPLETION_MODES).optional(),
   expectedStructureRevision: revisionSchema,
   operationId: z.uuid(),
 }).refine(input => input.title !== undefined || input.required !== undefined || input.completionMode !== undefined, {

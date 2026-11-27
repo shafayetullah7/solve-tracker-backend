@@ -23,6 +23,8 @@ Drizzle ORM and Kit 1.0.0-rc.5. Use the v2 `defineRelations` API and
 timestamped migration folders; do not reintroduce 0.x APIs or metadata.
 All schemas live under `src/database/schema/`, grouped into domain folders and
 exported through the root `index.ts` barrel used by both runtime and Kit.
+Persisted enum columns use `*.enum.ts` value objects (see DRIZZLE_CONVENTIONS);
+run `pnpm verify:pg-enums` when changing them.
 
 ## NestJS
 

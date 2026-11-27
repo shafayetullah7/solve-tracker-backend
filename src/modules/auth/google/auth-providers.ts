@@ -1,2 +1,4 @@
-export const AUTH_PROVIDER_GOOGLE = 'google' as const;
-export type AuthProvider = typeof AUTH_PROVIDER_GOOGLE;
+export {
+  AUTH_PROVIDER_GOOGLE,
+  type AuthProviderName as AuthProvider,
+} from '../../../database/schema/auth/auth-provider.enum.js';

@@ -1,18 +1,28 @@
 import { z } from 'zod';
+import {
+  LEARNING_BLOCK_TYPES,
+  learningBlockType,
+  type LearningBlockType,
+} from '../../../database/schema/learning/learning-block-type.enum.js';
 import { revisionSchema } from './learning-guides.schema.js';
 import {
   checklistPayloadSchema,
   codePayloadSchema,
+  linkPayloadSchema,
   normalizeBlockPayload,
   textPayloadSchema,
 } from '../learning-block-payload.js';
 
-const blockTypeSchema = z.enum(['text', 'code', 'checklist']);
+const blockTypeSchema = z.enum(LEARNING_BLOCK_TYPES);
 
 const blockInputSchema = z.discriminatedUnion('type', [
-  z.strictObject({ type: z.literal('text'), payload: textPayloadSchema }),
-  z.strictObject({ type: z.literal('code'), payload: codePayloadSchema }),
-  z.strictObject({ type: z.literal('checklist'), payload: checklistPayloadSchema }),
+  z.strictObject({ type: z.literal(learningBlockType.Text), payload: textPayloadSchema }),
+  z.strictObject({ type: z.literal(learningBlockType.Code), payload: codePayloadSchema }),
+  z.strictObject({
+    type: z.literal(learningBlockType.Checklist),
+    payload: checklistPayloadSchema,
+  }),
+  z.strictObject({ type: z.literal(learningBlockType.Link), payload: linkPayloadSchema }),
 ]);
 
 export const replaceNodeContentSchema = z.strictObject({
@@ -51,11 +61,17 @@ export const progressSummarySchema = z.strictObject({
 export type ProgressSummary = z.infer<typeof progressSummarySchema>;
 
 export function toBlockResponse(
-  row: { id: string; position: number; type: 'text' | 'code' | 'checklist'; payload: unknown; schemaVersion: number },
+  row: {
+    id: string;
+    position: number;
+    type: LearningBlockType;
+    payload: unknown;
+    schemaVersion: number;
+  },
 ): BlockResponse {
   const normalized = normalizeBlockPayload(row.type, row.payload);
   const payload =
-    row.type === 'text'
+    row.type === learningBlockType.Text
       ? { body: (normalized as { body: string }).body }
       : normalized;
   return {
@@ -67,6 +83,9 @@ export function toBlockResponse(
   };
 }
 
-export function parseStoredPayload(type: 'text' | 'code' | 'checklist', payload: unknown) {
+export function parseStoredPayload(
+  type: typeof learningBlockType.Text | typeof learningBlockType.Code | typeof learningBlockType.Checklist,
+  payload: unknown,
+) {
   return normalizeBlockPayload(type, payload);
 }

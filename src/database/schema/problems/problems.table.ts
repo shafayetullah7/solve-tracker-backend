@@ -8,7 +8,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { users } from '../users/users.table.js';
-import { problemStatusEnum } from './problem-status.enum.js';
+import { problemStatus, problemStatusEnum } from './problem-status.enum.js';
 
 // Display `url` preserves path/query casing; `normalized_url` follows FR-06 (see problem-url.ts).
 export const problems = pgTable(
@@ -26,7 +26,7 @@ export const problems = pgTable(
     difficulty: text('difficulty'),
     rating: integer('rating'),
     notes: text('notes'),
-    status: problemStatusEnum('status').notNull().default('unsolved'),
+    status: problemStatusEnum('status').notNull().default(problemStatus.Unsolved),
     solvedAt: timestamp('solved_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()

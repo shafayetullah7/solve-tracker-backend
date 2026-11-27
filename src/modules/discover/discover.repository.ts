@@ -8,6 +8,7 @@ import {
   topics,
   users,
 } from '../../database/schema/index.js';
+import { practiceVisibility } from '../../database/schema/users/practice-visibility.enum.js';
 import { MIN_PROBLEMS_FOR_DISCOVERY } from './discover.config.js';
 
 const EXCLUDED_DISCOVER_HANDLES = new Set(['starter']);
@@ -49,7 +50,7 @@ export class DiscoverRepository {
       .from(users)
       .where(
         and(
-          ne(users.practiceVisibility, 'private'),
+          ne(users.practiceVisibility, practiceVisibility.Private),
           ne(users.id, viewerId),
           inArray(users.id, eligibleIds),
           ...(excludeUserIds.length > 0
@@ -257,7 +258,7 @@ export class DiscoverRepository {
       .from(users)
       .where(
         and(
-          ne(users.practiceVisibility, 'private'),
+          ne(users.practiceVisibility, practiceVisibility.Private),
           ne(users.id, viewerId),
           inArray(users.id, eligibleIds),
           ...(excludeUserIds.length > 0

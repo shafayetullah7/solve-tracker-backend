@@ -1,5 +1,9 @@
 import { sql } from 'drizzle-orm';
 import { bigint, boolean, check, foreignKey, index, integer, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
+import {
+  learningNodeCompletionMode,
+  learningNodeCompletionModeEnum,
+} from './learning-node-completion-mode.enum.js';
 import { learningGuides } from './learning-guides.table.js';
 
 export const learningNodes = pgTable(
@@ -11,7 +15,9 @@ export const learningNodes = pgTable(
     title: text('title').notNull(),
     position: integer('position').notNull(),
     required: boolean('required').notNull().default(true),
-    completionMode: text('completion_mode', { enum: ['structural', 'manual', 'gated'] }).notNull().default('structural'),
+    completionMode: learningNodeCompletionModeEnum('completion_mode')
+      .notNull()
+      .default(learningNodeCompletionMode.Structural),
     contentRevision: bigint('content_revision', { mode: 'bigint' }).notNull().default(1n),
     requirementRevision: bigint('requirement_revision', { mode: 'bigint' }).notNull().default(1n),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
@@ -29,7 +35,6 @@ export const learningNodes = pgTable(
     check('learning_nodes_parent_check', sql`${t.parentId} is null or ${t.parentId} <> ${t.id}`),
     check('learning_nodes_position_check', sql`${t.position} >= 0`),
     check('learning_nodes_title_check', sql`length(btrim(${t.title})) > 0`),
-    check('learning_nodes_mode_check', sql`${t.completionMode} in ('structural', 'manual', 'gated')`),
     check('learning_nodes_revisions_check', sql`${t.contentRevision} > 0 and ${t.requirementRevision} > 0`),
     check('learning_nodes_deletion_check', sql`(${t.deletedAt} is null) = (${t.deletionBatchId} is null)`),
   ],

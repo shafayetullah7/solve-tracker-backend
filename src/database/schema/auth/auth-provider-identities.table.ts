@@ -1,5 +1,4 @@
 import {
-  check,
   index,
   pgTable,
   text,
@@ -7,8 +6,8 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm';
 import { users } from '../users/users.table.js';
+import { authProviderEnum } from './auth-provider.enum.js';
 
 export const authProviderIdentities = pgTable(
   'auth_provider_identities',
@@ -17,7 +16,7 @@ export const authProviderIdentities = pgTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    provider: text('provider').notNull(),
+    provider: authProviderEnum('provider').notNull(),
     providerSubject: text('provider_subject').notNull(),
     providerEmail: text('provider_email').notNull(),
     linkedAt: timestamp('linked_at', { withTimezone: true })
@@ -37,7 +36,6 @@ export const authProviderIdentities = pgTable(
       t.provider,
     ),
     index('auth_provider_identities_user_idx').on(t.userId),
-    check('auth_provider_identities_provider_google', sql`${t.provider} = 'google'`),
   ],
 );
 

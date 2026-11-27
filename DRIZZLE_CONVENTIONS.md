@@ -88,6 +88,29 @@ export type NewPlatform = typeof platforms.$inferInsert;
 - Import PostgreSQL builders from `drizzle-orm/pg-core`, never SQLite or MySQL builders.
 - Use plural snake_case SQL table names, snake_case SQL column names, and camelCase TypeScript properties. Specify SQL column names explicitly, as with `baseUrl: text('base_url')`.
 - Define primary keys, required columns, unique constraints, checks, and foreign keys in the schema. Zod validation alone does not protect persistent data.
+- For closed categorical columns, declare a `pgEnum` in a domain `*.enum.ts`. Do not use `text(..., { enum: [...] })` or duplicate `CHECK ... IN (...)` lists alongside the enum type.
+
+### PostgreSQL enum value objects
+
+Every `*.enum.ts` file must define **one canonical value object** (camelCase export, PascalCase keys), a **derived tuple** for `pgEnum` / `z.enum`, the **`pgEnum` builder**, and a **string union type**. Application code, table defaults, and Zod schemas import these modules; do not scatter persisted enum string literals in feature code (raw SQL `filter (where status = 'solved')` may still use literals when Drizzle builders are impractical).
+
+```typescript
+export const problemStatus = {
+  Unsolved: 'unsolved',
+  Solved: 'solved',
+} as const;
+
+export const PROBLEM_STATUSES = [
+  problemStatus.Unsolved,
+  problemStatus.Solved,
+] as const;
+
+export type ProblemStatus = (typeof PROBLEM_STATUSES)[number];
+
+export const problemStatusEnum = pgEnum('problem_status', [...PROBLEM_STATUSES]);
+```
+
+When the API accepts only a subset of DB enum values (for example `gated` completion mode or `bundle` import), export a second tuple such as `WRITABLE_*` built from the same value object. Run `pnpm verify:pg-enums` before merging schema enum changes.
 - For new numeric surrogate IDs, prefer `integer('id').primaryKey().generatedAlwaysAsIdentity()`. Choose UUIDs explicitly if the domain needs them; do not change the existing natural platform slug key.
 - Use `timestamp('created_at', { withTimezone: true }).notNull().defaultNow()` for new audit timestamps. Choose Date/string modes deliberately and consistently.
 - An `updatedAt` column does not update itself. Set it in writes, or deliberately implement a database trigger; runtime-only hooks are not database defaults.

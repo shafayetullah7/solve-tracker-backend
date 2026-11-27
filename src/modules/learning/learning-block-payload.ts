@@ -1,4 +1,8 @@
 import { z } from 'zod';
+import {
+  learningBlockType,
+  type LearningBlockType,
+} from '../../database/schema/learning/learning-block-type.enum.js';
 
 const bodyLimit = 64_000;
 
@@ -20,6 +24,11 @@ export const checklistPayloadSchema = z.strictObject({
   items: z.array(checklistItemSchema).min(1).max(100),
 });
 
+export const linkPayloadSchema = z.strictObject({
+  url: z.string().max(2048).refine((value) => /^https?:\/\//i.test(value), 'URL must use http or https.'),
+  label: z.string().max(500),
+});
+
 export function stripMarkup(value: string): string {
   return value.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '').replace(/<[^>]+>/g, '');
 }
@@ -28,14 +37,18 @@ export function sanitizeTextBody(body: string): string {
   return stripMarkup(body).trim();
 }
 
-export function normalizeBlockPayload(type: 'text' | 'code' | 'checklist', payload: unknown) {
-  if (type === 'text') {
+export function normalizeBlockPayload(type: LearningBlockType, payload: unknown) {
+  if (type === learningBlockType.Text) {
     const parsed = textPayloadSchema.parse(payload);
     return { body: sanitizeTextBody(parsed.body) };
   }
-  if (type === 'code') {
+  if (type === learningBlockType.Code) {
     const parsed = codePayloadSchema.parse(payload);
     return { language: parsed.language?.trim() || undefined, body: parsed.body };
+  }
+  if (type === learningBlockType.Link) {
+    const parsed = linkPayloadSchema.parse(payload);
+    return { url: parsed.url.trim(), label: stripMarkup(parsed.label).trim() };
   }
   const parsed = checklistPayloadSchema.parse(payload);
   return {

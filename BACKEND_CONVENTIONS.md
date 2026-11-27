@@ -138,6 +138,9 @@ The feature and `common/` folders above are conventions for future work, not exi
 
 Follow [DRIZZLE_CONVENTIONS.md](./DRIZZLE_CONVENTIONS.md) for the exact schema, relation, and migration APIs.
 
+- Import persisted categorical values from `database/schema/**/*.enum.ts` value objects (for example `practiceVisibility.Private`, `learningBlockType.Text`). Do not introduce new inline string literals for those domains in services, repositories, or Zod modules.
+- Run `pnpm verify:pg-enums` with other database gates when adding or changing `*.enum.ts` files.
+
 - Use `DatabaseService.db` and the shared pool. Standalone scripts own and close their own pools.
 - Enforce uniqueness, references, and other persistent invariants in PostgreSQL as well as in application validation. A read-before-write check alone cannot prevent a concurrent duplicate.
 - Use parameterized Drizzle queries. Keep dynamic identifiers and sorting on allowlists; never concatenate user-controlled SQL.

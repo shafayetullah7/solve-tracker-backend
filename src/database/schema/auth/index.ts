@@ -1,3 +1,10 @@
+export {
+  AUTH_PROVIDER_GOOGLE,
+  AUTH_PROVIDER_VALUES,
+  authProvider,
+  authProviderEnum,
+  type AuthProviderName,
+} from './auth-provider.enum.js';
 export { authSessions } from './auth-sessions.table.js';
 export type { AuthSession } from './auth-sessions.table.js';
 export { passwordResetTokens } from './password-reset-tokens.table.js';

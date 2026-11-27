@@ -34,6 +34,7 @@
     "db:backfill:platform-slugs": "tsx --import dotenv/config scripts/backfill-problem-platform-slugs.ts",
     "db:generate": "drizzle-kit generate",
     "db:check": "drizzle-kit check",
+    "verify:pg-enums": "node scripts/verify-pg-enum-conventions.mjs",
     "api:export": "pnpm build && node scripts/export-openapi.mjs",
     "api:check": "pnpm build && node scripts/export-openapi.mjs --check",
     "api:types": "node scripts/generate-api-types.mjs",

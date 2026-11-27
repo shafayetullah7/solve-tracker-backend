@@ -1,16 +1,13 @@
 import { z } from 'zod';
+import { PRACTICE_GOAL_VALUES } from '../../database/schema/users/practice-goal.enum.js';
+import { PRACTICE_VISIBILITY_VALUES } from '../../database/schema/users/practice-visibility.enum.js';
 import { measureCodePoints } from '../unicode.js';
 
 export const TOPIC_DESCRIPTION_MAX = 280;
 
-export const practiceVisibilitySchema = z.enum(['private', 'summary', 'topics']);
+export const practiceVisibilitySchema = z.enum(PRACTICE_VISIBILITY_VALUES);
 
-export const practiceGoalSchema = z.enum([
-  'interview',
-  'contests',
-  'fundamentals',
-  'coaching',
-]);
+export const practiceGoalSchema = z.enum(PRACTICE_GOAL_VALUES);
 
 /** PATCH: set goal or clear with `null`. */
 export const practiceGoalPatchSchema = z.union([practiceGoalSchema, z.null()]);
@@ -27,5 +24,4 @@ export const topicDescriptionSchema = z
     message: `Description must contain at most ${TOPIC_DESCRIPTION_MAX} characters.`,
   });
 
-export type PracticeVisibility = z.infer<typeof practiceVisibilitySchema>;
-export type PracticeGoal = z.infer<typeof practiceGoalSchema>;
+export type { PracticeGoal, PracticeVisibility } from '../../database/schema/users/index.js';
