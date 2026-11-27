@@ -3,7 +3,8 @@
 ## Backend conventions
 
 Before implementing or reviewing backend changes, read
-[BACKEND_CONVENTIONS.md](./BACKEND_CONVENTIONS.md). It defines project-wide
+[BACKEND_CONVENTIONS.md](./BACKEND_CONVENTIONS.md). Integration and gate scripts:
+[scripts/README.md](./scripts/README.md) — run with `node`, not new `package.json` aliases. It defines project-wide
 architecture, naming, Zod/API contracts, configuration, Docker, error handling,
 and testing conventions. Check [REQUIREMENTS.md](./REQUIREMENTS.md) for product
 scope and unresolved decisions. Update the relevant documents when a change

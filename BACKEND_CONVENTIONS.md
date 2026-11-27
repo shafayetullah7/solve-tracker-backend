@@ -185,11 +185,20 @@ Run the checks appropriate to the change from `backend/`:
 
 ```bash
 pnpm build
-pnpm exec tsc --noEmit
 pnpm lint
 pnpm test
 pnpm test:e2e
 ```
+
+**PostgreSQL integration and gate scripts** live under `scripts/` and are run with `node`, not as `package.json` aliases. See [scripts/README.md](./scripts/README.md). Typical pattern:
+
+```bash
+pnpm build
+export TEST_DATABASE_URL=postgresql://…/practice_tracker_test   # name must end in _test
+node scripts/test-topics-integration.mjs
+```
+
+Do not add new `pnpm` scripts that only wrap `node scripts/<gate>.mjs` or duplicate `pnpm build && node scripts/…`. Keep `package.json` for Nest/Drizzle/OpenAPI tooling only.
 
 For schema changes, also run `pnpm db:check`, review generated SQL, and verify that another `pnpm db:generate` reports no unintended changes. Apply and verify migrations against an appropriate test database. Validate Compose when changing it with `docker compose config --quiet`.
 

@@ -35,21 +35,21 @@ function run(command, args, cwd, env = process.env) {
 }
 
 const phases = [
-  'verify:platform-p1',
-  'verify:platform-p2',
-  'verify:platform-p3',
-  'verify:platform-p4',
+  'verify-platform-p1.mjs',
+  'verify-platform-p2.mjs',
+  'verify-platform-p3.mjs',
+  'verify-platform-p4.mjs',
 ];
 
 for (const script of phases) {
   console.log(`\nPLATFORM-CLS — ${script} …`);
-  await run('pnpm', [script], backendRoot, {
+  await run('node', [`scripts/${script}`], backendRoot, {
     ...process.env,
     TEST_DATABASE_URL: target,
   });
 }
 
-console.log('\nPLATFORM-CLS — frontend verify:platform-api …');
-await run('pnpm', ['verify:platform-api'], frontendRoot);
+console.log('\nPLATFORM-CLS — frontend verify-platform-api …');
+await run('node', ['scripts/verify-platform-api.mjs'], frontendRoot);
 
 console.log('\nPLATFORM-CLS — PASS');

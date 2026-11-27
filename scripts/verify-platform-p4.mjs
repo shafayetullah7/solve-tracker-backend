@@ -43,7 +43,7 @@ await run('pnpm', ['api:check'], backendRoot);
 await run('pnpm', ['api:types:check'], backendRoot);
 
 console.log('P4 verify — problems integration (platformSlug JSON) …');
-await run('pnpm', ['test:problems:integration'], backendRoot, {
+await run('node', ['scripts/test-problems-integration.mjs'], backendRoot, {
   ...process.env,
   TEST_DATABASE_URL: target,
 });

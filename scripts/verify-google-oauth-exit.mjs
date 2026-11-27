@@ -42,14 +42,14 @@ async function main() {
 
   console.log('Google OAuth exit — PostgreSQL integration …');
   await run('pnpm', ['build']);
-  await run('pnpm', ['test:auth-identities:integration']);
-  await run('pnpm', ['test:google-oauth:auth']);
-  await run('pnpm', ['test:google-oauth:integration']);
+  await run('node', ['scripts/test-auth-provider-identities.mjs']);
+  await run('node', ['scripts/test-google-oauth-auth.mjs']);
+  await run('node', ['scripts/test-google-oauth-integration.mjs']);
 
   console.log('Google OAuth exit — OpenAPI drift …');
   await run('pnpm', ['api:check']);
   await run('pnpm', ['api:check'], frontendRoot);
-  await run('pnpm', ['verify:platform-api'], frontendRoot);
+  await run('node', ['scripts/verify-platform-api.mjs'], frontendRoot);
 
   console.log('\nGoogle OAuth automated exit passed.');
 }

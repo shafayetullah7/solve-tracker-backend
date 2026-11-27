@@ -113,7 +113,7 @@ pnpm db:migrate:docker
 
 Drizzle Kit generates timestamped folders under `drizzle/`, each containing `migration.sql` and `snapshot.json`; commit both. Generate on the host because this folder is mounted read-only in Docker. Use `pnpm db:migrate:create --name=data-backfill` for custom SQL. Rollbacks use new corrective migrations; there is no automatic down command. Do not edit applied migrations.
 
-After applying migrations that add `problems.platform_slug`, run `pnpm db:seed` (or `db:seed:docker`) to backfill slugs on existing problems, or `pnpm db:backfill:platform-slugs` when you only need to re-derive slugs after catalog changes. Full PLATFORM-CLS gate: `TEST_DATABASE_URL=…/_test pnpm verify:platform-cls` (chains P1–P4 + frontend catalog). See [docs/PLATFORM_CLASSIFICATION_PHASED_PLAN.md](docs/PLATFORM_CLASSIFICATION_PHASED_PLAN.md). **PLATFORM-API** (catalog from API): [docs/PLATFORM_CATALOG_API_PHASED_PLAN.md](docs/PLATFORM_CATALOG_API_PHASED_PLAN.md) — **A4 complete** (consumer migration); next **A5** (remove static catalog).
+After applying migrations that add `problems.platform_slug`, run `pnpm db:seed` (or `db:seed:docker`) to backfill slugs on existing problems, or `pnpm db:backfill:platform-slugs` when you only need to re-derive slugs after catalog changes. Full PLATFORM-CLS gate: `TEST_DATABASE_URL=…/_test node scripts/verify-platform-cls.mjs` (chains P1–P4 + frontend catalog). See [docs/PLATFORM_CLASSIFICATION_PHASED_PLAN.md](docs/PLATFORM_CLASSIFICATION_PHASED_PLAN.md). **PLATFORM-API** (catalog from API): [docs/PLATFORM_CATALOG_API_PHASED_PLAN.md](docs/PLATFORM_CATALOG_API_PHASED_PLAN.md) — **A4 complete** (consumer migration); next **A5** (remove static catalog).
 
 The initial platform migration was regenerated from the current schema. It contains generated table creation SQL without legacy compatibility logic. Generating migrations does not apply them or change database history.
 
@@ -296,10 +296,11 @@ Rate limiting currently uses bounded in-process state and untrusted forwarded IP
 Use a dedicated test database with a name ending in `_test`, and pass its URL through `TEST_DATABASE_URL` in the process environment, then run:
 
 ```bash
-pnpm test:auth:integration
+pnpm build
+node scripts/test-auth-integration.mjs
 ```
 
-There is no fallback to application `DATABASE_URL`. The suite applies committed migrations, exercises real transactions/HTTP with mocked email, and deletes only users created by that run (with cascading sessions/tokens). It does not truncate tables, drop schemas, reset volumes, or send email. Run it only against an intentionally supplied test database. Docker is not required if that PostgreSQL test instance is otherwise available.
+There is no fallback to application `DATABASE_URL`. All integration entry points are listed in [scripts/README.md](scripts/README.md). The suite applies committed migrations, exercises real transactions/HTTP with mocked email, and deletes only users created by that run (with cascading sessions/tokens). It does not truncate tables, drop schemas, reset volumes, or send email. Run it only against an intentionally supplied test database. Docker is not required if that PostgreSQL test instance is otherwise available.
 
 Regular `pnpm test` / `pnpm test:e2e` use explicit test configuration; existing HTTP tests replace the database provider. These are separate from the live suite.
 
@@ -308,7 +309,7 @@ Regular `pnpm test` / `pnpm test:e2e` use explicit test configuration; existing 
 With the same `TEST_DATABASE_URL` rules:
 
 ```bash
-pnpm test:topics:integration
+pnpm build && node scripts/test-topics-integration.mjs
 ```
 
 The suite exercises create/list/rename/delete, per-user name uniqueness, cross-account **404** on foreign ids, concurrent duplicate create, and Swagger path coverage. Users created during the run are deleted on teardown (cascade removes their topics).
@@ -318,7 +319,7 @@ The suite exercises create/list/rename/delete, per-user name uniqueness, cross-a
 With the same `TEST_DATABASE_URL` rules:
 
 ```bash
-pnpm test:learning:integration
+pnpm build && node scripts/test-learning-integration.mjs
 ```
 
 Requires the learning schema migration applied. Covers guide create/list/tree, node create/patch, placement invariants, owner enrollment resume, archive write guard, subtree delete and recovery listing, cross-account **404**, and Swagger `/learning/guides` paths.
@@ -328,18 +329,11 @@ Requires the learning schema migration applied. Covers guide create/list/tree, n
 With the same `TEST_DATABASE_URL` rules:
 
 ```bash
-pnpm test:problems:integration
+pnpm build && node scripts/test-problems-integration.mjs
 ```
 
 The suite exercises problem CRUD, topic associations, URL duplicate **409**, cross-account isolation, `topicId` list filter, concurrent duplicate URL race, topic delete retest (problem remains), and Swagger coverage.
 
-### Phase exit criteria (automated)
+### Phase / feature exit orchestrators (optional)
 
-On a dedicated `TEST_DATABASE_URL` ending in `_test`:
-
-```bash
-pnpm verify:phase-5   # topics gates + optional problems topic-delete retest (VERIFY_PHASE6_TOPIC_DELETE=0 to skip)
-pnpm verify:phase-6   # problems gates + frontend checks
-```
-
-See `docs/PHASE_5_RESULTS.md` and `docs/PHASE_6_RESULTS.md`.
+Historical exit gates are `scripts/verify-phase-*-exit.mjs`, `verify-discover*.mjs`, etc. Run with `node` when replaying a results doc — they are not registered in `package.json`. See [scripts/README.md](scripts/README.md).

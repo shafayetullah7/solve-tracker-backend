@@ -43,9 +43,9 @@ async function main() {
   await run('node', ['scripts/verify-google-risc.mjs']);
 
   console.log('Google RISC exit — PostgreSQL integration …');
-  await run('pnpm', ['test:risc-receipts:integration']);
-  await run('pnpm', ['test:google-risc-handle:integration']);
-  await run('pnpm', ['test:google-risc-http:integration']);
+  await run('node', ['scripts/test-risc-receipts.mjs']);
+  await run('node', ['scripts/test-google-risc-handle.mjs']);
+  await run('node', ['scripts/test-google-risc-http.mjs']);
 
   console.log('Google RISC exit — OpenAPI drift …');
   await run('pnpm', ['api:check']);

@@ -39,7 +39,7 @@ Database: `postgresql://practice:practice_dev@127.0.0.1:5437/practice_tracker_te
 | Command | Result |
 |---------|--------|
 | `pnpm db:migrate` (×2 idempotent) | pass |
-| `pnpm test:topics:integration` | pass (16 assertions) |
-| `pnpm test:learning:integration` | pass (16 assertions) after `LearningModule` wire-up |
+| `node scripts/test-topics-integration.mjs` (after `pnpm build`) | pass (16 assertions) |
+| `node scripts/test-learning-integration.mjs` (after `pnpm build`) | pass (16 assertions) after `LearningModule` wire-up |
 
 Frontend post-3A: `pnpm check` 429 tests pass; `pnpm api:check` pass.

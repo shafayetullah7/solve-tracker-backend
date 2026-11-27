@@ -1,7 +1,7 @@
 # Discover launch results (E7)
 
-**Gate command:** `pnpm verify:discover` (from `solve-tracker-backend`, with `TEST_DATABASE_URL=*_test`).  
-**Optional:** `SKIP_DISCOVER_E2E=1` for DB-only runs; Playwright needs API + app on `PHASE_47_BASE_URL` and `E2E_DISCOVER_SEED=1`.
+**Gate command:** `node scripts/verify-discover.mjs` (from `solve-tracker-backend`, with `TEST_DATABASE_URL=*_test`).  
+**Note:** Browser E2E for Discover was removed; `pnpm verify:discover` is integration/DB gates only. Journey sign-off remains manual or staging walkthrough.
 
 **Staging flags:** `DISCOVER_MODE=full`, `VITE_DISCOVER_MODE=full`, demo seed + starter lists.
 

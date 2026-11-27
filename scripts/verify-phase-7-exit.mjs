@@ -159,8 +159,8 @@ async function main() {
   gates["full-matrix"] = true;
 
   console.log("\nPhase 7 smoke — Phase 5/6 exit verifiers …");
-  await run("pnpm", ["verify:phase-5"], backendRoot);
-  await run("pnpm", ["verify:phase-6"], backendRoot);
+  await run("node", ["scripts/verify-phase-5-exit.mjs"], backendRoot);
+  await run("node", ["scripts/verify-phase-6-exit.mjs"], backendRoot);
 
   console.log("\n--- Phase 7 exit criteria (overall) ---");
   for (const item of criteria) {

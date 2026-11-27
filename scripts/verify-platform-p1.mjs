@@ -130,7 +130,7 @@ try {
   }
 
   console.log('P1 verify — problems integration regression …');
-  await run('pnpm', ['test:problems:integration'], backendRoot, {
+  await run('node', ['scripts/test-problems-integration.mjs'], backendRoot, {
     ...process.env,
     TEST_DATABASE_URL: target,
   });

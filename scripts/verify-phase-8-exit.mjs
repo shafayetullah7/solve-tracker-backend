@@ -162,14 +162,15 @@ async function main() {
   checkNoObviousSecretLogs();
 
   console.log("\nPhase 8 — regression umbrella (Phase 7) …");
-  await run("pnpm", ["verify:phase-7"]);
+  await run("node", ["scripts/verify-phase-7-exit.mjs"], backendRoot);
 
   console.log("\nPhase 8 — auth integration …");
-  await run("pnpm", ["test:auth:integration"]);
+  await run("pnpm", ["build"], backendRoot);
+  await run("node", ["scripts/test-auth-integration.mjs"], backendRoot);
 
   console.log("\nPhase 8 — Google OAuth regression …");
-  await run("pnpm", ["verify:google-oauth"]);
-  await run("pnpm", ["verify:google-oauth:exit"]);
+  await run("node", ["scripts/verify-google-oauth.mjs"], backendRoot);
+  await run("node", ["scripts/verify-google-oauth-exit.mjs"], backendRoot);
 
   console.log("\nPhase 8 — frontend check (post-Google) …");
   await run("pnpm", ["check"], frontendRoot);
@@ -181,9 +182,9 @@ async function main() {
   await run("node", ["scripts/test-backend-restart-persistence.mjs"]);
 
   console.log("\n--- Phase 8 automated exit criteria ---");
-  console.log("[PASS] Regression: verify:phase-7");
-  console.log("[PASS] Auth: test:auth:integration");
-  console.log("[PASS] Google OAuth: verify:google-oauth + verify:google-oauth:exit");
+  console.log("[PASS] Regression: verify-phase-7-exit.mjs");
+  console.log("[PASS] Auth: test-auth-integration.mjs");
+  console.log("[PASS] Google OAuth: verify-google-oauth*.mjs");
   console.log("[PASS] Frontend: pnpm check");
   console.log("[PASS] Client boundaries + acceptance workbook");
   console.log("[PASS] Persistence: test-backend-restart-persistence.mjs");

@@ -46,9 +46,9 @@ async function main() {
 
   console.log('User handle exit — schema + auth + profile integration …');
   await run('pnpm', ['db:check']);
-  await run('pnpm', ['test:user-handle:integration']);
-  await run('pnpm', ['test:auth:integration']);
-  await run('pnpm', ['test:profile:integration']);
+  await run('node', ['scripts/test-user-handle-schema.mjs']);
+  await run('node', ['scripts/test-auth-integration.mjs']);
+  await run('node', ['scripts/test-profile-integration.mjs']);
 
   console.log('User handle exit — OpenAPI drift …');
   await run('pnpm', ['api:check']);

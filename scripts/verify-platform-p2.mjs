@@ -40,7 +40,7 @@ console.log('P2 verify — unit tests …');
 await run('pnpm', ['test']);
 
 console.log('P2 verify — problems integration (write path SQL checks) …');
-await run('pnpm', ['test:problems:integration'], backendRoot, {
+await run('node', ['scripts/test-problems-integration.mjs'], backendRoot, {
   ...process.env,
   TEST_DATABASE_URL: target,
 });
