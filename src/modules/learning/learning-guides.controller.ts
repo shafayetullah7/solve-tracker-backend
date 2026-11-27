@@ -38,6 +38,17 @@ export class LearningGuidesController {
     return this.guides.createNode(req.auth.user.id, id, body);
   }
 
+  @Delete(':guideId/nodes/:nodeId')
+  @HttpCode(204)
+  @ApiHeader({ name: 'X-Expected-Revision', required: true })
+  @ApiHeader({ name: 'X-Operation-Id', required: true })
+  @ApiResponse({ status: 204, description: 'Subtree soft deleted' })
+  async deleteNode(@Req() req: AuthenticatedRequest, @Param('guideId') guideId: string, @Param('nodeId') nodeId: string,
+    @Headers('x-expected-revision') revision: string | undefined,
+    @Headers('x-operation-id') operation: string | undefined) {
+    await this.guides.deleteNode(req.auth.user.id, guideId, nodeId, revision, operation);
+  }
+
   @Patch(':guideId/nodes/:nodeId')
   @ApiResponse({ status: 200, standardSchema: guideMutationReceiptSchema })
   patchNode(@Req() req: AuthenticatedRequest, @Param('guideId') guideId: string, @Param('nodeId') nodeId: string, @Body({ schema: patchNodeSchema }) body: PatchNodeInput) {
