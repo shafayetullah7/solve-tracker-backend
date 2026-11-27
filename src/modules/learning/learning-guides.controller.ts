@@ -5,7 +5,7 @@ import { AuthSecurityGuard } from '../auth/auth-security.guard.js';
 import { LearningGuidesService } from './learning-guides.service.js';
 import { guideListResponseSchema, guideResponseSchema, learningErrorSchema, listGuidesQuerySchema, type ListGuidesQuery, createGuideSchema, patchGuideSchema, guideLifecycleSchema, guideMutationReceiptSchema, type CreateGuideInput, type PatchGuideInput, type GuideLifecycleInput } from './schemas/learning-guides.schema.js';
 
-import { createNodeSchema, moveNodeSchema, patchNodeSchema, treeResponseSchema, type CreateNodeInput, type MoveNodeInput, type PatchNodeInput } from './schemas/learning-nodes.schema.js';
+import { recoveryQuerySchema, recoveryResponseSchema, type RecoveryQuery, createNodeSchema, moveNodeSchema, patchNodeSchema, treeResponseSchema, type CreateNodeInput, type MoveNodeInput, type PatchNodeInput } from './schemas/learning-nodes.schema.js';
 
 @ApiTags('Learning')
 @ApiResponse({ status: '4XX', standardSchema: learningErrorSchema })
@@ -24,6 +24,12 @@ export class LearningGuidesController {
   @ApiResponse({ status: 200, standardSchema: guideResponseSchema })
   get(@Req() req: AuthenticatedRequest, @Param('guideId') guideId: string) {
     return this.guides.get(req.auth.user.id, guideId);
+  }
+
+  @Get(':guideId/recovery')
+  @ApiResponse({ status: 200, standardSchema: recoveryResponseSchema })
+  recoverable(@Req() req: AuthenticatedRequest, @Param('guideId') id: string, @Query({ schema: recoveryQuerySchema }) query: RecoveryQuery) {
+    return this.guides.recoverable(req.auth.user.id, id, query);
   }
 
   @Get(':guideId/tree')
